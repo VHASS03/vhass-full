@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lastCheck, setLastCheck] = useState(0);
+  const [isChecking, setIsChecking] = useState(false);
 
   useEffect(() => {
     checkAuthStatus();
@@ -31,16 +32,32 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuthStatus = async () => {
     const now = Date.now();
-    if (now - lastCheck < 1000) return;
+    if (now - lastCheck < 2000 || isChecking) return; // Increased rate limit and added checking flag
     setLastCheck(now);
+    setIsChecking(true);
+
+    // Check if we have a token first
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      setUser(null);
+      setLoading(false);
+      setIsChecking(false);
+      return;
+    }
 
     try {
       const profile = await ApiService.getProfile();
       setUser(profile?.user || profile || null);
     } catch (error) {
-      setUser(null);
+      // Only clear user if it's an auth error, not a network error
+      if (error.message === 'Unauthorized') {
+        setUser(null);
+        localStorage.removeItem('auth_token');
+        sessionStorage.removeItem('auth_token');
+      }
     } finally {
       setLoading(false);
+      setIsChecking(false);
     }
   };
 

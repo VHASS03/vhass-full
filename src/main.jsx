@@ -34,6 +34,7 @@ root.render(
             <Route path="/" element={<Home />} />
             <Route path="/helpdesk" element={<HelpDeskPage />} />
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/login" element={<AuthPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/aboutus" element={<AboutUs />} />
             <Route path="/services" element={<CybersecurityPage />} />

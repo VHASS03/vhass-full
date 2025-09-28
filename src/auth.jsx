@@ -35,6 +35,13 @@ export default function AuthPage() {
     }
   }, [user, authLoading, navigate]);
 
+  // Set login mode when accessing /login route
+  useEffect(() => {
+    if (window.location.pathname === '/login') {
+      setCurrentPage("login");
+    }
+  }, []);
+
   useEffect(() => {
     setIsLoaded(true)
   }, [])

@@ -45,12 +45,7 @@ class ApiService {
         // Clear any stored auth data
         localStorage.removeItem('auth_token');
         sessionStorage.removeItem('auth_token');
-        // Force redirect to login to re-authenticate
-        try {
-          if (typeof window !== 'undefined') {
-            window.location.href = '/login';
-          }
-        } catch (_) {}
+        // Don't automatically redirect - let the AuthContext handle it
         throw new Error('Unauthorized');
       }
       
