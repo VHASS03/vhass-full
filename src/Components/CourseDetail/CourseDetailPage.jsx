@@ -250,21 +250,30 @@ export default function CourseDetailsPage() {
     setIsProcessingPayment(true)
     
     try {
-      const resp = await fetch(`/api/course/${course._id || course.id}/phonepe-checkout`, {
+      const apiBase = import.meta.env.VITE_API_URL || 'https://api.vhassacademy.com';
+      const resp = await fetch(`${apiBase}/api/course/${course._id || course.id}/phonepe-checkout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         },
         credentials: 'include',
         body: JSON.stringify({}),
       });
 
+      if (!resp.ok) {
+        const errorText = await resp.text();
+        console.error('PhonePe API error:', resp.status, errorText);
+        throw new Error(`Payment API error: ${resp.status} - ${errorText}`);
+      }
+
       const data = await resp.json();
+      console.log('PhonePe response:', data);
       
       if (data.checkoutPageUrl) {
         window.location.href = data.checkoutPageUrl;
       } else {
-        throw new Error('Failed to get checkout URL');
+        throw new Error('Failed to get checkout URL from response');
       }
     } catch (error) {
       console.error("PhonePe payment error:", error)

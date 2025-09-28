@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuthStatus = async () => {
     const now = Date.now();
-    if (now - lastCheck < 2000 || isChecking) return; // Increased rate limit and added checking flag
+    if (now - lastCheck < 5000 || isChecking) return; // Increased rate limit to 5 seconds
     setLastCheck(now);
     setIsChecking(true);
 
