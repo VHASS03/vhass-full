@@ -130,7 +130,25 @@ function Home() {
 
           {/* 3D Scene */}
           <div ref={sceneWrapperRef} className="h-[50vh] lg:h-[100vh] w-full lg:w-1/2 order-1 lg:order-2 transform-gpu will-change-transform">
-            <Canvas>
+            <Canvas
+              onCreated={({ gl }) => {
+                // Handle WebGL context loss
+                gl.domElement.addEventListener('webglcontextlost', (event) => {
+                  event.preventDefault();
+                  console.warn('WebGL context lost, attempting recovery...');
+                });
+                
+                gl.domElement.addEventListener('webglcontextrestored', () => {
+                  console.log('WebGL context restored');
+                });
+              }}
+              gl={{ 
+                antialias: true, 
+                alpha: true,
+                powerPreference: "high-performance",
+                preserveDrawingBuffer: true
+              }}
+            >
               <Scene progress={progress} />
             </Canvas>
           </div>

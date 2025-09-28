@@ -30,15 +30,21 @@ class ApiService {
     const url = `${this.baseURL}/${cleanEndpoint}?_cb=${CACHE_BUSTER}`;
     console.log('🌐 Making API request to:', url);
     
+    // Create AbortController for request cancellation
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    
     const config = {
       headers: this.getHeaders(options.headers),
       credentials: 'include', // Include cookies for session management
       mode: 'cors', // Explicitly set CORS mode
+      signal: controller.signal, // Add abort signal
       ...options,
     };
 
     try {
       const response = await fetch(url, config);
+      clearTimeout(timeoutId); // Clear timeout on successful response
       
       // Handle 401 Unauthorized specifically
       if (response.status === 401) {
@@ -66,6 +72,17 @@ class ApiService {
         throw new Error(`Server returned ${response.status}: ${response.statusText}`);
       }
     } catch (error) {
+      clearTimeout(timeoutId); // Clear timeout on error
+      
+      // Handle specific error types
+      if (error.name === 'AbortError') {
+        console.error('API request was aborted or timed out');
+        throw new Error('Request timeout - please try again');
+      } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        console.error('Network error:', error);
+        throw new Error('Network error - please check your connection');
+      }
+      
       console.error('API Error:', error);
       throw error;
     }

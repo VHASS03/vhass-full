@@ -40,35 +40,41 @@ export default function GoogleLogin() {
 
   return (
     <div className="google-login-container">
-      {import.meta.env.MODE === 'production' && (
-        <GoogleLoginButton
-          onSuccess={handleGoogleSuccess}
-          onError={handleGoogleError}
-          useOneTap
-          theme="filled_black"
-          size="large"
-          text="continue_with"
-          shape="rectangular"
-          width={400}
-          locale="en"
-        />
-      )}
-      {/* Fallback: redirect-based OAuth if One Tap origin configuration blocks */}
+      <GoogleLoginButton
+        onSuccess={handleGoogleSuccess}
+        onError={handleGoogleError}
+        useOneTap={false} // Disable One Tap to avoid Cross-Origin-Opener-Policy issues
+        theme="filled_black"
+        size="large"
+        text="continue_with"
+        shape="rectangular"
+        width={400}
+        locale="en"
+        auto_select={false}
+        cancel_on_tap_outside={true}
+      />
+      {/* Fallback: redirect-based OAuth if popup is blocked */}
       <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center' }}>
         <button
           type="button"
           onClick={() => {
-            window.location.href = ApiService.getGoogleAuthUrl();
+            try {
+              window.location.href = ApiService.getGoogleAuthUrl();
+            } catch (error) {
+              console.error('Google OAuth redirect failed:', error);
+              alert('Unable to redirect to Google OAuth. Please try again.');
+            }
           }}
           style={{
             border: '1px solid #e5e7eb',
             padding: '10px 16px',
             borderRadius: 8,
             background: '#fff',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            fontSize: '14px'
           }}
         >
-          Continue with Google (fallback)
+          Continue with Google (redirect)
         </button>
       </div>
     </div>
