@@ -42,6 +42,59 @@ export default function AuthPage() {
     }
   }, []);
 
+  // Handle Google OAuth callback
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const state = urlParams.get('state');
+    
+    if (code && state) {
+      try {
+        const stateData = JSON.parse(decodeURIComponent(state));
+        if (stateData.source === 'google_oauth') {
+          // Handle Google OAuth callback
+          handleGoogleOAuthCallback(code);
+        }
+      } catch (error) {
+        console.error('Error parsing OAuth state:', error);
+      }
+    }
+  }, []);
+
+  const handleGoogleOAuthCallback = async (code) => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      // Exchange code for token via your backend
+      const response = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/auth/google/callback`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.token) {
+          localStorage.setItem('auth_token', data.token);
+          // Redirect to dashboard
+          navigate('/dashboard');
+        } else {
+          setError('Authentication failed. Please try again.');
+        }
+      } else {
+        setError('Authentication failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('OAuth callback error:', error);
+      setError('Authentication failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     setIsLoaded(true)
   }, [])
