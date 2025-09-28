@@ -67,14 +67,19 @@ export default function GoogleLogin() {
         onClick={() => {
           try {
             // Use direct OAuth redirect to bypass COOP issues
+            const redirectUri = window.location.origin + '/auth';
             const googleAuthUrl = `https://accounts.google.com/oauth/authorize?` +
               `client_id=${import.meta.env.VITE_GOOGLE_CLIENT_ID || '8739533127-rvga58btf64j28njdjdq84r2kof2h4n4.apps.googleusercontent.com'}&` +
-              `redirect_uri=${encodeURIComponent(window.location.origin + '/auth')}&` +
+              `redirect_uri=${encodeURIComponent(redirectUri)}&` +
               `response_type=code&` +
               `scope=openid%20email%20profile&` +
               `access_type=offline&` +
               `prompt=consent&` +
               `state=${encodeURIComponent(JSON.stringify({ source: 'google_oauth' }))}`;
+            
+            console.log('Google OAuth URL:', googleAuthUrl);
+            console.log('Redirect URI:', redirectUri);
+            console.log('Current origin:', window.location.origin);
             
             // Use window.location.replace to avoid COOP issues
             window.location.replace(googleAuthUrl);
@@ -127,6 +132,36 @@ export default function GoogleLogin() {
           cancel_on_tap_outside={true}
           ux_mode="redirect"
         />
+      </div>
+      
+      {/* Fallback: Manual OAuth with proper redirect */}
+      <div style={{ marginTop: '8px', textAlign: 'center' }}>
+        <button
+          type="button"
+          onClick={() => {
+            try {
+              // Use the API service method which should have proper redirect URI
+              const apiUrl = ApiService.getGoogleAuthUrl();
+              console.log('Using API Google Auth URL:', apiUrl);
+              window.location.href = apiUrl;
+            } catch (error) {
+              console.error('API Google OAuth failed:', error);
+              alert('Google OAuth failed. Please try again.');
+            }
+          }}
+          style={{
+            width: '100%',
+            padding: '8px 16px',
+            borderRadius: '6px',
+            background: '#f8f9fa',
+            color: '#333',
+            border: '1px solid #ddd',
+            cursor: 'pointer',
+            fontSize: '14px'
+          }}
+        >
+          Try Alternative Google Login
+        </button>
       </div>
     </div>
   );
