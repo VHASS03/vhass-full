@@ -128,7 +128,7 @@ function Home() {
             </div>
           </div>
 
-          {/* 3D Scene */}
+          {/* 3D Scene with WebGL fallback */}
           <div ref={sceneWrapperRef} className="h-[50vh] lg:h-[100vh] w-full lg:w-1/2 order-1 lg:order-2 transform-gpu will-change-transform">
             <Canvas
               onCreated={({ gl, scene, camera }) => {
@@ -139,10 +139,21 @@ function Home() {
                   
                   // Force a re-render attempt
                   setTimeout(() => {
-                    if (gl.isContextLost()) {
-                      console.log('Attempting to restore WebGL context...');
-                      // Try to restore the context
-                      gl.getExtension('WEBGL_lose_context')?.restoreContext();
+                    try {
+                      // Check if context is lost using the canvas element
+                      const canvas = gl.domElement;
+                      const context = canvas.getContext('webgl') || canvas.getContext('webgl2');
+                      
+                      if (context && context.isContextLost && context.isContextLost()) {
+                        console.log('Attempting to restore WebGL context...');
+                        // Try to restore the context
+                        const loseContext = context.getExtension('WEBGL_lose_context');
+                        if (loseContext) {
+                          loseContext.restoreContext();
+                        }
+                      }
+                    } catch (error) {
+                      console.warn('Context recovery failed:', error);
                     }
                   }, 100);
                 };
@@ -162,17 +173,45 @@ function Home() {
                 gl._contextLostHandler = handleContextLost;
                 gl._contextRestoredHandler = handleContextRestored;
               }}
+              onError={(error) => {
+                console.error('WebGL error:', error);
+                // Fallback to 2D content if WebGL fails
+                const container = sceneWrapperRef.current;
+                if (container) {
+                  container.innerHTML = `
+                    <div style="
+                      display: flex; 
+                      align-items: center; 
+                      justify-content: center; 
+                      height: 100%; 
+                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                      color: white;
+                      font-size: 2rem;
+                      text-align: center;
+                      border-radius: 20px;
+                    ">
+                      <div>
+                        <div style="font-size: 4rem; margin-bottom: 1rem;">🚀</div>
+                        <div>VHASS</div>
+                        <div style="font-size: 1rem; margin-top: 0.5rem;">Innovation in Motion</div>
+                      </div>
+                    </div>
+                  `;
+                }
+              }}
               gl={{ 
-                antialias: true, 
+                antialias: false, // Disable antialiasing to reduce GPU load
                 alpha: true,
-                powerPreference: "high-performance",
-                preserveDrawingBuffer: true,
+                powerPreference: "default", // Use default instead of high-performance
+                preserveDrawingBuffer: false, // Disable to reduce memory usage
                 failIfMajorPerformanceCaveat: false,
                 depth: true,
                 stencil: false,
-                logarithmicDepthBuffer: false
+                logarithmicDepthBuffer: false,
+                premultipliedAlpha: false,
+                desynchronized: true // Allow async rendering
               }}
-              dpr={[1, 2]} // Limit device pixel ratio to prevent context loss
+              dpr={1} // Use device pixel ratio of 1 to prevent context loss
             >
               <Scene progress={progress} />
             </Canvas>
