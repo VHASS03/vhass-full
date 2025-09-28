@@ -13,23 +13,74 @@ gsap.registerPlugin(ScrollTrigger);
 function Home() {
   const mainRef = useRef(null);
   const sceneWrapperRef = useRef(null);
+  const logoRef = useRef(null);
   const sectionRefs = [useRef(null), useRef(null), useRef(null)];
   const [progress, setProgress] = useState(0);
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
+      // Create a more dramatic scroll animation for the 3D scene
       gsap.timeline({
         scrollTrigger: {
           trigger: mainRef.current,
           start: "top top",
           end: "bottom bottom",
-          scrub: true,
+          scrub: 0.3, // More responsive scrubbing
           onUpdate: (self) => setProgress(self.progress),
         },
       })
-        .to(sceneWrapperRef.current, { x: "-50vw", y: "101vh" })
-        .to(sceneWrapperRef.current, { x: "0vw", y: "200vh" })
-        .to(sceneWrapperRef.current, { x: "-50vw", y: "300vh" });
+        .to(sceneWrapperRef.current, { 
+          x: "-60vw", 
+          y: "120vh",
+          rotation: 0.2,
+          scale: 1.1,
+          duration: 0.3,
+          ease: "power2.out"
+        })
+        .to(sceneWrapperRef.current, { 
+          x: "10vw", 
+          y: "250vh",
+          rotation: -0.3,
+          scale: 0.9,
+          duration: 0.4,
+          ease: "power2.inOut"
+        })
+        .to(sceneWrapperRef.current, { 
+          x: "-70vw", 
+          y: "350vh",
+          rotation: 0.4,
+          scale: 1.2,
+          duration: 0.3,
+          ease: "power2.in"
+        });
+
+      // Add separate logo animation for more dramatic effect
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: mainRef.current,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 0.5,
+        },
+      })
+        .to(sceneWrapperRef.current, {
+          scale: 1.2,
+          rotation: 0.3,
+          duration: 0.5,
+          ease: "power2.out"
+        })
+        .to(sceneWrapperRef.current, {
+          scale: 0.8,
+          rotation: -0.2,
+          duration: 0.5,
+          ease: "power2.inOut"
+        })
+        .to(sceneWrapperRef.current, {
+          scale: 1.1,
+          rotation: 0.4,
+          duration: 0.5,
+          ease: "power2.in"
+        });
 
       sectionRefs.forEach((ref) => {
         gsap.fromTo(
@@ -78,7 +129,7 @@ function Home() {
           </div>
 
           {/* 3D Scene */}
-          <div ref={sceneWrapperRef} className="h-[50vh] lg:h-[100vh] w-full lg:w-1/2 order-1 lg:order-2">
+          <div ref={sceneWrapperRef} className="h-[50vh] lg:h-[100vh] w-full lg:w-1/2 order-1 lg:order-2 transform-gpu will-change-transform">
             <Canvas>
               <Scene progress={progress} />
             </Canvas>
