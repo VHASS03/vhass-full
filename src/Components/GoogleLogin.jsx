@@ -33,17 +33,39 @@ export default function GoogleLogin() {
     }
   };
 
-  const handleGoogleError = () => {
-    console.error('Google login failed');
-    alert('Google login failed. Please try again.');
+  const handleGoogleError = (error) => {
+    console.error('Google login failed:', error);
+    
+    // Check if it's a FedCM error
+    if (error?.error === 'popup_closed_by_user' || error?.error === 'access_denied') {
+      console.log('FedCM disabled, trying alternative OAuth flow...');
+      // Try the manual OAuth flow
+      try {
+        const googleAuthUrl = `https://accounts.google.com/oauth/authorize?` +
+          `client_id=${import.meta.env.VITE_GOOGLE_CLIENT_ID || '8739533127-rvga58btf64j28njdjdq84r2kof2h4n4.apps.googleusercontent.com'}&` +
+          `redirect_uri=${encodeURIComponent(window.location.origin + '/auth')}&` +
+          `response_type=code&` +
+          `scope=openid%20email%20profile&` +
+          `access_type=offline&` +
+          `prompt=consent`;
+        
+        window.location.href = googleAuthUrl;
+        return;
+      } catch (fallbackError) {
+        console.error('Fallback OAuth also failed:', fallbackError);
+      }
+    }
+    
+    alert('Google login failed. Please try the alternative login methods below.');
   };
 
   return (
     <div className="google-login-container">
+      {/* Primary: Standard Google Login Button */}
       <GoogleLoginButton
         onSuccess={handleGoogleSuccess}
         onError={handleGoogleError}
-        useOneTap={false} // Disable One Tap to avoid Cross-Origin-Opener-Policy issues
+        useOneTap={false}
         theme="filled_black"
         size="large"
         text="continue_with"
@@ -52,9 +74,47 @@ export default function GoogleLogin() {
         locale="en"
         auto_select={false}
         cancel_on_tap_outside={true}
+        ux_mode="popup"
+        popup_type="window"
       />
-      {/* Fallback: redirect-based OAuth if popup is blocked */}
+      
+      {/* Fallback 1: Manual OAuth flow */}
       <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center' }}>
+        <button
+          type="button"
+          onClick={() => {
+            try {
+              // Use a more direct OAuth approach
+              const googleAuthUrl = `https://accounts.google.com/oauth/authorize?` +
+                `client_id=${import.meta.env.VITE_GOOGLE_CLIENT_ID || '8739533127-rvga58btf64j28njdjdq84r2kof2h4n4.apps.googleusercontent.com'}&` +
+                `redirect_uri=${encodeURIComponent(window.location.origin + '/auth')}&` +
+                `response_type=code&` +
+                `scope=openid%20email%20profile&` +
+                `access_type=offline&` +
+                `prompt=consent`;
+              
+              window.location.href = googleAuthUrl;
+            } catch (error) {
+              console.error('Google OAuth redirect failed:', error);
+              alert('Unable to redirect to Google OAuth. Please try again.');
+            }
+          }}
+          style={{
+            border: '1px solid #e5e7eb',
+            padding: '10px 16px',
+            borderRadius: 8,
+            background: '#fff',
+            cursor: 'pointer',
+            fontSize: '14px',
+            marginRight: '8px'
+          }}
+        >
+          Continue with Google (OAuth)
+        </button>
+      </div>
+      
+      {/* Fallback 2: API-based OAuth */}
+      <div style={{ marginTop: 8, display: 'flex', justifyContent: 'center' }}>
         <button
           type="button"
           onClick={() => {
@@ -69,12 +129,12 @@ export default function GoogleLogin() {
             border: '1px solid #e5e7eb',
             padding: '10px 16px',
             borderRadius: 8,
-            background: '#fff',
+            background: '#f8f9fa',
             cursor: 'pointer',
             fontSize: '14px'
           }}
         >
-          Continue with Google (redirect)
+          Continue with Google (API)
         </button>
       </div>
     </div>

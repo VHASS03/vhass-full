@@ -131,23 +131,48 @@ function Home() {
           {/* 3D Scene */}
           <div ref={sceneWrapperRef} className="h-[50vh] lg:h-[100vh] w-full lg:w-1/2 order-1 lg:order-2 transform-gpu will-change-transform">
             <Canvas
-              onCreated={({ gl }) => {
-                // Handle WebGL context loss
-                gl.domElement.addEventListener('webglcontextlost', (event) => {
+              onCreated={({ gl, scene, camera }) => {
+                // Enhanced WebGL context loss handling
+                const handleContextLost = (event) => {
                   event.preventDefault();
                   console.warn('WebGL context lost, attempting recovery...');
-                });
+                  
+                  // Force a re-render attempt
+                  setTimeout(() => {
+                    if (gl.isContextLost()) {
+                      console.log('Attempting to restore WebGL context...');
+                      // Try to restore the context
+                      gl.getExtension('WEBGL_lose_context')?.restoreContext();
+                    }
+                  }, 100);
+                };
                 
-                gl.domElement.addEventListener('webglcontextrestored', () => {
+                const handleContextRestored = () => {
                   console.log('WebGL context restored');
-                });
+                  // Force a re-render
+                  if (scene && camera) {
+                    gl.render(scene, camera);
+                  }
+                };
+                
+                gl.domElement.addEventListener('webglcontextlost', handleContextLost);
+                gl.domElement.addEventListener('webglcontextrestored', handleContextRestored);
+                
+                // Store references for cleanup
+                gl._contextLostHandler = handleContextLost;
+                gl._contextRestoredHandler = handleContextRestored;
               }}
               gl={{ 
                 antialias: true, 
                 alpha: true,
                 powerPreference: "high-performance",
-                preserveDrawingBuffer: true
+                preserveDrawingBuffer: true,
+                failIfMajorPerformanceCaveat: false,
+                depth: true,
+                stencil: false,
+                logarithmicDepthBuffer: false
               }}
+              dpr={[1, 2]} // Limit device pixel ratio to prevent context loss
             >
               <Scene progress={progress} />
             </Canvas>

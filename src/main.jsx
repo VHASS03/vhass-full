@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect } from "react"
 import ReactDOM from "react-dom/client"
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { GoogleOAuthProvider } from "@react-oauth/google"
@@ -24,6 +24,24 @@ import Policies from "./Components/Policies.jsx"
 import { GOOGLE_CLIENT_ID } from "./config/googleConfig.js"
 
 const root = ReactDOM.createRoot(document.getElementById("root"))
+
+// Add COOP headers handling
+useEffect(() => {
+  // Set COOP headers to allow Google OAuth
+  if (typeof window !== 'undefined') {
+    // Add meta tag for COOP
+    const meta = document.createElement('meta');
+    meta.httpEquiv = 'Cross-Origin-Opener-Policy';
+    meta.content = 'same-origin-allow-popups';
+    document.head.appendChild(meta);
+    
+    // Add CSP header for Google OAuth
+    const cspMeta = document.createElement('meta');
+    cspMeta.httpEquiv = 'Content-Security-Policy';
+    cspMeta.content = "frame-src 'self' https://accounts.google.com https://www.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.gstatic.com;";
+    document.head.appendChild(cspMeta);
+  }
+}, []);
 
 root.render(
   <React.StrictMode>
