@@ -68,6 +68,7 @@ root.render(
                     <Route path="/workshop" element={<VHASSWorkshopsPage />} />
                     <Route path="/workshop/:slug" element={<WorkshopDetailPage />} />
                     <Route path="/payment/callback" element={<PaymentCallback />} />
+                    <Route path="/payment-success/:transactionId" element={<PaymentCallback />} />
                     <Route path="/phonepe-test" element={<PhonePeTest />} />
                     <Route path="/phonepe-debug" element={<PhonePeDebug />} />
                     <Route path="/admin" element={<AdminDashboard />} />

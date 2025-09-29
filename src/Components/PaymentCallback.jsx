@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
 import { CheckCircle, XCircle, Loader } from 'lucide-react';
 import ApiService from '../services/api.js';
 
 export default function PaymentCallback() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { transactionId } = useParams(); // Get transactionId from URL params
   const [paymentStatus, setPaymentStatus] = useState('processing');
   const [paymentDetails, setPaymentDetails] = useState(null);
   const [countdown, setCountdown] = useState(3);
@@ -13,15 +14,24 @@ export default function PaymentCallback() {
   useEffect(() => {
     const handlePaymentCallback = async () => {
       try {
-        const merchantTransactionId = searchParams.get('merchantTransactionId');
-        const transactionId = searchParams.get('transactionId');
+        const merchantTransactionId = searchParams.get('merchantTransactionId') || transactionId;
+        const phonepeTransactionId = searchParams.get('transactionId');
         const code = searchParams.get('code');
         const type = searchParams.get('type'); // course or workshop
 
-        console.log('Payment callback params:', { merchantTransactionId, transactionId, code, type });
+        console.log('Payment callback params:', { 
+          merchantTransactionId, 
+          phonepeTransactionId, 
+          code, 
+          type,
+          urlTransactionId: transactionId 
+        });
 
         if (!merchantTransactionId) {
           setPaymentStatus('error');
+          setPaymentDetails({
+            message: 'No transaction ID found in URL or parameters'
+          });
           return;
         }
 
@@ -38,6 +48,14 @@ export default function PaymentCallback() {
             status: 'COMPLETED',
             message: 'Course enrollment successful!'
           });
+          
+          // Also try to fix any missing enrollments
+          try {
+            await ApiService.fixEnrollment();
+            console.log('Enrollment fix completed');
+          } catch (error) {
+            console.error('Enrollment fix failed:', error);
+          }
           
           // Auto-redirect to dashboard after 3 seconds with countdown
           const countdownInterval = setInterval(() => {
@@ -78,7 +96,7 @@ export default function PaymentCallback() {
     };
 
     handlePaymentCallback();
-  }, [searchParams, navigate]);
+  }, [searchParams, navigate, transactionId]);
 
   const getStatusContent = () => {
     switch (paymentStatus) {

@@ -80,10 +80,23 @@ router.post('/fix-enrollment', async (req, res) => {
     console.log('🔧 Manual enrollment fix requested');
     
     // Find all successful transactions that might not be enrolled
+    // Check for different possible success statuses
     const successfulTransactions = await Transaction.find({
-      transactionStatus: 'SUCCESS',
+      $or: [
+        { transactionStatus: 'SUCCESS' },
+        { transactionStatus: 'COMPLETED' },
+        { transactionStatus: 'PAYMENT_SUCCESS' }
+      ],
       courseID: { $exists: true, $ne: null }
     }).populate('userID', 'email name subscription').populate('courseID', 'title');
+    
+    console.log('🔍 Found successful transactions:', successfulTransactions.length);
+    console.log('Transaction details:', successfulTransactions.map(t => ({
+      id: t._id,
+      user: t.userID?.email,
+      course: t.courseID?.title,
+      status: t.transactionStatus
+    })));
     
     console.log('Found successful transactions:', successfulTransactions.length);
     
