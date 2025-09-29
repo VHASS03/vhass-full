@@ -25,11 +25,15 @@ router.get('/google',
 
 router.get('/google/callback',
   (req, res, next) => {
-    console.log('Received Google callback...');
+    console.log('🔍 Received Google OAuth callback:');
+    console.log('Query params:', req.query);
+    console.log('URL:', req.url);
+    console.log('Headers origin:', req.headers.origin);
+    console.log('Headers referer:', req.headers.referer);
     next();
   },
   passport.authenticate('google', { 
-    failureRedirect: '/login',
+    failureRedirect: `${process.env.FRONTEND_URL}/auth?error=oauth_failed`,
     session: true
   }),
   async (req, res) => {

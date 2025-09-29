@@ -151,14 +151,18 @@ app.get("/", (req, res) => {
 
 // Handle OAuth callback redirect to /auth
 app.get('/auth', (req, res) => {
-  console.log('Handling /auth route - redirecting to frontend with session check');
+  console.log('🔍 Handling /auth route:');
+  console.log('Session exists:', !!req.session);
+  console.log('Session user:', req.session?.user ? 'Authenticated' : 'Not authenticated');
+  console.log('Query params:', req.query);
+  console.log('Headers:', req.headers);
   
   // Check if user is authenticated via session
   if (req.session && req.session.user) {
-    console.log('User authenticated via session, redirecting to frontend');
+    console.log('✅ User authenticated via session, redirecting to frontend');
     res.redirect(process.env.FRONTEND_URL);
   } else {
-    console.log('User not authenticated, redirecting to login');
+    console.log('❌ User not authenticated, redirecting to login');
     res.redirect(`${process.env.FRONTEND_URL}/auth`);
   }
 });
@@ -167,6 +171,14 @@ app.get('/auth', (req, res) => {
 app.get('/auth/google', (req, res) => {
   console.log('Redirecting from /auth/google to /api/auth/google');
   res.redirect('/api/auth/google');
+});
+
+// Handle Google OAuth callback if it goes to wrong URL
+app.get('/auth/google/callback', (req, res) => {
+  console.log('🔍 Google OAuth callback hit /auth/google/callback instead of /api/auth/google/callback');
+  console.log('Query params:', req.query);
+  console.log('Redirecting to correct callback URL...');
+  res.redirect('/api/auth/google/callback' + (req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : ''));
 });
 
 // Serve static files from the uploads directory

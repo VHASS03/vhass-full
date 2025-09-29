@@ -17,6 +17,12 @@ const googleConfig = {
   callbackURL: `${backendUrl}/api/auth/google/callback`
 };
 
+// Validate callback URL configuration
+console.log('🔍 OAuth Callback URL Validation:');
+console.log('Expected callback URL:', googleConfig.callbackURL);
+console.log('Backend URL:', backendUrl);
+console.log('Frontend URL:', frontendUrl);
+
 console.log('Google OAuth Configuration:', {
   clientID: googleConfig.clientID ? 'Set' : 'Not Set',
   clientSecret: googleConfig.clientSecret ? 'Set' : 'Not Set',
