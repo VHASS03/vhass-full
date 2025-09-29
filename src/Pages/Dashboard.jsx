@@ -44,6 +44,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [fixingEnrollment, setFixingEnrollment] = useState(false);
   
   // Profile editing state
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -109,6 +110,27 @@ function Dashboard() {
       setError(error.message || "Failed to update profile");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFixEnrollment = async () => {
+    setFixingEnrollment(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const response = await ApiService.fixEnrollment();
+      if (response.success) {
+        setSuccess(`Enrollment fixed! ${response.message}`);
+        // Refresh the page to show updated courses
+        window.location.reload();
+      } else {
+        setError(response.message || "Failed to fix enrollment");
+      }
+    } catch (error) {
+      setError(error.message || "Failed to fix enrollment");
+    } finally {
+      setFixingEnrollment(false);
     }
   };
 
@@ -330,12 +352,29 @@ function Dashboard() {
                 <div className="empty-state">
                   <h3>No courses enrolled yet</h3>
                   <p>Start your learning journey by enrolling in our courses!</p>
-                  <button 
-                    className="browse-btn"
-                    onClick={() => navigate("/course")}
-                  >
-                    Browse Courses
-                  </button>
+                  <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                    <button 
+                      className="browse-btn"
+                      onClick={() => navigate("/course")}
+                    >
+                      Browse Courses
+                    </button>
+                    <button 
+                      className="browse-btn"
+                      onClick={handleFixEnrollment}
+                      disabled={fixingEnrollment}
+                      style={{ 
+                        backgroundColor: '#10b981', 
+                        color: 'white',
+                        opacity: fixingEnrollment ? 0.6 : 1
+                      }}
+                    >
+                      {fixingEnrollment ? 'Fixing...' : 'Fix My Enrollments'}
+                    </button>
+                  </div>
+                  <p style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}>
+                    Click "Fix My Enrollments" if you've paid for a course but it's not showing up
+                  </p>
                 </div>
               ) : (
                 registeredCourses.map((course) => (

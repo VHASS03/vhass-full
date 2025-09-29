@@ -74,4 +74,101 @@ router.post('/phonepe/webhook', async (req, res) => {
   }
 });
 
+// Manual enrollment fix for existing successful payments
+router.post('/fix-enrollment', async (req, res) => {
+  try {
+    console.log('🔧 Manual enrollment fix requested');
+    
+    // Find all successful transactions that might not be enrolled
+    const successfulTransactions = await Transaction.find({
+      transactionStatus: 'SUCCESS',
+      courseID: { $exists: true, $ne: null }
+    }).populate('userID', 'email name subscription').populate('courseID', 'title');
+    
+    console.log('Found successful transactions:', successfulTransactions.length);
+    
+    let fixedCount = 0;
+    const results = [];
+    
+    for (const transaction of successfulTransactions) {
+      if (!transaction.userID || !transaction.courseID) {
+        continue;
+      }
+      
+      const user = transaction.userID;
+      const course = transaction.courseID;
+      
+      // Check if user is already enrolled
+      if (!user.subscription.includes(course._id)) {
+        // Enroll user in course
+        await User.findByIdAndUpdate(user._id, {
+          $addToSet: { subscription: course._id }
+        });
+        
+        // Add user to course purchasers
+        await Courses.findByIdAndUpdate(course._id, {
+          $addToSet: { purchasers: user._id }
+        });
+        
+        fixedCount++;
+        results.push({
+          user: user.email,
+          course: course.title,
+          transactionId: transaction.merchantOrderID,
+          status: 'ENROLLED'
+        });
+        
+        console.log(`✅ Enrolled ${user.email} in ${course.title}`);
+      } else {
+        results.push({
+          user: user.email,
+          course: course.title,
+          transactionId: transaction.merchantOrderID,
+          status: 'ALREADY_ENROLLED'
+        });
+      }
+    }
+    
+    res.json({
+      success: true,
+      message: `Fixed enrollment for ${fixedCount} users`,
+      totalTransactions: successfulTransactions.length,
+      fixedCount,
+      results
+    });
+    
+  } catch (error) {
+    console.error('❌ Enrollment fix error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fix enrollments',
+      error: error.message
+    });
+  }
+});
+
+// Check user's transaction status
+router.get('/user-transactions/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    const transactions = await Transaction.find({ userID: userId })
+      .populate('courseID', 'title price')
+      .sort({ createdAt: -1 });
+    
+    res.json({
+      success: true,
+      transactions
+    });
+    
+  } catch (error) {
+    console.error('❌ Get transactions error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get transactions',
+      error: error.message
+    });
+  }
+});
+
 export default router;

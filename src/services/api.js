@@ -320,6 +320,17 @@ class ApiService {
   async getUserDetails(userId) {
     return this.makeRequest(`/admin/user/${userId}`);
   }
+
+  // Payment utilities
+  async fixEnrollment() {
+    return this.makeRequest('/api/payment/fix-enrollment', {
+      method: 'POST'
+    });
+  }
+
+  async getUserTransactions(userId) {
+    return this.makeRequest(`/api/payment/user-transactions/${userId}`);
+  }
 }
 
 export default new ApiService();
