@@ -17,7 +17,7 @@ export const isAuth = async (req, res, next) => {
       
       try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await User.findById(decoded._id);
+        const user = await User.findById(decoded.id);
         
         if (!user) {
           console.log('Auth: User not found in database');
