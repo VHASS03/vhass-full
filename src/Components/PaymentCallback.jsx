@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle, XCircle, Loader } from 'lucide-react';
-import phonepeService from '../services/phonepeService';
+import ApiService from '../services/api.js';
 
 export default function PaymentCallback() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [paymentStatus, setPaymentStatus] = useState('processing');
   const [paymentDetails, setPaymentDetails] = useState(null);
+  const [countdown, setCountdown] = useState(3);
 
   useEffect(() => {
     const handlePaymentCallback = async () => {
@@ -15,42 +16,69 @@ export default function PaymentCallback() {
         const merchantTransactionId = searchParams.get('merchantTransactionId');
         const transactionId = searchParams.get('transactionId');
         const code = searchParams.get('code');
+        const type = searchParams.get('type'); // course or workshop
+
+        console.log('Payment callback params:', { merchantTransactionId, transactionId, code, type });
 
         if (!merchantTransactionId) {
           setPaymentStatus('error');
           return;
         }
 
-        // Check payment status with PhonePe
-        const statusResponse = await phonepeService.checkPaymentStatus(merchantTransactionId);
+        // Check payment status with backend API
+        const statusResponse = await ApiService.phonepeStatus(type || 'course', merchantTransactionId);
         
-        if (statusResponse.success) {
-          if (statusResponse.status === 'COMPLETED') {
-            setPaymentStatus('success');
-            setPaymentDetails({
-              transactionId: statusResponse.transactionId,
-              amount: statusResponse.amount,
-              status: statusResponse.status
+        console.log('Payment status response:', statusResponse);
+        
+        if (statusResponse.status === 'SUCCESS') {
+          setPaymentStatus('success');
+          setPaymentDetails({
+            transactionId: statusResponse.txnid,
+            merchantOrderId: statusResponse.merchantOrderId,
+            status: 'COMPLETED',
+            message: 'Course enrollment successful!'
+          });
+          
+          // Auto-redirect to dashboard after 3 seconds with countdown
+          const countdownInterval = setInterval(() => {
+            setCountdown(prev => {
+              if (prev <= 1) {
+                clearInterval(countdownInterval);
+                navigate('/dashboard');
+                return 0;
+              }
+              return prev - 1;
             });
-          } else {
-            setPaymentStatus('failed');
-            setPaymentDetails({
-              transactionId: statusResponse.transactionId,
-              status: statusResponse.status,
-              responseCode: statusResponse.responseCode
-            });
-          }
+          }, 1000);
+          
+        } else if (statusResponse.status === 'FAILURE') {
+          setPaymentStatus('failed');
+          setPaymentDetails({
+            transactionId: statusResponse.merchantOrderId,
+            status: 'FAILED',
+            message: 'Payment failed. Please try again.'
+          });
+        } else if (statusResponse.status === 'PENDING') {
+          setPaymentStatus('processing');
+          setPaymentDetails({
+            transactionId: statusResponse.merchantOrderId,
+            status: 'PENDING',
+            message: 'Payment is still being processed.'
+          });
         } else {
           setPaymentStatus('error');
         }
       } catch (error) {
         console.error('Payment callback error:', error);
         setPaymentStatus('error');
+        setPaymentDetails({
+          message: 'An error occurred while processing your payment.'
+        });
       }
     };
 
     handlePaymentCallback();
-  }, [searchParams]);
+  }, [searchParams, navigate]);
 
   const getStatusContent = () => {
     switch (paymentStatus) {
@@ -65,7 +93,7 @@ export default function PaymentCallback() {
         return {
           icon: <CheckCircle className="w-16 h-16 text-green-500" />,
           title: 'Payment Successful!',
-          message: 'Your enrollment has been confirmed.',
+          message: `Your course has been enrolled! Redirecting to dashboard in ${countdown} seconds...`,
           color: 'text-green-500'
         };
       case 'failed':
@@ -114,12 +142,12 @@ export default function PaymentCallback() {
             <h3 className="text-white font-semibold mb-2">Payment Details:</h3>
             <div className="space-y-1 text-sm text-gray-300">
               <p><strong>Transaction ID:</strong> {paymentDetails.transactionId}</p>
-              {paymentDetails.amount && (
-                <p><strong>Amount:</strong> ₹{paymentDetails.amount}</p>
+              {paymentDetails.merchantOrderId && (
+                <p><strong>Order ID:</strong> {paymentDetails.merchantOrderId}</p>
               )}
               <p><strong>Status:</strong> {paymentDetails.status}</p>
-              {paymentDetails.responseCode && (
-                <p><strong>Response Code:</strong> {paymentDetails.responseCode}</p>
+              {paymentDetails.message && (
+                <p><strong>Message:</strong> {paymentDetails.message}</p>
               )}
             </div>
           </div>
@@ -130,7 +158,7 @@ export default function PaymentCallback() {
             onClick={() => navigate('/dashboard')}
             className="w-full bg-purple-600 text-white py-3 px-6 rounded-lg hover:bg-purple-700 transition-colors"
           >
-            Go to Dashboard
+            {paymentStatus === 'success' ? 'View My Courses' : 'Go to Dashboard'}
           </button>
           
           {paymentStatus === 'failed' && (
