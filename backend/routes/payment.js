@@ -79,6 +79,15 @@ router.post('/fix-enrollment', async (req, res) => {
   try {
     console.log('🔧 Manual enrollment fix requested');
     
+    // First, let's see all transactions to understand the data structure
+    const allTransactions = await Transaction.find({}).limit(5);
+    console.log('🔍 Sample transactions in database:', allTransactions.map(t => ({
+      id: t._id,
+      status: t.transactionStatus,
+      hasCourse: !!t.courseID,
+      hasUser: !!t.userID
+    })));
+    
     // Find all successful transactions that might not be enrolled
     // Check for different possible success statuses
     const successfulTransactions = await Transaction.find({
@@ -98,40 +107,58 @@ router.post('/fix-enrollment', async (req, res) => {
       status: t.transactionStatus
     })));
     
-    console.log('Found successful transactions:', successfulTransactions.length);
-    
     let fixedCount = 0;
     const results = [];
     
     for (const transaction of successfulTransactions) {
       if (!transaction.userID || !transaction.courseID) {
+        console.log('Skipping transaction - missing user or course:', {
+          hasUser: !!transaction.userID,
+          hasCourse: !!transaction.courseID
+        });
         continue;
       }
       
       const user = transaction.userID;
       const course = transaction.courseID;
       
+      // Ensure user has subscription array
+      if (!user.subscription) {
+        user.subscription = [];
+      }
+      
       // Check if user is already enrolled
-      if (!user.subscription.includes(course._id)) {
-        // Enroll user in course
-        await User.findByIdAndUpdate(user._id, {
-          $addToSet: { subscription: course._id }
-        });
-        
-        // Add user to course purchasers
-        await Courses.findByIdAndUpdate(course._id, {
-          $addToSet: { purchasers: user._id }
-        });
-        
-        fixedCount++;
-        results.push({
-          user: user.email,
-          course: course.title,
-          transactionId: transaction.merchantOrderID,
-          status: 'ENROLLED'
-        });
-        
-        console.log(`✅ Enrolled ${user.email} in ${course.title}`);
+      if (!user.subscription.includes(course._id.toString())) {
+        try {
+          // Enroll user in course
+          await User.findByIdAndUpdate(user._id, {
+            $addToSet: { subscription: course._id }
+          });
+          
+          // Add user to course purchasers
+          await Courses.findByIdAndUpdate(course._id, {
+            $addToSet: { purchasers: user._id }
+          });
+          
+          fixedCount++;
+          results.push({
+            user: user.email,
+            course: course.title,
+            transactionId: transaction.merchantOrderID,
+            status: 'ENROLLED'
+          });
+          
+          console.log(`✅ Enrolled ${user.email} in ${course.title}`);
+        } catch (enrollmentError) {
+          console.error(`❌ Failed to enroll ${user.email} in ${course.title}:`, enrollmentError);
+          results.push({
+            user: user.email,
+            course: course.title,
+            transactionId: transaction.merchantOrderID,
+            status: 'ENROLLMENT_FAILED',
+            error: enrollmentError.message
+          });
+        }
       } else {
         results.push({
           user: user.email,
