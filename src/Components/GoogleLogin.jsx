@@ -41,13 +41,8 @@ export default function GoogleLogin() {
       console.log('FedCM disabled, trying alternative OAuth flow...');
       // Try the manual OAuth flow
       try {
-        const googleAuthUrl = `https://accounts.google.com/oauth/authorize?` +
-          `client_id=${import.meta.env.VITE_GOOGLE_CLIENT_ID || '8739533127-rvga58btf64j28njdjdq84r2kof2h4n4.apps.googleusercontent.com'}&` +
-          `redirect_uri=${encodeURIComponent(window.location.origin + '/auth')}&` +
-          `response_type=code&` +
-          `scope=openid%20email%20profile&` +
-          `access_type=offline&` +
-          `prompt=consent`;
+        const backendUrl = import.meta.env.VITE_API_URL || 'https://api.vhassacademy.com';
+        const googleAuthUrl = `${backendUrl}/api/auth/google`;
         
         window.location.href = googleAuthUrl;
         return;

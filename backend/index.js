@@ -149,6 +149,20 @@ app.get("/", (req, res) => {
   res.send("Server is working");
 });
 
+// Handle OAuth callback redirect to /auth
+app.get('/auth', (req, res) => {
+  console.log('Handling /auth route - redirecting to frontend with session check');
+  
+  // Check if user is authenticated via session
+  if (req.session && req.session.user) {
+    console.log('User authenticated, redirecting to frontend');
+    res.redirect(process.env.FRONTEND_URL);
+  } else {
+    console.log('User not authenticated, redirecting to login');
+    res.redirect(`${process.env.FRONTEND_URL}/auth`);
+  }
+});
+
 // Redirect from /auth/google to /api/auth/google for compatibility
 app.get('/auth/google', (req, res) => {
   console.log('Redirecting from /auth/google to /api/auth/google');
