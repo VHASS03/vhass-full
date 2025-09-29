@@ -35,22 +35,32 @@ router.get('/google/callback',
   async (req, res) => {
     try {
       console.log('Google authentication successful, setting session...');
-      // console.log(req);
-      // console.log(req.user);
+      console.log('User data:', req.user);
+      
+      // Store user in session
       req.session.user = req.user;
+      
+      // Generate JWT token for frontend
+      const token = jwt.sign(
+        { id: req.user._id, email: req.user.email },
+        process.env.JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+      
       req.session.save(err => {
         if (err) {
           console.error("Session save error:", err);
-          return res.redirect('https://www.vhass.in/login?error=session_error');
+          return res.redirect(`${process.env.FRONTEND_URL}/auth?error=session_error`);
         }
       
-        // ✅ Redirect only after session is saved
-        res.redirect(process.env.FRONTEND_URL);
+        // Redirect to frontend with token in URL fragment (more secure than query param)
+        const redirectUrl = `${process.env.FRONTEND_URL}/auth?token=${token}&source=google`;
+        console.log('Redirecting to:', redirectUrl);
+        res.redirect(redirectUrl);
       });
-      // res.redirect(process.env.FRONTEND_URL);
     } catch (error) {
       console.error('Error in Google callback:', error);
-      res.redirect('https://www.vhass.in/login?error=auth_failed');
+      res.redirect(`${process.env.FRONTEND_URL}/auth?error=auth_failed`);
     }
   }
 );

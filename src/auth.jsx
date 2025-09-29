@@ -11,7 +11,7 @@ import GoogleLogin from "./Components/GoogleLogin.jsx";
 
 export default function AuthPage() {
   const navigate = useNavigate();
-  const { login, register, user, loading: authLoading } = useAuth();
+  const { login, register, user, loading: authLoading, checkAuthStatus } = useAuth();
   const [currentPage, setCurrentPage] = useState("signup") // Start with signup as shown in reference
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -45,6 +45,22 @@ export default function AuthPage() {
   // Handle Google OAuth callback
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    const source = urlParams.get('source');
+    const error = urlParams.get('error');
+    
+    if (error) {
+      setError(`Authentication failed: ${error}`);
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return;
+    }
+    
+    if (token && source === 'google') {
+      handleGoogleOAuthSuccess(token);
+    }
+    
+    // Legacy code handling (keep for compatibility)
     const code = urlParams.get('code');
     const state = urlParams.get('state');
     
@@ -60,6 +76,44 @@ export default function AuthPage() {
       }
     }
   }, []);
+
+  const handleGoogleOAuthSuccess = async (token) => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      console.log('Google OAuth success, token received');
+      
+      // Store the token
+      localStorage.setItem('auth_token', token);
+      
+      // Get user profile to update context
+      const response = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/profile`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        // Token is already stored, just refresh auth status
+        await checkAuthStatus();
+        
+        // Clean up URL and redirect
+        window.history.replaceState({}, document.title, window.location.pathname);
+        navigate('/dashboard');
+      } else {
+        throw new Error('Failed to get user profile');
+      }
+    } catch (error) {
+      console.error('OAuth success handling error:', error);
+      setError('Authentication failed. Please try again.');
+      localStorage.removeItem('auth_token');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleGoogleOAuthCallback = async (code) => {
     try {

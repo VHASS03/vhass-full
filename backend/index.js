@@ -155,7 +155,7 @@ app.get('/auth', (req, res) => {
   
   // Check if user is authenticated via session
   if (req.session && req.session.user) {
-    console.log('User authenticated, redirecting to frontend');
+    console.log('User authenticated via session, redirecting to frontend');
     res.redirect(process.env.FRONTEND_URL);
   } else {
     console.log('User not authenticated, redirecting to login');
