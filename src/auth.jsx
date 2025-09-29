@@ -88,7 +88,7 @@ export default function AuthPage() {
       localStorage.setItem('auth_token', token);
       
       // Get user profile to update context
-      const response = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/user/me`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/api/user/me`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
