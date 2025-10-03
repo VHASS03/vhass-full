@@ -45,6 +45,7 @@ function Dashboard() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [fixingEnrollment, setFixingEnrollment] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   
   // Profile editing state
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -69,22 +70,58 @@ function Dashboard() {
 
   const loadDashboardData = async () => {
     setLoading(true);
+    setError("");
     try {
-      // Load user's registered courses
-      const coursesResponse = await ApiService.getUserCourses();
-      setRegisteredCourses(coursesResponse.courses || []);
+      console.log("Loading dashboard data...");
+      
+      // Load data in parallel for better performance
+      const [coursesResponse, workshopsResponse, historyResponse] = await Promise.allSettled([
+        ApiService.getUserCourses(),
+        ApiService.getUserWorkshops(),
+        ApiService.getEnrollmentHistory()
+      ]);
 
-      // Load user's registered workshops
-      const workshopsResponse = await ApiService.getUserWorkshops();
-      setRegisteredWorkshops(workshopsResponse.workshops || []);
+      // Handle courses response
+      if (coursesResponse.status === 'fulfilled') {
+        setRegisteredCourses(coursesResponse.value.courses || []);
+        console.log("Courses loaded:", coursesResponse.value.courses?.length || 0);
+      } else {
+        console.error("Failed to load courses:", coursesResponse.reason);
+        setRegisteredCourses([]);
+      }
 
-      // Load enrollment history
-      const historyResponse = await ApiService.getEnrollmentHistory();
-      setEnrollmentHistory(historyResponse.history || []);
+      // Handle workshops response
+      if (workshopsResponse.status === 'fulfilled') {
+        setRegisteredWorkshops(workshopsResponse.value.workshops || []);
+        console.log("Workshops loaded:", workshopsResponse.value.workshops?.length || 0);
+      } else {
+        console.error("Failed to load workshops:", workshopsResponse.reason);
+        setRegisteredWorkshops([]);
+      }
+
+      // Handle history response
+      if (historyResponse.status === 'fulfilled') {
+        setEnrollmentHistory(historyResponse.value.history || []);
+        console.log("History loaded:", historyResponse.value.history?.length || 0);
+      } else {
+        console.error("Failed to load history:", historyResponse.reason);
+        setEnrollmentHistory([]);
+      }
+
+      // Check if all requests failed
+      const allFailed = coursesResponse.status === 'rejected' && 
+                       workshopsResponse.status === 'rejected' && 
+                       historyResponse.status === 'rejected';
+      
+      if (allFailed) {
+        setError("Failed to load dashboard data. Please check your connection and try again.");
+      } else {
+        console.log("Dashboard data loaded successfully");
+      }
 
     } catch (error) {
       console.error("Error loading dashboard data:", error);
-      setError("Failed to load dashboard data");
+      setError("Failed to load dashboard data. Please refresh the page.");
     } finally {
       setLoading(false);
     }
@@ -302,7 +339,36 @@ function Dashboard() {
 
           {error && (
             <div className="error-message">
-              {error}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
+                <p>{error}</p>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                  <button 
+                    className="retry-btn"
+                    onClick={() => {
+                      setRetryCount(prev => prev + 1);
+                      loadDashboardData();
+                    }}
+                    disabled={loading}
+                  >
+                    {loading ? 'Retrying...' : 'Retry'}
+                  </button>
+                  <button 
+                    className="refresh-btn"
+                    onClick={() => window.location.reload()}
+                    style={{ 
+                      background: 'rgba(34, 197, 94, 0.2)', 
+                      color: '#86efac',
+                      border: '1px solid rgba(34, 197, 94, 0.3)',
+                      padding: '0.5rem 1rem',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontWeight: '600'
+                    }}
+                  >
+                    Refresh Page
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
