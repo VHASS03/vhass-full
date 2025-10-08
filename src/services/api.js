@@ -168,7 +168,7 @@ class ApiService {
   }
 
   async getUserCourses() {
-    return this.makeRequest('/api/user/courses');
+    return this.makeRequest('/api/mycourse');
   }
 
   async getLectures(courseId) {
@@ -204,7 +204,7 @@ class ApiService {
   }
 
   async getUserWorkshops() {
-    return this.makeRequest('/api/user/workshops');
+    return this.makeRequest('/api/myworkshop');
   }
 
   async getEnrollmentHistory() {
@@ -330,6 +330,15 @@ class ApiService {
 
   async getUserTransactions(userId) {
     return this.makeRequest(`/api/payment/user-transactions/${userId}`);
+  }
+
+  // Admin enrollment management
+  async getAllEnrollments() {
+    return this.makeRequest('/api/admin/enrollments');
+  }
+
+  async getCourseEnrollments(courseId) {
+    return this.makeRequest(`/api/admin/course/${courseId}/enrollments`);
   }
 }
 

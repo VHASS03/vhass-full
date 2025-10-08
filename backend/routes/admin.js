@@ -16,6 +16,8 @@ import {
   deleteWorkshop,
   deleteUser,
   getUserDetails,
+  getAllEnrollments,
+  getCourseEnrollments,
 } from "../controllers/admin.js";
 import { uploadFiles, handleMulterError } from "../middlewares/multer.js";
 import { User } from "../models/User.js";
@@ -162,6 +164,10 @@ router.put("/workshop/:id", isAuth, isAdmin, uploadFiles.single('image'), update
 router.delete("/workshop/:id", isAuth, isAdmin, deleteWorkshop);
 router.delete("/user/:id", isAuth, isAdmin, deleteUser);
 router.get("/user/:id", isAuth, isAdmin, getUserDetails);
+
+// Enrollment management routes
+router.get("/enrollments", isAuth, isAdmin, getAllEnrollments);
+router.get("/course/:courseId/enrollments", isAuth, isAdmin, getCourseEnrollments);
 
 // Catch-all 404 handler
 router.use((req, res) => {

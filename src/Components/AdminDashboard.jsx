@@ -49,6 +49,7 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState([])
   const [courses, setCourses] = useState([])
   const [workshops, setWorkshops] = useState([])
+  const [enrollments, setEnrollments] = useState([])
   const [loading, setLoading] = useState(true)
   const [showAddUser, setShowAddUser] = useState(false)
   const [showAddCourse, setShowAddCourse] = useState(false)
@@ -142,6 +143,20 @@ export default function AdminDashboard() {
         setWorkshops(workshopsData.workshops || [])
       } else {
         console.error('Failed to load workshops:', workshopsResponse.status, workshopsResponse.statusText)
+      }
+
+      // Load enrollments
+      const enrollmentsResponse = await fetch(`${baseURL}/api/admin/enrollments`, {
+        credentials: 'include',
+        headers: {
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        }
+      })
+      if (enrollmentsResponse.ok) {
+        const enrollmentsData = await enrollmentsResponse.json()
+        setEnrollments(enrollmentsData.transactions || [])
+      } else {
+        console.error('Failed to load enrollments:', enrollmentsResponse.status, enrollmentsResponse.statusText)
       }
     } catch (error) {
       console.error('Error loading data:', error)
@@ -682,6 +697,20 @@ export default function AdminDashboard() {
             <Calendar className="w-5 h-5 mr-2" />
             Workshops ({workshops.length})
           </Button>
+          <Button
+            onClick={() => setActiveTab("enrollments")}
+            className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
+              activeTab === "enrollments" 
+                ? "text-white" 
+                : "text-black"
+            }`}
+            style={{ 
+              backgroundColor: activeTab === "enrollments" ? "#000000" : "#B88AFF" 
+            }}
+          >
+            <Users className="w-5 h-5 mr-2" />
+            Enrollments ({enrollments.length})
+          </Button>
         </div>
 
         {/* Dashboard Tab */}
@@ -776,9 +805,12 @@ export default function AdminDashboard() {
                   />
                   <CardContent className="p-4">
                     <h3 className="text-lg font-semibold mb-2" style={{ color: "#FFFFF0" }}>{course.title}</h3>
-                    <p className="text-sm mb-2" style={{ color: "#B88AFF" }}>{course.instructor}</p>
-                    <p className="text-sm mb-2" style={{ color: "#B88AFF" }}>{course.duration}</p>
-                    <p className="text-xl font-bold mb-4" style={{ color: "#B88AFF" }}>{course.price}</p>
+                    <p className="text-sm mb-2" style={{ color: "#B88AFF" }}>{course.createdBy || course.instructor}</p>
+                    <p className="text-sm mb-2" style={{ color: "#B88AFF" }}>{course.duration} hours</p>
+                    <p className="text-xl font-bold mb-2" style={{ color: "#B88AFF" }}>₹{course.price}</p>
+                    <p className="text-sm mb-4" style={{ color: "#10b981" }}>
+                      {enrollments.filter(e => e.course?._id === course._id).length} enrollments
+                    </p>
                     <div className="flex gap-2">
                       <Button
                         onClick={() => handleEditCourse(course)}
@@ -859,6 +891,62 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Enrollments Tab */}
+        {activeTab === "enrollments" && (
+          <div>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-3xl font-bold" style={{ color: "#FFFFF0" }}>User Enrollments</h2>
+            </div>
+            
+            <div className="space-y-6">
+              {enrollments.length === 0 ? (
+                <Card className="p-8 text-center" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)", border: "2px solid #B88AFF" }}>
+                  <p style={{ color: "#B88AFF" }}>No enrollments found</p>
+                </Card>
+              ) : (
+                <div className="grid gap-4">
+                  {enrollments.map((enrollment) => (
+                    <Card key={enrollment._id} className="p-4" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)", border: "2px solid #B88AFF" }}>
+                      <div className="grid md:grid-cols-4 gap-4 items-center">
+                        <div>
+                          <h3 className="text-lg font-semibold" style={{ color: "#FFFFF0" }}>
+                            {enrollment.user?.name || 'Unknown User'}
+                          </h3>
+                          <p style={{ color: "#B88AFF" }}>{enrollment.user?.email || 'No email'}</p>
+                        </div>
+                        <div>
+                          <p className="font-semibold" style={{ color: "#FFFFF0" }}>
+                            {enrollment.course?.title || enrollment.workshop?.title || 'Unknown Item'}
+                          </p>
+                          <p style={{ color: "#B88AFF" }}>
+                            {enrollment.course ? 'Course' : enrollment.workshop ? 'Workshop' : 'Unknown'}
+                          </p>
+                        </div>
+                        <div>
+                          <p style={{ color: "#B88AFF" }}>
+                            ₹{enrollment.amount || 0}
+                          </p>
+                          <p style={{ color: "#B88AFF" }}>
+                            {enrollment.status}
+                          </p>
+                        </div>
+                        <div>
+                          <p style={{ color: "#B88AFF" }}>
+                            {new Date(enrollment.enrollmentDate).toLocaleDateString()}
+                          </p>
+                          <p className="text-xs" style={{ color: "#666" }}>
+                            ID: {enrollment.transactionId}
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}

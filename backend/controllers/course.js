@@ -107,7 +107,7 @@ export const fetchLecture = TryCatch(async (req, res) => {
 });
 
 export const getMyCourses = TryCatch(async (req, res) => {
-  const courses = await Courses.find({ _id: req.user.subscription });
+  const courses = await Courses.find({ _id: { $in: req.user.subscription } });
 
   res.json({
     courses,
@@ -115,14 +115,12 @@ export const getMyCourses = TryCatch(async (req, res) => {
 });
 
 export const getUserCourses = TryCatch(async (req, res) => {
-  const user = await User.findById(req.user._id).populate('subscription');
-  
-  const courses = user.subscription.map(courseId => {
-    if (typeof courseId === 'string') {
-      return { _id: courseId, title: 'Course', description: 'Course description' };
-    }
-    return courseId;
+  const user = await User.findById(req.user._id).populate({
+    path: 'subscription',
+    model: 'Courses'
   });
+  
+  const courses = user.subscription || [];
 
   res.json({
     courses,
@@ -130,14 +128,12 @@ export const getUserCourses = TryCatch(async (req, res) => {
 });
 
 export const getUserWorkshops = TryCatch(async (req, res) => {
-  const user = await User.findById(req.user._id).populate('workshopSubscription');
+  const user = await User.findById(req.user._id).populate({
+    path: 'workshopSubscription',
+    model: 'Workshop'
+  });
   
-  const workshops = user.workshopSubscription ? user.workshopSubscription.map(workshopId => {
-    if (typeof workshopId === 'string') {
-      return { _id: workshopId, title: 'Workshop', description: 'Workshop description' };
-    }
-    return workshopId;
-  }) : [];
+  const workshops = user.workshopSubscription || [];
 
   res.json({
     workshops,
@@ -147,28 +143,36 @@ export const getUserWorkshops = TryCatch(async (req, res) => {
 export const getEnrollmentHistory = TryCatch(async (req, res) => {
   const user = await User.findById(req.user._id);
   
-  // Get course enrollments
-  const courseEnrollments = await Courses.find({ _id: { $in: user.subscription } })
-    .select('title category')
-    .lean();
+  // Get course enrollments with real enrollment dates from transactions
+  const courseTransactions = await Transaction.find({
+    userID: user._id,
+    courseID: { $exists: true, $ne: null },
+    transactionStatus: { $in: ['SUCCESS', 'COMPLETED', 'PAYMENT_SUCCESS'] }
+  }).populate('courseID', 'title category').sort({ createdAt: -1 });
   
-  // Get workshop enrollments (if workshop model exists)
-  const workshopEnrollments = []; // Placeholder for workshop enrollments
+  // Get workshop enrollments with real enrollment dates from transactions
+  const workshopTransactions = await Transaction.find({
+    userID: user._id,
+    workshopID: { $exists: true, $ne: null },
+    transactionStatus: { $in: ['SUCCESS', 'COMPLETED', 'PAYMENT_SUCCESS'] }
+  }).populate('workshopID', 'title category').sort({ createdAt: -1 });
   
   const history = [
-    ...courseEnrollments.map(course => ({
-      _id: course._id,
-      title: course.title,
+    ...courseTransactions.map(transaction => ({
+      _id: transaction.courseID._id,
+      title: transaction.courseID.title,
       type: 'course',
-      enrollmentDate: new Date(),
-      status: 'enrolled'
+      enrollmentDate: transaction.createdAt,
+      status: 'enrolled',
+      transactionId: transaction.merchantOrderID
     })),
-    ...workshopEnrollments.map(workshop => ({
-      _id: workshop._id,
-      title: workshop.title,
+    ...workshopTransactions.map(transaction => ({
+      _id: transaction.workshopID._id,
+      title: transaction.workshopID.title,
       type: 'workshop',
-      enrollmentDate: new Date(),
-      status: 'registered'
+      enrollmentDate: transaction.createdAt,
+      status: 'registered',
+      transactionId: transaction.merchantOrderID
     }))
   ];
 
@@ -270,7 +274,8 @@ export const phonepeCheckout = async (req, res) => {
       originalAmount: originalAmount,
       discountAmount: discountAmount,
       finalAmount: finalAmount,
-      couponCode: null,
+      userID: user._id,
+      userEmail: user.email,
       transactionStatus: "PENDING",
     });
     console.log('✅ Transaction created:', txn._id);
@@ -331,107 +336,97 @@ export const phonepeStatus = TryCatch(async (req, res) => {
   const merchantOrderId = req.params.merchantOrderId;
   console.log("phonepeStatus (course) – merchantOrderId:", merchantOrderId);
 
-  const user = await User.findById(req.user._id);
-
-  const userID = user._id;
-  const userEmail = user.email;
+  // Load existing transaction to determine user and course
+  let txn = await Transaction.findOne({ merchantOrderID: merchantOrderId });
+  if (!txn) {
+    return res.status(404).json({ message: 'Transaction not found', status: 'FAILED', merchantOrderId });
+  }
 
   const client = getPhonePeClient();
   const statusResponse = await client.getOrderStatus(merchantOrderId);
-
   console.log("PhonePe getOrderStatus response:", statusResponse);
 
-  const transactionID = statusResponse.paymentDetails[0].transactionId;
-
-  const transactionMode = statusResponse.paymentDetails[0].paymentMode;
-
+  const paymentDetails = statusResponse?.paymentDetails?.[0] || {};
+  const transactionID = paymentDetails.transactionId;
+  const transactionMode = paymentDetails.paymentMode;
   const transactionStatus = statusResponse.state;
 
-  if (statusResponse.state === "COMPLETED") {
+  // Derive user from transaction (fallback to req.user if present)
+  let user = null;
+  if (txn.userID) {
+    user = await User.findById(txn.userID);
+  } else if (req.user?._id) {
+    user = await User.findById(req.user._id);
+  }
+
+  // Update transaction with latest details and user info if available
+  await Transaction.findOneAndUpdate(
+    { merchantOrderID: merchantOrderId },
+    {
+      ...(user ? { userID: user._id, userEmail: user.email } : {}),
+      transactionID: transactionID,
+      transactionType: transactionMode,
+      transactionStatus: transactionStatus,
+      updatedAt: Date.now(),
+    }
+  );
+
+  // Refresh txn after update
+  txn = await Transaction.findOne({ merchantOrderID: merchantOrderId });
+
+  if (transactionStatus === "COMPLETED") {
     console.log("Payment completed successfully");
-    await Transaction.findOneAndUpdate(
-      { merchantOrderID : merchantOrderId },
-      {
-        userID : userID,
-        userEmail : userEmail,
-        transactionID: transactionID,
-        transactionType: transactionMode,
-        transactionStatus: transactionStatus,
-        updatedAt: Date.now()
+    if (user && txn.courseID) {
+      // Enroll idempotently
+      await User.findByIdAndUpdate(user._id, {
+        $addToSet: { subscription: txn.courseID },
+      });
+      await Courses.findByIdAndUpdate(txn.courseID, {
+        $addToSet: { purchasers: user._id },
+      });
+      console.log("User subscription updated successfully");
+    } else {
+      console.log('Skipping enrollment due to missing user or course', { hasUser: !!user, hasCourse: !!txn.courseID });
+    }
+
+    const course = txn.courseID ? await Courses.findById(txn.courseID) : null;
+    if (user && course) {
+      const mailData = {
+        name: user.name,
+        email: user.email,
+        course: course.title,
+        txnid: transactionID,
+        stat: transactionStatus,
+        time: txn.updatedAt,
+      };
+      try {
+        await sendTransactMailAdmin("Somone Bought your course", mailData);
+        await sendTransactMailUser("Your course purchase was successful! Welcome aboard 🚀", mailData);
+      } catch (e) {
+        console.error('Email send failed:', e.message);
       }
-    );
-    console.log("Transaction updated successfully");
-    const txn = await Transaction.findOne({
-      merchantOrderID: merchantOrderId,
-    });
-    console.log("Transaction found:", txn);
-    // Add course to user's subscription
-    await User.findByIdAndUpdate(user._id, {
-      $addToSet: { subscription: txn.courseID },
-    });
-
-    await Courses.findByIdAndUpdate(txn.courseID, {
-      $addToSet: { purchasers: user._id },
-    });
-
-    console.log("User subscription updated successfully");
-
-    const course = await Courses.findById(txn.courseID);
-
-    const data = {
-      name: user.name,
-      email: user.email,
-      course: course.title,
-      txnid: transactionID,
-      stat: transactionStatus,
-      time: txn.updatedAt,
-    };
-
-    await sendTransactMailAdmin("Somone Bought your course",data);
-
-    const data_user = {
-      name: user.name,
-      email: user.email,
-      course: course.title,
-      txnid: transactionID,
-      stat: transactionStatus,
-      time: txn.updatedAt,
-    };
-
-    await sendTransactMailUser("Your course purchase was successful! Welcome aboard 🚀",data_user);
+    }
 
     return res.json({ message: "nice", status: "SUCCESS", merchantOrderId, txnid: transactionID });
-  } else if (statusResponse.state === "FAILED") {
+  } else if (transactionStatus === "FAILED") {
     console.log("Payment completed failed");
-    await Transaction.findOneAndUpdate(
-      { merchantOrderID : merchantOrderId },
-      {
-        userID : userID,
-        userEmail : userEmail,
-        transactionID: transactionID,
-        transactionType: transactionMode,
-        transactionStatus: transactionStatus,
-        updatedAt: Date.now()
+
+    const course = txn.courseID ? await Courses.findById(txn.courseID) : null;
+    if (user && course) {
+      const data_user = {
+        name: user.name,
+        email: user.email,
+        course: course.title,
+        txnid: transactionID,
+        stat: transactionStatus,
+        time: txn.updatedAt,
+      };
+      try {
+        await sendTransactMailUser("Course Enrollment not completed ⚠️", data_user);
+      } catch (e) {
+        console.error('Email send failed:', e.message);
       }
-    );
-    console.log("Transaction updated failed");
-
-    const txn = await Transaction.findOne({
-      merchantOrderID: merchantOrderId,
-    });
-
-    const course = await Courses.findById(txn.courseID);
-
-    const data_user = {
-      name: user.name,
-      email: user.email,
-      course: course.title,
-      txnid: transactionID,
-      stat: transactionStatus,
-      time: txn.updatedAt,
-    };
-
-    await sendTransactMailUser("Course Enrollment not completed ⚠️", data_user);
+    }
 
     return res.json({ message: "bad", status: "FAILURE", merchantOrderId });
   } else {

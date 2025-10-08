@@ -7,6 +7,7 @@ import fs from "fs";
 import { User } from "../models/User.js";
 import path from "path";
 import { Workshop } from "../models/Workshop.js";
+import { Transaction } from "../models/Transaction.js";
 import { sendContactMail, sendContactAck } from "../middlewares/sendMail.js";
 
 // Ensure uploads directory exists
@@ -675,6 +676,84 @@ export const getUserDetails = async (req, res) => {
     console.error('Error getting user details:', error);
     res.status(500).json({
       message: "Failed to retrieve user details",
+      error: error.message
+    });
+  }
+};
+
+// Get all enrollments (users enrolled in courses/workshops)
+export const getAllEnrollments = async (req, res) => {
+  try {
+    // Get course enrollments
+    const courseEnrollments = await User.find({
+      subscription: { $exists: true, $ne: [] }
+    }).populate('subscription', 'title price category').select('name email subscription');
+
+    // Get workshop enrollments
+    const workshopEnrollments = await User.find({
+      workshopSubscription: { $exists: true, $ne: [] }
+    }).populate('workshopSubscription', 'title price category').select('name email workshopSubscription');
+
+    // Get transaction data for enrollment dates
+    const transactions = await Transaction.find({
+      transactionStatus: { $in: ['SUCCESS', 'COMPLETED', 'PAYMENT_SUCCESS'] }
+    }).populate('userID', 'name email').populate('courseID', 'title').populate('workshopID', 'title');
+
+    res.json({
+      courseEnrollments,
+      workshopEnrollments,
+      transactions: transactions.map(t => ({
+        _id: t._id,
+        user: t.userID,
+        course: t.courseID,
+        workshop: t.workshopID,
+        amount: t.finalAmount || t.transactionAmount,
+        status: t.transactionStatus,
+        enrollmentDate: t.createdAt,
+        transactionId: t.merchantOrderID
+      }))
+    });
+  } catch (error) {
+    console.error('Error getting enrollments:', error);
+    res.status(500).json({
+      message: "Failed to retrieve enrollments",
+      error: error.message
+    });
+  }
+};
+
+// Get enrollments for a specific course
+export const getCourseEnrollments = async (req, res) => {
+  try {
+    const courseId = req.params.courseId;
+    
+    // Get users enrolled in this course
+    const enrolledUsers = await User.find({
+      subscription: courseId
+    }).select('name email phone createdAt');
+
+    // Get transaction details for this course
+    const transactions = await Transaction.find({
+      courseID: courseId,
+      transactionStatus: { $in: ['SUCCESS', 'COMPLETED', 'PAYMENT_SUCCESS'] }
+    }).populate('userID', 'name email').sort({ createdAt: -1 });
+
+    res.json({
+      courseId,
+      enrolledUsers,
+      transactions: transactions.map(t => ({
+        _id: t._id,
+        user: t.userID,
+        amount: t.finalAmount || t.transactionAmount,
+        status: t.transactionStatus,
+        enrollmentDate: t.createdAt,
+        transactionId: t.merchantOrderID
+      }))
+    });
+  } catch (error) {
+    console.error('Error getting course enrollments:', error);
+    res.status(500).json({
+      message: "Failed to retrieve course enrollments",
       error: error.message
     });
   }
