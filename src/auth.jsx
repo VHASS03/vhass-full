@@ -87,25 +87,12 @@ export default function AuthPage() {
       // Store the token
       localStorage.setItem('auth_token', token);
       
-      // Get user profile to update context
-      const response = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/user/me`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-      });
+      // Token is already stored, just refresh auth status
+      await checkAuthStatus();
       
-      if (response.ok) {
-        // Token is already stored, just refresh auth status
-        await checkAuthStatus();
-        
-        // Clean up URL and redirect
-        window.history.replaceState({}, document.title, window.location.pathname);
-        navigate('/dashboard');
-      } else {
-        throw new Error('Failed to get user profile');
-      }
+      // Clean up URL and redirect
+      window.history.replaceState({}, document.title, window.location.pathname);
+      navigate('/dashboard');
     } catch (error) {
       console.error('OAuth success handling error:', error);
       setError('Authentication failed. Please try again.');

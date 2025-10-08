@@ -27,7 +27,9 @@ class ApiService {
   async makeRequest(endpoint, options = {}) {
     // Remove leading slash if present to avoid double slashes
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
-    const url = `${this.baseURL}/${cleanEndpoint}?_cb=${CACHE_BUSTER}`;
+    // Ensure baseURL doesn't end with slash to avoid double slashes
+    const baseURL = this.baseURL.endsWith('/') ? this.baseURL.slice(0, -1) : this.baseURL;
+    const url = `${baseURL}/${cleanEndpoint}?_cb=${CACHE_BUSTER}`;
     console.log('🌐 Making API request to:', url);
     
     // Create AbortController for request cancellation
@@ -168,7 +170,7 @@ class ApiService {
   }
 
   async getUserCourses() {
-    return this.makeRequest('/api/mycourse');
+    return this.makeRequest('/api/user/courses');
   }
 
   async getLectures(courseId) {
@@ -204,7 +206,7 @@ class ApiService {
   }
 
   async getUserWorkshops() {
-    return this.makeRequest('/api/myworkshop');
+    return this.makeRequest('/api/user/workshops');
   }
 
   async getEnrollmentHistory() {
