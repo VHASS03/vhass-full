@@ -22,7 +22,7 @@ router.post("/course/new", isAuth, isAdmin, createCourse);
 
 // PhonePe payment endpoints - MUST come BEFORE generic /course/:id route
 router.post("/course/:id/phonepe-checkout", isAuth, phonepeCheckout);
-router.post("/course/phonepe/status/:merchantOrderId", isAuth, phonepeStatus);
+router.post("/course/phonepe/status/:merchantOrderId", phonepeStatus);
 
 // Generic course routes - MUST come AFTER specific routes
 router.post("/course/:id", isAuth, isAdmin, uploadFiles.fields([{ name: 'file', maxCount: 1 }]), addLectures);
