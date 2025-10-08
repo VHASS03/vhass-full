@@ -47,6 +47,6 @@ router.delete("/workshop/:id", isAuth, isAdmin, (req, res, next) => {
 
 // PhonePe payment endpoints
 router.post("/workshop/phonepe/checkout/:id", isAuth, phonepeCheckout);
-router.post("/workshop/phonepe/status/:transactionId", isAuth, phonepeStatus);
+router.post("/workshop/phonepe/status/:transactionId", phonepeStatus);
 
 export default router; 
