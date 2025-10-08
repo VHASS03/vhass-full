@@ -914,9 +914,9 @@ export default function AdminDashboard() {
                       <div className="grid md:grid-cols-4 gap-4 items-center">
                         <div>
                           <h3 className="text-lg font-semibold" style={{ color: "#FFFFF0" }}>
-                            {enrollment.user?.name || 'Unknown User'}
+                            {enrollment.user?.name || 'User'}
                           </h3>
-                          <p style={{ color: "#B88AFF" }}>{enrollment.user?.email || 'No email'}</p>
+                          <p style={{ color: "#B88AFF" }}>{enrollment.user?.email || 'No email available'}</p>
                         </div>
                         <div>
                           <p className="font-semibold" style={{ color: "#FFFFF0" }}>

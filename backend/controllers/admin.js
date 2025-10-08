@@ -704,7 +704,13 @@ export const getAllEnrollments = async (req, res) => {
       workshopEnrollments,
       transactions: transactions.map(t => ({
         _id: t._id,
-        user: t.userID,
+        user: t.userID ? {
+          name: t.userID.name || 'User',
+          email: t.userID.email || t.userEmail || 'No email available'
+        } : {
+          name: 'User',
+          email: t.userEmail || 'No email available'
+        },
         course: t.courseID,
         workshop: t.workshopID,
         amount: t.finalAmount || t.transactionAmount,
