@@ -55,14 +55,29 @@ router.post('/phonepe/webhook', async (req, res) => {
 
     // If payment successful, enroll user in course/workshop
     if (status === 'SUCCESS') {
-      const user = await User.findById(transaction.userID);
-      if (user && transaction.courseID) {
-        // Enroll in course
-        if (!user.subscription.includes(transaction.courseID)) {
-          user.subscription.push(transaction.courseID);
-          await user.save();
-          console.log('✅ User enrolled in course:', transaction.courseID);
+      try {
+        const user = await User.findById(transaction.userID);
+        if (user && transaction.courseID) {
+          // Enroll in course (idempotent)
+          await User.findByIdAndUpdate(user._id, {
+            $addToSet: { subscription: transaction.courseID }
+          });
+          // Add purchaser to course (idempotent)
+          await Courses.findByIdAndUpdate(transaction.courseID, {
+            $addToSet: { purchasers: user._id }
+          });
+          console.log('✅ Enrollment synced for user and course:', {
+            user: user.email,
+            course: String(transaction.courseID)
+          });
+        } else {
+          console.log('⚠️ Cannot enroll - missing user or course on transaction', {
+            hasUser: !!transaction.userID,
+            hasCourse: !!transaction.courseID
+          });
         }
+      } catch (enrollErr) {
+        console.error('❌ Enrollment sync error:', enrollErr);
       }
     }
 

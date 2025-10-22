@@ -223,8 +223,15 @@ export const phonepeStatus = TryCatch(async (req, res) => {
   const transactionID = statusResponse.paymentDetails[0].transactionId;
   const transactionMode = statusResponse.paymentDetails[0].paymentMode;
   const transactionStatus = statusResponse.state;
+  // Normalize success across possible variants
+  const isSuccess = (
+    transactionStatus === 'COMPLETED' ||
+    transactionStatus === 'SUCCESS' ||
+    statusResponse?.success === true ||
+    statusResponse?.code === 'PAYMENT_SUCCESS'
+  );
 
-  if (statusResponse.state === "COMPLETED") {
+  if (isSuccess) {
     console.log("Payment completed successfully");
     await Transaction.findOneAndUpdate(
       { merchantOrderID: merchantOrderId },

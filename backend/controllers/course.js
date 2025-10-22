@@ -350,6 +350,13 @@ export const phonepeStatus = TryCatch(async (req, res) => {
   const transactionID = paymentDetails.transactionId;
   const transactionMode = paymentDetails.paymentMode;
   const transactionStatus = statusResponse.state;
+  // Normalize success across possible variants
+  const isSuccess = (
+    transactionStatus === 'COMPLETED' ||
+    transactionStatus === 'SUCCESS' ||
+    statusResponse?.success === true ||
+    statusResponse?.code === 'PAYMENT_SUCCESS'
+  );
 
   // Derive user from transaction (fallback to req.user if present)
   let user = null;
@@ -374,7 +381,7 @@ export const phonepeStatus = TryCatch(async (req, res) => {
   // Refresh txn after update
   txn = await Transaction.findOne({ merchantOrderID: merchantOrderId });
 
-  if (transactionStatus === "COMPLETED") {
+  if (isSuccess) {
     console.log("Payment completed successfully");
     if (user && txn.courseID) {
       // Enroll idempotently
