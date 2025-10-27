@@ -1,0 +1,99 @@
+[1mdiff --git a/backend/controllers/course.js b/backend/controllers/course.js[m
+[1mindex b15bea4..44f2892 100644[m
+[1m--- a/backend/controllers/course.js[m
+[1m+++ b/backend/controllers/course.js[m
+[36m@@ -350,6 +350,13 @@[m [mexport const phonepeStatus = TryCatch(async (req, res) => {[m
+   const transactionID = paymentDetails.transactionId;[m
+   const transactionMode = paymentDetails.paymentMode;[m
+   const transactionStatus = statusResponse.state;[m
+[32m+[m[32m  // Normalize success across possible variants[m
+[32m+[m[32m  const isSuccess = ([m
+[32m+[m[32m    transactionStatus === 'COMPLETED' ||[m
+[32m+[m[32m    transactionStatus === 'SUCCESS' ||[m
+[32m+[m[32m    statusResponse?.success === true ||[m
+[32m+[m[32m    statusResponse?.code === 'PAYMENT_SUCCESS'[m
+[32m+[m[32m  );[m
+ [m
+   // Derive user from transaction (fallback to req.user if present)[m
+   let user = null;[m
+[36m@@ -374,7 +381,7 @@[m [mexport const phonepeStatus = TryCatch(async (req, res) => {[m
+   // Refresh txn after update[m
+   txn = await Transaction.findOne({ merchantOrderID: merchantOrderId });[m
+ [m
+[31m-  if (transactionStatus === "COMPLETED") {[m
+[32m+[m[32m  if (isSuccess) {[m
+     console.log("Payment completed successfully");[m
+     if (user && txn.courseID) {[m
+       // Enroll idempotently[m
+[1mdiff --git a/backend/controllers/workshop.js b/backend/controllers/workshop.js[m
+[1mindex c56b907..6a21411 100644[m
+[1m--- a/backend/controllers/workshop.js[m
+[1m+++ b/backend/controllers/workshop.js[m
+[36m@@ -223,8 +223,15 @@[m [mexport const phonepeStatus = TryCatch(async (req, res) => {[m
+   const transactionID = statusResponse.paymentDetails[0].transactionId;[m
+   const transactionMode = statusResponse.paymentDetails[0].paymentMode;[m
+   const transactionStatus = statusResponse.state;[m
+[31m-[m
+[31m-  if (statusResponse.state === "COMPLETED") {[m
+[32m+[m[32m  // Normalize success across possible variants[m
+[32m+[m[32m  const isSuccess = ([m
+[32m+[m[32m    transactionStatus === 'COMPLETED' ||[m
+[32m+[m[32m    transactionStatus === 'SUCCESS' ||[m
+[32m+[m[32m    statusResponse?.success === true ||[m
+[32m+[m[32m    statusResponse?.code === 'PAYMENT_SUCCESS'[m
+[32m+[m[32m  );[m
+[32m+[m
+[32m+[m[32m  if (isSuccess) {[m
+     console.log("Payment completed successfully");[m
+     await Transaction.findOneAndUpdate([m
+       { merchantOrderID: merchantOrderId },[m
+[1mdiff --git a/backend/routes/payment.js b/backend/routes/payment.js[m
+[1mindex 99f70b2..8fa5aa0 100644[m
+[1m--- a/backend/routes/payment.js[m
+[1m+++ b/backend/routes/payment.js[m
+[36m@@ -55,14 +55,29 @@[m [mrouter.post('/phonepe/webhook', async (req, res) => {[m
+ [m
+     // If payment successful, enroll user in course/workshop[m
+     if (status === 'SUCCESS') {[m
+[31m-      const user = await User.findById(transaction.userID);[m
+[31m-      if (user && transaction.courseID) {[m
+[31m-        // Enroll in course[m
+[31m-        if (!user.subscription.includes(transaction.courseID)) {[m
+[31m-          user.subscription.push(transaction.courseID);[m
+[31m-          await user.save();[m
+[31m-          console.log('✅ User enrolled in course:', transaction.courseID);[m
+[32m+[m[32m      try {[m
+[32m+[m[32m        const user = await User.findById(transaction.userID);[m
+[32m+[m[32m        if (user && transaction.courseID) {[m
+[32m+[m[32m          // Enroll in course (idempotent)[m
+[32m+[m[32m          await User.findByIdAndUpdate(user._id, {[m
+[32m+[m[32m            $addToSet: { subscription: transaction.courseID }[m
+[32m+[m[32m          });[m
+[32m+[m[32m          // Add purchaser to course (idempotent)[m
+[32m+[m[32m          await Courses.findByIdAndUpdate(transaction.courseID, {[m
+[32m+[m[32m            $addToSet: { purchasers: user._id }[m
+[32m+[m[32m          });[m
+[32m+[m[32m          console.log('✅ Enrollment synced for user and course:', {[m
+[32m+[m[32m            user: user.email,[m
+[32m+[m[32m            course: String(transaction.courseID)[m
+[32m+[m[32m          });[m
+[32m+[m[32m        } else {[m
+[32m+[m[32m          console.log('⚠️ Cannot enroll - missing user or course on transaction', {[m
+[32m+[m[32m            hasUser: !!transaction.userID,[m
+[32m+[m[32m            hasCourse: !!transaction.courseID[m
+[32m+[m[32m          });[m
+         }[m
+[32m+[m[32m      } catch (enrollErr) {[m
+[32m+[m[32m        console.error('❌ Enrollment sync error:', enrollErr);[m
+       }[m
+     }[m
+ [m
+[1mdiff --git a/render.yaml b/render.yaml[m
+[1mindex 626044c..a8dbb0a 100644[m
+[1m--- a/render.yaml[m
+[1m+++ b/render.yaml[m
+[36m@@ -1,3 +1,4 @@[m
+[32m+[m
+ services:[m
+   # Backend API Service[m
+   - type: web[m
