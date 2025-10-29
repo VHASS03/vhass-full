@@ -102,6 +102,27 @@ function Dashboard() {
             console.error("Auto-fix enrollments failed:", e);
           }
         }
+
+        // Secondary reconciliation: compare successful transactions vs enrolled courses
+        if (user) {
+          try {
+            const tx = await ApiService.getUserTransactions(user._id);
+            const transactions = tx.transactions || tx || [];
+            const successfulTxCount = (transactions || []).filter((t) => {
+              const s = (t.transactionStatus || '').toUpperCase();
+              return s === 'SUCCESS' || s === 'COMPLETED' || s === 'PAYMENT_SUCCESS';
+            }).length;
+            if (successfulTxCount > courses.length && !attemptedAutoFix) {
+              console.log("Detected successful payments without enrollments. Running fixEnrollment...");
+              await ApiService.fixEnrollment();
+              setAttemptedAutoFix(true);
+              const refreshed = await ApiService.getUserCourses();
+              setRegisteredCourses(refreshed.courses || []);
+            }
+          } catch (e) {
+            console.warn("Could not reconcile transactions:", e.message || e);
+          }
+        }
       } else {
         console.error("Failed to load courses:", coursesResponse.reason);
         setRegisteredCourses([]);
