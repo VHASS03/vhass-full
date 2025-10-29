@@ -461,7 +461,11 @@ function Dashboard() {
                       </div>
                       <button 
                         className="view-course-btn"
-                        onClick={() => navigate(`/course/${course._id}`)}
+                        onClick={() => {
+                          const toSlug = (title) => title?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+                          const slug = toSlug(course.title);
+                          navigate(`/course/${slug}`);
+                        }}
                       >
                         Continue Learning
                       </button>
