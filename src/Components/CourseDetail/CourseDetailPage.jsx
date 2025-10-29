@@ -171,6 +171,7 @@ export default function CourseDetailsPage() {
   const [course, setCourse] = useState(null)
   const [loading, setLoading] = useState(true)
   const [finalAmount, setFinalAmount] = useState(null)
+  const [isEnrolled, setIsEnrolled] = useState(false)
 
   useEffect(() => {
     const loadCourse = async () => {
@@ -192,6 +193,17 @@ export default function CourseDetailsPage() {
             whoShouldAttend: Array.isArray(match.whoShouldAttend) ? match.whoShouldAttend : [],
             prerequisites: Array.isArray(match.prerequisites) ? match.prerequisites : [],
           })
+          // If user is logged in, check if already enrolled
+          if (user) {
+            try {
+              const my = await ApiService.getUserCourses();
+              const myCourses = my.courses || []
+              const enrolled = myCourses.some((c) => c._id === match._id)
+              setIsEnrolled(enrolled)
+            } catch (e) {
+              console.error('Failed to check user courses:', e)
+            }
+          }
         } else {
           // Fallback to legacy static data by slug
           setCourse(courseData[slug] || null)
@@ -391,13 +403,24 @@ export default function CourseDetailsPage() {
 
         {/* Enrollment Button */}
         <div className="text-center">
-          <Button
-            onClick={handleEnrollClick}
-            className="px-8 py-4 text-xl"
-            style={{ backgroundColor: "#B88AFF", color: "#FFFFF0" }}
-          >
-            {user ? `Enroll in Course - ${course.price}` : "Login to Enroll"}
-          </Button>
+          {isEnrolled ? (
+            <Button
+              onClick={() => navigate('/dashboard')}
+              className="px-8 py-4 text-xl"
+              style={{ backgroundColor: "#10b981", color: "#FFFFF0" }}
+            >
+              Enrolled already — Go to Dashboard
+            </Button>
+          ) : (
+            <Button
+              onClick={handleEnrollClick}
+              className="px-8 py-4 text-xl"
+              style={{ backgroundColor: "#B88AFF", color: "#FFFFF0" }}
+              disabled={!user}
+            >
+              {user ? `Enroll in Course - ${course.price}` : "Login to Enroll"}
+            </Button>
+          )}
         </div>
       </main>
 
