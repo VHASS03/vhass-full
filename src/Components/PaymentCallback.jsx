@@ -35,20 +35,17 @@ export default function PaymentCallback() {
           return;
         }
 
-        // Skip payment status check - assume success since user was redirected back
-        console.log('✅ Payment callback received - assuming success');
-        
-        setPaymentStatus('success');
-        setPaymentDetails({
-          transactionId: phonepeTransactionId || merchantTransactionId,
-          merchantOrderId: merchantTransactionId,
-          status: 'COMPLETED',
-          message: 'Payment successful! Enrollment completed successfully.'
-        });
-        
-          // Immediate redirect to dashboard (no intermediate page)
-          navigate('/dashboard', { replace: true });
-          return;
+        // Verify payment status with backend without surfacing UI status
+        console.log('🔎 Verifying payment status with backend...', { merchantTransactionId, type });
+        try {
+          await ApiService.phonepeStatus(type || 'course', merchantTransactionId);
+        } catch (verifyErr) {
+          console.warn('Payment verification failed (will still redirect):', verifyErr?.message || verifyErr);
+        }
+
+        // Always redirect to dashboard silently after verification attempt
+        navigate('/dashboard', { replace: true });
+        return;
         
       } catch (error) {
         console.error('Payment callback error:', error);
