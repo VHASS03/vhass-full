@@ -48,8 +48,8 @@ function Navbar() {
   return (
     <header>
       <div className={`navbar ${isMobileMenuOpen ? 'mobile-menu-open' : ''}`}>
-        <div className="brand" onClick={() => navigate("/")}>
-          <img src="VHASS.png" alt="VHASS Logo" className="logo" />
+        <div className="brand" onClick={() => navigate("/")}> 
+          <img src="/VHASS.png" alt="VHASS Logo" className="logo" />
           <h1 className="brand-text">VHASS</h1>
         </div>
 
