@@ -33,6 +33,18 @@ function Navbar() {
     setIsMobileMenuOpen(false);
   };
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.classList.add('mobile-menu-open');
+    } else {
+      document.body.classList.remove('mobile-menu-open');
+    }
+    return () => {
+      document.body.classList.remove('mobile-menu-open');
+    };
+  }, [isMobileMenuOpen]);
+
   return (
     <header>
       <div className={`navbar ${isMobileMenuOpen ? 'mobile-menu-open' : ''}`}>
@@ -76,6 +88,10 @@ function Navbar() {
           <span className={`hamburger ${isMobileMenuOpen ? 'open' : ''}`}></span>
           <span className={`hamburger ${isMobileMenuOpen ? 'open' : ''}`}></span>
         </button>
+
+        {isMobileMenuOpen && (
+          <div className="nav-backdrop" onClick={closeMobileMenu} />
+        )}
       </div>
     </header>
   );

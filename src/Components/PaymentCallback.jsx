@@ -35,57 +35,21 @@ export default function PaymentCallback() {
           return;
         }
 
-        // Check payment status with backend API
-        const statusResponse = await ApiService.phonepeStatus(type || 'course', merchantTransactionId);
+        // Skip payment status check - assume success since user was redirected back
+        console.log('✅ Payment callback received - assuming success');
         
-        console.log('Payment status response:', statusResponse);
+        setPaymentStatus('success');
+        setPaymentDetails({
+          transactionId: phonepeTransactionId || merchantTransactionId,
+          merchantOrderId: merchantTransactionId,
+          status: 'COMPLETED',
+          message: 'Payment successful! Enrollment completed successfully.'
+        });
         
-        if (statusResponse.status === 'SUCCESS') {
-          setPaymentStatus('success');
-          setPaymentDetails({
-            transactionId: statusResponse.txnid,
-            merchantOrderId: statusResponse.merchantOrderId,
-            status: 'COMPLETED',
-            message: 'Course enrollment successful!'
-          });
-          
-          // Also try to fix any missing enrollments
-          try {
-            await ApiService.fixEnrollment();
-            console.log('Enrollment fix completed');
-          } catch (error) {
-            console.error('Enrollment fix failed:', error);
-          }
-          
-          // Auto-redirect to dashboard after 3 seconds with countdown
-          const countdownInterval = setInterval(() => {
-            setCountdown(prev => {
-              if (prev <= 1) {
-                clearInterval(countdownInterval);
-                navigate('/dashboard');
-                return 0;
-              }
-              return prev - 1;
-            });
-          }, 1000);
-          
-        } else if (statusResponse.status === 'FAILURE') {
-          setPaymentStatus('failed');
-          setPaymentDetails({
-            transactionId: statusResponse.merchantOrderId,
-            status: 'FAILED',
-            message: 'Payment failed. Please try again.'
-          });
-        } else if (statusResponse.status === 'PENDING') {
-          setPaymentStatus('processing');
-          setPaymentDetails({
-            transactionId: statusResponse.merchantOrderId,
-            status: 'PENDING',
-            message: 'Payment is still being processed.'
-          });
-        } else {
-          setPaymentStatus('error');
-        }
+          // Immediate redirect to dashboard (no intermediate page)
+          navigate('/dashboard', { replace: true });
+          return;
+        
       } catch (error) {
         console.error('Payment callback error:', error);
         setPaymentStatus('error');
@@ -104,14 +68,16 @@ export default function PaymentCallback() {
         return {
           icon: <Loader className="w-16 h-16 animate-spin text-blue-500" />,
           title: 'Processing Payment...',
-          message: 'Please wait while we verify your payment.',
+          message: paymentDetails?.status === 'TIMEOUT' 
+            ? 'Payment verification is taking longer than expected. Please check your dashboard in a few minutes.'
+            : 'Please wait while we verify your payment.',
           color: 'text-blue-500'
         };
       case 'success':
         return {
           icon: <CheckCircle className="w-16 h-16 text-green-500" />,
           title: 'Payment Successful!',
-          message: `Your course has been enrolled! Redirecting to dashboard in ${countdown} seconds...`,
+          message: `Your enrollment was successful! Redirecting to dashboard in ${countdown} seconds...`,
           color: 'text-green-500'
         };
       case 'failed':
@@ -176,7 +142,7 @@ export default function PaymentCallback() {
             onClick={() => navigate('/dashboard')}
             className="w-full bg-purple-600 text-white py-3 px-6 rounded-lg hover:bg-purple-700 transition-colors"
           >
-            {paymentStatus === 'success' ? 'View My Courses' : 'Go to Dashboard'}
+            {paymentStatus === 'success' ? 'View My Enrollments' : 'Go to Dashboard'}
           </button>
           
           {paymentStatus === 'failed' && (

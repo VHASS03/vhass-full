@@ -1,3 +1,4 @@
+
 .navbar {
   height: auto;
   position: relative;
@@ -12,7 +13,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
-  z-index: 1;
+  z-index: 100;
 }
 
 
@@ -225,7 +226,9 @@ body, html {
 @media (max-width: 768px) {
   .navbar {
     padding: 10px 15px;
-    position: relative;
+    position: sticky;
+    top: 0;
+    z-index: 1100;
   }
 
   .brand-text {
@@ -239,6 +242,15 @@ body, html {
 
   .mobile-menu-toggle {
     display: flex;
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 1300;
+  }
+
+  /* Hide toggle when menu is open to avoid blocking clicks */
+  .mobile-menu-open .mobile-menu-toggle {
+    display: none;
   }
 
   .nav-menu {
@@ -251,7 +263,7 @@ body, html {
     background: rgba(0, 0, 0, 0.95);
     backdrop-filter: blur(10px);
     transition: right 0.3s ease;
-    z-index: 999;
+    z-index: 2000;
     padding-top: 80px;
   }
 
@@ -304,6 +316,22 @@ body, html {
   .mobile-menu-open .nav-menu:not(.mobile-open) {
     display: none;
   }
+}
+
+/* Prevent body scroll when mobile menu open */
+body.mobile-menu-open {
+  overflow: hidden;
+}
+
+/* Backdrop behind mobile sidebar */
+.nav-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1150;
 }
 
 @media (max-width: 480px) {
