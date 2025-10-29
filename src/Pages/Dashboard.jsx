@@ -59,6 +59,7 @@ function Dashboard() {
   const [registeredCourses, setRegisteredCourses] = useState([]);
   const [registeredWorkshops, setRegisteredWorkshops] = useState([]);
   const [enrollmentHistory, setEnrollmentHistory] = useState([]);
+  const [attemptedAutoFix, setAttemptedAutoFix] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -83,8 +84,24 @@ function Dashboard() {
 
       // Handle courses response
       if (coursesResponse.status === 'fulfilled') {
-        setRegisteredCourses(coursesResponse.value.courses || []);
-        console.log("Courses loaded:", coursesResponse.value.courses?.length || 0);
+        const courses = coursesResponse.value.courses || [];
+        setRegisteredCourses(courses);
+        console.log("Courses loaded:", courses.length);
+
+        // Auto-attempt to fix enrollments once if none are returned
+        if (user && courses.length === 0 && !attemptedAutoFix) {
+          try {
+            console.log("No courses found. Attempting automatic enrollment fix...");
+            await ApiService.fixEnrollment();
+            setAttemptedAutoFix(true);
+            // Reload after fix
+            const afterFix = await ApiService.getUserCourses();
+            setRegisteredCourses(afterFix.courses || []);
+            console.log("Auto-fix completed. Courses now:", (afterFix.courses || []).length);
+          } catch (e) {
+            console.error("Auto-fix enrollments failed:", e);
+          }
+        }
       } else {
         console.error("Failed to load courses:", coursesResponse.reason);
         setRegisteredCourses([]);
