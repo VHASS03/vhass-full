@@ -30,14 +30,12 @@ const Scene = ({ progress }) => {
     [0, 0, 40],
     [-10, 20, 10],
     [20, 25, 20],
-    [30, 10, 15],
-    [-20, 30, 25],
   ];
 
   useFrame((state, delta) => {
     const factor = 1 - Math.pow(0.001, delta);
 
-    // Smooth camera movement based on scroll progress
+    // Smooth camera movement
     const targetPos = getTargetPosition(progress);
     currentPos.current = [
       lerp(currentPos.current[0], targetPos[0], factor),
@@ -50,28 +48,19 @@ const Scene = ({ progress }) => {
       cameraRef.current.lookAt(0, 0, 0);
     }
 
-    // Enhanced logo rotation with scroll influence
-    const scrollInfluence = progress * 0.5; // Add scroll-based rotation
-    const targetX = mousePos.current.y * 0.3 + scrollInfluence * 0.2;
-    const targetY = mousePos.current.x * 0.3 + scrollInfluence * 0.3;
+    // Rotate logo based on global mouse position
+const targetX = mousePos.current.y * 0.5;  // Correct direction
+const targetY = mousePos.current.x * 0.5;  // Horizontal rotation
+
 
     logoRotation.current = [
-      lerp(logoRotation.current[0], targetX, 0.08),
-      lerp(logoRotation.current[1], targetY, 0.08),
+      lerp(logoRotation.current[0], targetX, 0.1),
+      lerp(logoRotation.current[1], targetY, 0.1),
     ];
 
     if (logoRef.current) {
       logoRef.current.rotation.x = logoRotation.current[0];
       logoRef.current.rotation.y = logoRotation.current[1];
-      // Add more dramatic scale animation based on scroll
-      const baseScale = 1 + progress * 0.5; // Scale up as user scrolls
-      const pulseScale = 1 + Math.sin(progress * Math.PI * 4) * 0.2; // Pulsing effect
-      const finalScale = baseScale * pulseScale;
-      logoRef.current.scale.setScalar(finalScale);
-      
-      // Add position animation based on scroll
-      const yOffset = Math.sin(progress * Math.PI * 2) * 2;
-      logoRef.current.position.y = yOffset;
     }
   });
 

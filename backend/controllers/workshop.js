@@ -169,24 +169,31 @@ export const deleteWorkshop = TryCatch(async (req, res) => {
 
 export const phonepeCheckout = async (req, res) => {
   try {
-  const user = await User.findById(req.user._id);
-  const workshop = await Workshop.findById(req.params.id);
+    const user = await User.findById(req.user._id);
+    const workshop = await Workshop.findById(req.params.id);
+    
     if (!user || !workshop) {
       return res.status(404).json({ message: 'User or workshop not found' });
     }
-  if (user.workshopSubscription.includes(workshop._id)) {
+    
+    if (user.workshopSubscription.includes(workshop._id)) {
       return res.status(400).json({ message: 'You already have this workshop' });
-  }
+    }
+    
     const merchantOrderId = randomUUID();
     const amount = Math.round(Number(workshop.price) * 100); // in paise
     
     // Create transaction record
     const txn = await Transaction.create({
+      userID: user._id,
+      userEmail: user.email,
       workshopID: workshop._id,
       merchantOrderID: merchantOrderId,
       transactionAmount: workshop.price,
       transactionStatus: "PENDING",
     });
+    
+    console.log("Transaction created successfully:", txn);
     
     const redirectUrl = `${process.env.PHONEPE_REDIRECT_URL}/payment-success/${merchantOrderId}`;
     const request = StandardCheckoutPayRequest.builder()
@@ -194,12 +201,29 @@ export const phonepeCheckout = async (req, res) => {
       .amount(amount)
       .redirectUrl(redirectUrl)
       .build();
+    
     const client = getPhonePeClient();
+    if (!client) {
+      throw new Error('PhonePe client initialization failed');
+    }
+    
     const response = await client.pay(request);
     const checkoutPageUrl = response.redirectUrl;
+    
     res.json({ checkoutPageUrl });
   } catch (err) {
-    console.error('PhonePe API Error:', err.response?.data || err.message);
+    console.error('PhonePe Checkout Error:', err);
+    
+    // If transaction was created but payment failed, we should clean it up
+    if (err.message.includes('PhonePe') && req.body?.merchantOrderId) {
+      try {
+        await Transaction.findOneAndDelete({ merchantOrderID: req.body.merchantOrderId });
+        console.log("Cleaned up failed transaction");
+      } catch (cleanupErr) {
+        console.error("Failed to cleanup transaction:", cleanupErr);
+      }
+    }
+    
     res.status(500).json({
       message: 'Payment gateway error',
       error: err.response?.data || err.message
@@ -208,17 +232,31 @@ export const phonepeCheckout = async (req, res) => {
 };
 
 export const phonepeStatus = TryCatch(async (req, res) => {
-  const merchantOrderId = req.params.transactionId;
+  const merchantOrderId = req.params.merchantOrderId;
   console.log("phonepeStatus (workshop) – merchantOrderId:", merchantOrderId);
 
   const user = await User.findById(req.user._id);
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+  
   const userID = user._id;
   const userEmail = user.email;
 
   const client = getPhonePeClient();
+  if (!client) {
+    return res.status(500).json({ message: 'Payment gateway client not available' });
+  }
+  
   const statusResponse = await client.getOrderStatus(merchantOrderId);
 
   console.log("PhonePe getOrderStatus response:", statusResponse);
+
+  // Validate response structure
+  if (!statusResponse || !statusResponse.paymentDetails || !statusResponse.paymentDetails[0]) {
+    console.error("Invalid PhonePe response structure:", statusResponse);
+    return res.status(500).json({ message: "Invalid payment response" });
+  }
 
   const transactionID = statusResponse.paymentDetails[0].transactionId;
   const transactionMode = statusResponse.paymentDetails[0].paymentMode;
@@ -233,36 +271,38 @@ export const phonepeStatus = TryCatch(async (req, res) => {
 
   if (isSuccess) {
     console.log("Payment completed successfully");
-    await Transaction.findOneAndUpdate(
+    
+    // Update transaction with payment details
+    const updatedTxn = await Transaction.findOneAndUpdate(
       { merchantOrderID: merchantOrderId },
       {
-        userID: userID,
-        userEmail: userEmail,
         transactionID: transactionID,
         transactionType: transactionMode,
         transactionStatus: transactionStatus,
         updatedAt: Date.now()
-      }
+      },
+      { new: true } // Return updated document
     );
-    console.log("Transaction updated successfully");
     
-    const txn = await Transaction.findOne({
-      merchantOrderID: merchantOrderId,
-    });
-    console.log("Transaction found:", txn);
+    if (!updatedTxn) {
+      console.error("Transaction not found for merchantOrderID:", merchantOrderId);
+      return res.status(404).json({ message: "Transaction not found" });
+    }
+    
+    console.log("Transaction updated successfully:", updatedTxn);
     
     // Add workshop to user's subscription
     await User.findByIdAndUpdate(user._id, {
-      $addToSet: { workshopSubscription: txn.workshopID },
+      $addToSet: { workshopSubscription: updatedTxn.workshopID },
     });
 
-    await Workshop.findByIdAndUpdate(txn.workshopID, {
+    await Workshop.findByIdAndUpdate(updatedTxn.workshopID, {
       $addToSet: { purchasers: user._id },
     });
 
     console.log("User workshop subscription updated successfully");
 
-    const workshop = await Workshop.findById(txn.workshopID);
+    const workshop = await Workshop.findById(updatedTxn.workshopID);
 
     const data = {
       name: user.name,
@@ -270,7 +310,7 @@ export const phonepeStatus = TryCatch(async (req, res) => {
       course: workshop.title,
       txnid: transactionID,
       stat: transactionStatus,
-      time: txn.updatedAt,
+      time: updatedTxn.updatedAt,
     };
 
     await sendTransactMailAdmin("Someone registered for your workshop", data);
@@ -281,32 +321,35 @@ export const phonepeStatus = TryCatch(async (req, res) => {
       course: workshop.title,
       txnid: transactionID,
       stat: transactionStatus,
-      time: txn.updatedAt,
+      time: updatedTxn.updatedAt,
     };
 
     await sendTransactMailUser("Your workshop registration was successful! Welcome aboard 🚀", data_user);
 
     return res.json({ message: "nice", status: "SUCCESS", merchantOrderId, txnid: transactionID });
   } else if (statusResponse.state === "FAILED") {
-    console.log("Payment completed failed");
-    await Transaction.findOneAndUpdate(
+    console.log("Payment failed");
+    
+    // Update transaction with failure details
+    const updatedTxn = await Transaction.findOneAndUpdate(
       { merchantOrderID: merchantOrderId },
       {
-        userID: userID,
-        userEmail: userEmail,
         transactionID: transactionID,
         transactionType: transactionMode,
         transactionStatus: transactionStatus,
         updatedAt: Date.now()
-      }
+      },
+      { new: true }
     );
-    console.log("Transaction updated failed");
+    
+    if (!updatedTxn) {
+      console.error("Transaction not found for merchantOrderID:", merchantOrderId);
+      return res.status(404).json({ message: "Transaction not found" });
+    }
+    
+    console.log("Transaction updated with failure status:", updatedTxn);
 
-    const txn = await Transaction.findOne({
-      merchantOrderID: merchantOrderId,
-    });
-
-    const workshop = await Workshop.findById(txn.workshopID);
+    const workshop = await Workshop.findById(updatedTxn.workshopID);
 
     const data_user = {
       name: user.name,
@@ -314,7 +357,7 @@ export const phonepeStatus = TryCatch(async (req, res) => {
       course: workshop.title,
       txnid: transactionID,
       stat: transactionStatus,
-      time: txn.updatedAt,
+      time: updatedTxn.updatedAt,
     };
 
     await sendTransactMailUser("Your workshop registration failed", data_user);

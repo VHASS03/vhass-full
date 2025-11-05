@@ -29,12 +29,18 @@ class ApiService {
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
     // Ensure baseURL doesn't end with slash to avoid double slashes
     const baseURL = this.baseURL.endsWith('/') ? this.baseURL.slice(0, -1) : this.baseURL;
-    const url = `${baseURL}/${cleanEndpoint}?_cb=${CACHE_BUSTER}`;
+    
+    // Build URL and only append cache-buster for GET requests
+    const method = (options.method || 'GET').toUpperCase();
+    const hasQuery = cleanEndpoint.includes('?');
+    const cacheBusted = method === 'GET' ? `${hasQuery ? '&' : '?'}_cb=${CACHE_BUSTER}` : '';
+    const url = `${baseURL}/${cleanEndpoint}${cacheBusted}`;
     console.log('🌐 Making API request to:', url);
     
     // Create AbortController for request cancellation
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    const timeout = options.timeout || 30000; // Default 30 seconds, customizable
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
     
     const config = {
       headers: this.getHeaders(options.headers),
@@ -42,51 +48,62 @@ class ApiService {
       mode: 'cors', // Explicitly set CORS mode
       signal: controller.signal, // Add abort signal
       ...options,
+      method,
     };
 
-    try {
-      const response = await fetch(url, config);
-      clearTimeout(timeoutId); // Clear timeout on successful response
-      
-      // Handle 401 Unauthorized specifically
-      if (response.status === 401) {
-        // Clear any stored auth data
-        localStorage.removeItem('auth_token');
-        sessionStorage.removeItem('auth_token');
-        // Don't automatically redirect - let the AuthContext handle it
-        throw new Error('Unauthorized');
-      }
-      
-      // Check if response is JSON before trying to parse
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        const data = await response.json();
+    // Lightweight retry for transient network errors (e.g., ERR_NETWORK_CHANGED)
+    const maxNetworkRetries = options.networkRetries ?? 2;
+    let attempt = 0;
+    while (true) {
+      try {
+        const response = await fetch(url, config);
+        clearTimeout(timeoutId); // Clear timeout on successful response
         
-        if (!response.ok) {
-          throw new Error(data.message || 'API request failed');
+        // Handle 401 Unauthorized specifically
+        if (response.status === 401) {
+          // Clear any stored auth data
+          localStorage.removeItem('auth_token');
+          sessionStorage.removeItem('auth_token');
+          // Don't automatically redirect - let the AuthContext handle it
+          throw new Error('Unauthorized');
         }
         
-        return data;
-      } else {
-        // Handle non-JSON responses (like HTML error pages)
-        const text = await response.text();
-        console.error('Non-JSON response:', text);
-        throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        // Check if response is JSON before trying to parse
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(data.message || 'API request failed');
+          }
+          
+          return data;
+        } else {
+          // Handle non-JSON responses (like HTML error pages)
+          const text = await response.text();
+          console.error('Non-JSON response:', text);
+          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        }
+      } catch (error) {
+        // If aborted/timed out, or non-network error, surface immediately
+        if (error.name === 'AbortError') {
+          console.error('API request was aborted or timed out');
+          throw new Error('Request timeout - please try again');
+        }
+
+        const isNetworkError = error.name === 'TypeError' && (error.message.includes('fetch') || error.message.includes('NetworkError'));
+        if (!isNetworkError || attempt >= maxNetworkRetries) {
+          console.error('API Error:', error);
+          throw isNetworkError ? new Error('Network error - please check your connection') : error;
+        }
+
+        // Retry with small backoff
+        attempt += 1;
+        const backoffMs = 500 * attempt; // 500ms, 1000ms
+        console.warn(`Transient network error. Retry ${attempt}/${maxNetworkRetries} in ${backoffMs}ms...`);
+        await new Promise(r => setTimeout(r, backoffMs));
+        // loop continues
       }
-    } catch (error) {
-      clearTimeout(timeoutId); // Clear timeout on error
-      
-      // Handle specific error types
-      if (error.name === 'AbortError') {
-        console.error('API request was aborted or timed out');
-        throw new Error('Request timeout - please try again');
-      } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        console.error('Network error:', error);
-        throw new Error('Network error - please check your connection');
-      }
-      
-      console.error('API Error:', error);
-      throw error;
     }
   }
 
@@ -229,11 +246,35 @@ class ApiService {
     });
   }
 
-  async phonepeStatus(type, transactionId) {
-    const endpoint = type === 'course' ? `/api/course/phonepe/status/${transactionId}` : `/api/workshop/phonepe/status/${transactionId}`;
-    return this.makeRequest(endpoint, {
-      method: 'POST',
-    });
+  async phonepeStatus(type, merchantOrderId, retries = 3) {
+    const endpoint = type === 'course' ? `/api/course/phonepe/status/${merchantOrderId}` : `/api/workshop/phonepe/status/${merchantOrderId}`;
+    
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        console.log(`🔄 Payment status check attempt ${attempt}/${retries} for ${merchantOrderId}`);
+        
+        const result = await this.makeRequest(endpoint, {
+          method: 'POST',
+          timeout: 60000, // 60 seconds for payment status checks
+        });
+        
+        console.log(`✅ Payment status check successful on attempt ${attempt}`);
+        return result;
+        
+      } catch (error) {
+        console.warn(`⚠️ Payment status check attempt ${attempt} failed:`, error.message);
+        
+        if (attempt === retries) {
+          console.error(`❌ All ${retries} payment status check attempts failed`);
+          throw error;
+        }
+        
+        // Wait before retry (exponential backoff)
+        const delay = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s...
+        console.log(`⏳ Waiting ${delay}ms before retry...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
   }
 
   // Google OAuth

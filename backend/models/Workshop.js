@@ -53,6 +53,11 @@ const schema = new mongoose.Schema({
     type: [String],
     default: [],
   },
+  purchasers: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "User",
+    default: [],
+  },
   createdAt: {
     type: Date,
     default: Date.now,

@@ -339,14 +339,26 @@ export const phonepeStatus = TryCatch(async (req, res) => {
   // Load existing transaction to determine user and course
   let txn = await Transaction.findOne({ merchantOrderID: merchantOrderId });
   if (!txn) {
+    console.error("Transaction not found for merchantOrderID:", merchantOrderId);
     return res.status(404).json({ message: 'Transaction not found', status: 'FAILED', merchantOrderId });
   }
 
   const client = getPhonePeClient();
+  if (!client) {
+    console.error("PhonePe client not available");
+    return res.status(500).json({ message: 'Payment gateway client not available' });
+  }
+  
   const statusResponse = await client.getOrderStatus(merchantOrderId);
   console.log("PhonePe getOrderStatus response:", statusResponse);
 
-  const paymentDetails = statusResponse?.paymentDetails?.[0] || {};
+  // Validate response structure
+  if (!statusResponse || !statusResponse.paymentDetails || !statusResponse.paymentDetails[0]) {
+    console.error("Invalid PhonePe response structure:", statusResponse);
+    return res.status(500).json({ message: "Invalid payment response" });
+  }
+
+  const paymentDetails = statusResponse.paymentDetails[0];
   const transactionID = paymentDetails.transactionId;
   const transactionMode = paymentDetails.paymentMode;
   const transactionStatus = statusResponse.state;
@@ -366,37 +378,48 @@ export const phonepeStatus = TryCatch(async (req, res) => {
     user = await User.findById(req.user._id);
   }
 
-  // Update transaction with latest details and user info if available
-  await Transaction.findOneAndUpdate(
+  if (!user) {
+    console.error("User not found for transaction:", merchantOrderId);
+    return res.status(404).json({ message: 'User not found for this transaction' });
+  }
+
+  // Update transaction with latest details
+  const updatedTxn = await Transaction.findOneAndUpdate(
     { merchantOrderID: merchantOrderId },
     {
-      ...(user ? { userID: user._id, userEmail: user.email } : {}),
+      userID: user._id,
+      userEmail: user.email,
       transactionID: transactionID,
       transactionType: transactionMode,
       transactionStatus: transactionStatus,
       updatedAt: Date.now(),
-    }
+    },
+    { new: true } // Return updated document
   );
 
-  // Refresh txn after update
-  txn = await Transaction.findOne({ merchantOrderID: merchantOrderId });
+  if (!updatedTxn) {
+    console.error("Failed to update transaction:", merchantOrderId);
+    return res.status(500).json({ message: 'Failed to update transaction' });
+  }
+
+  console.log("Transaction updated successfully:", updatedTxn);
 
   if (isSuccess) {
     console.log("Payment completed successfully");
-    if (user && txn.courseID) {
+    if (user && updatedTxn.courseID) {
       // Enroll idempotently
       await User.findByIdAndUpdate(user._id, {
-        $addToSet: { subscription: txn.courseID },
+        $addToSet: { subscription: updatedTxn.courseID },
       });
-      await Courses.findByIdAndUpdate(txn.courseID, {
+      await Courses.findByIdAndUpdate(updatedTxn.courseID, {
         $addToSet: { purchasers: user._id },
       });
       console.log("User subscription updated successfully");
     } else {
-      console.log('Skipping enrollment due to missing user or course', { hasUser: !!user, hasCourse: !!txn.courseID });
+      console.log('Skipping enrollment due to missing user or course', { hasUser: !!user, hasCourse: !!updatedTxn.courseID });
     }
 
-    const course = txn.courseID ? await Courses.findById(txn.courseID) : null;
+    const course = updatedTxn.courseID ? await Courses.findById(updatedTxn.courseID) : null;
     if (user && course) {
       const mailData = {
         name: user.name,
@@ -404,7 +427,7 @@ export const phonepeStatus = TryCatch(async (req, res) => {
         course: course.title,
         txnid: transactionID,
         stat: transactionStatus,
-        time: txn.updatedAt,
+        time: updatedTxn.updatedAt,
       };
       try {
         await sendTransactMailAdmin("Somone Bought your course", mailData);
@@ -416,9 +439,9 @@ export const phonepeStatus = TryCatch(async (req, res) => {
 
     return res.json({ message: "nice", status: "SUCCESS", merchantOrderId, txnid: transactionID });
   } else if (transactionStatus === "FAILED") {
-    console.log("Payment completed failed");
+    console.log("Payment failed");
 
-    const course = txn.courseID ? await Courses.findById(txn.courseID) : null;
+    const course = updatedTxn.courseID ? await Courses.findById(updatedTxn.courseID) : null;
     if (user && course) {
       const data_user = {
         name: user.name,
@@ -426,7 +449,7 @@ export const phonepeStatus = TryCatch(async (req, res) => {
         course: course.title,
         txnid: transactionID,
         stat: transactionStatus,
-        time: txn.updatedAt,
+        time: updatedTxn.updatedAt,
       };
       try {
         await sendTransactMailUser("Course Enrollment not completed ⚠️", data_user);
@@ -435,7 +458,7 @@ export const phonepeStatus = TryCatch(async (req, res) => {
       }
     }
 
-    return res.json({ message: "bad", status: "FAILURE", merchantOrderId });
+    return res.json({ message: "Payment failed", status: "FAILURE", merchantOrderId, txnid: transactionID });
   } else {
     return res.json({ message: "pending", status: "PENDING", merchantOrderId });
   }

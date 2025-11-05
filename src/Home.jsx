@@ -13,74 +13,23 @@ gsap.registerPlugin(ScrollTrigger);
 function Home() {
   const mainRef = useRef(null);
   const sceneWrapperRef = useRef(null);
-  const logoRef = useRef(null);
   const sectionRefs = [useRef(null), useRef(null), useRef(null)];
   const [progress, setProgress] = useState(0);
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      // Create a more dramatic scroll animation for the 3D scene
       gsap.timeline({
         scrollTrigger: {
           trigger: mainRef.current,
           start: "top top",
           end: "bottom bottom",
-          scrub: 0.3, // More responsive scrubbing
+          scrub: true,
           onUpdate: (self) => setProgress(self.progress),
         },
       })
-        .to(sceneWrapperRef.current, { 
-          x: "-60vw", 
-          y: "120vh",
-          rotation: 0.2,
-          scale: 1.1,
-          duration: 0.3,
-          ease: "power2.out"
-        })
-        .to(sceneWrapperRef.current, { 
-          x: "10vw", 
-          y: "250vh",
-          rotation: -0.3,
-          scale: 0.9,
-          duration: 0.4,
-          ease: "power2.inOut"
-        })
-        .to(sceneWrapperRef.current, { 
-          x: "-70vw", 
-          y: "350vh",
-          rotation: 0.4,
-          scale: 1.2,
-          duration: 0.3,
-          ease: "power2.in"
-        });
-
-      // Add separate logo animation for more dramatic effect
-      gsap.timeline({
-        scrollTrigger: {
-          trigger: mainRef.current,
-          start: "top top",
-          end: "bottom bottom",
-          scrub: 0.5,
-        },
-      })
-        .to(sceneWrapperRef.current, {
-          scale: 1.2,
-          rotation: 0.3,
-          duration: 0.5,
-          ease: "power2.out"
-        })
-        .to(sceneWrapperRef.current, {
-          scale: 0.8,
-          rotation: -0.2,
-          duration: 0.5,
-          ease: "power2.inOut"
-        })
-        .to(sceneWrapperRef.current, {
-          scale: 1.1,
-          rotation: 0.4,
-          duration: 0.5,
-          ease: "power2.in"
-        });
+        .to(sceneWrapperRef.current, { x: "-50vw", y: "101vh" })
+        .to(sceneWrapperRef.current, { x: "0vw", y: "200vh" })
+        .to(sceneWrapperRef.current, { x: "-50vw", y: "300vh" });
 
       sectionRefs.forEach((ref) => {
         gsap.fromTo(
@@ -112,124 +61,42 @@ function Home() {
         <Navbar />
 
         {/* Intro Section */}
-        <section className="relative flex flex-col lg:flex-row items-center justify-between min-h-[100vh] px-4 md:px-8 py-8 md:py-0">
-          <div className="flex flex-col justify-center w-full lg:w-1/2 lg:ml-20 mb-8 lg:mb-20 order-2 lg:order-1">
-            <div className="lg:absolute lg:top-28 lg:left-10 px-4 pt-8 lg:pt-14 text-center lg:text-left">
+        <section className="relative flex items-center justify-between h-[100vh] px-8">
+          <div className="flex flex-col justify-center w-1/2 ml-20 mb-20">
+            <div className="absolute top-28 left-10 px-4 pt-14">
               <div className="landing-page">
                 <div className="tag-box">
                   <div className="tag">INTRODUCING</div>
                 </div>
               </div>
-              <h1 className="text-white text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold mb-2" style={{ fontFamily: 'Times New Roman, serif' }}>LEARN FROM</h1>
-              <h1 className="text-white text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold mb-4 lg:mb-2" style={{ fontFamily: 'Times New Roman, serif' }}>VHASS</h1>
-              <p className="text-white text-base sm:text-lg md:text-xl font-normal max-w-lg mx-auto lg:mx-0" style={{ fontFamily: 'Times New Roman, serif' }}>
+              <h1 className="text-white text-8xl font-bold mb-2" style={{ fontFamily: 'Times New Roman, serif' }}>LEARN FROM</h1>
+              <h1 className="text-white text-8xl font-bold mb-2" style={{ fontFamily: 'Times New Roman, serif' }}>VHASS</h1>
+              <p className="text-white text-xl font-normal max-w-lg" style={{ fontFamily: 'Times New Roman, serif' }}>
                 VHASS Softwares is a leading ed-tech company focused on cybersecurity training, dedicated to addressing real-time problems, especially in the areas of privacy and security.
               </p>
             </div>
           </div>
 
-          {/* 3D Scene with WebGL fallback */}
-          <div ref={sceneWrapperRef} className="h-[50vh] lg:h-[100vh] w-full lg:w-1/2 order-1 lg:order-2 transform-gpu will-change-transform">
-            <Canvas
-              onCreated={({ gl, scene, camera }) => {
-                // Enhanced WebGL context loss handling
-                const handleContextLost = (event) => {
-                  event.preventDefault();
-                  console.warn('WebGL context lost, attempting recovery...');
-                  
-                  // Force a re-render attempt
-                  setTimeout(() => {
-                    try {
-                      // Check if context is lost using the canvas element
-                      const canvas = gl.domElement;
-                      const context = canvas.getContext('webgl') || canvas.getContext('webgl2');
-                      
-                      if (context && context.isContextLost && context.isContextLost()) {
-                        console.log('Attempting to restore WebGL context...');
-                        // Try to restore the context
-                        const loseContext = context.getExtension('WEBGL_lose_context');
-                        if (loseContext) {
-                          loseContext.restoreContext();
-                        }
-                      }
-                    } catch (error) {
-                      console.warn('Context recovery failed:', error);
-                    }
-                  }, 100);
-                };
-                
-                const handleContextRestored = () => {
-                  console.log('WebGL context restored');
-                  // Force a re-render
-                  if (scene && camera) {
-                    gl.render(scene, camera);
-                  }
-                };
-                
-                gl.domElement.addEventListener('webglcontextlost', handleContextLost);
-                gl.domElement.addEventListener('webglcontextrestored', handleContextRestored);
-                
-                // Store references for cleanup
-                gl._contextLostHandler = handleContextLost;
-                gl._contextRestoredHandler = handleContextRestored;
-              }}
-              onError={(error) => {
-                console.error('WebGL error:', error);
-                // Fallback to 2D content if WebGL fails
-                const container = sceneWrapperRef.current;
-                if (container) {
-                  container.innerHTML = `
-                    <div style="
-                      display: flex; 
-                      align-items: center; 
-                      justify-content: center; 
-                      height: 100%; 
-                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                      color: white;
-                      font-size: 2rem;
-                      text-align: center;
-                      border-radius: 20px;
-                    ">
-                      <div>
-                        <div style="font-size: 4rem; margin-bottom: 1rem;">🚀</div>
-                        <div>VHASS</div>
-                        <div style="font-size: 1rem; margin-top: 0.5rem;">Innovation in Motion</div>
-                      </div>
-                    </div>
-                  `;
-                }
-              }}
-              gl={{ 
-                antialias: false, // Disable antialiasing to reduce GPU load
-                alpha: true,
-                powerPreference: "default", // Use default instead of high-performance
-                preserveDrawingBuffer: false, // Disable to reduce memory usage
-                failIfMajorPerformanceCaveat: false,
-                depth: true,
-                stencil: false,
-                logarithmicDepthBuffer: false,
-                premultipliedAlpha: false,
-                desynchronized: true // Allow async rendering
-              }}
-              dpr={1} // Use device pixel ratio of 1 to prevent context loss
-            >
+          {/* 3D Scene */}
+          <div ref={sceneWrapperRef} className="h-[100vh] w-1/2">
+            <Canvas>
               <Scene progress={progress} />
             </Canvas>
           </div>
         </section>
 
         {/* Section 1 */}
-        <section className="relative flex flex-col lg:flex-row items-center justify-evenly min-h-[100vh] py-8 md:py-16 px-4 md:px-8">
-          <div className="w-full lg:w-[50%] order-2 lg:order-1"></div>
-          <div ref={sectionRefs[0]} className="text-white w-full lg:w-[50%] px-4 md:px-12 order-1 lg:order-2 mb-8 lg:mb-0">
-            <div className="relative bg-black bg-opacity-30 backdrop-blur-md rounded-2xl p-6 md:p-10 border border-white border-opacity-20 shadow-2xl">
+        <section className="relative flex items-center justify-evenly h-[100vh] py-16">
+          <div className="w-[50%]"></div>
+          <div ref={sectionRefs[0]} className="text-white w-[50%] px-12">
+            <div className="relative bg-black bg-opacity-30 backdrop-blur-md rounded-2xl p-10 border border-white border-opacity-20 shadow-2xl">
               <div className="absolute top-6 -left-2 w-4 h-4 bg-blue-500 rounded-full animate-ping"></div>
-              <div className="flex items-center mb-6 md:mb-8">
-                <div className="w-8 md:w-12 h-0.5 bg-blue-500 mr-3 md:mr-4"></div>
-                <h2 className="text-blue-400 text-lg md:text-xl font-semibold tracking-wider">ABOUT US</h2>
+              <div className="flex items-center mb-8">
+                <div className="w-12 h-0.5 bg-blue-500 mr-4"></div>
+                <h2 className="text-blue-400 text-xl font-semibold tracking-wider">ABOUT US</h2>
               </div>
-              <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6" style={{ fontFamily: 'Times New Roman, serif' }}>INTRODUCTION</h3>
-              <p className="text-base md:text-lg lg:text-xl font-light leading-relaxed">
+              <h3 className="text-4xl font-bold mb-6" style={{ fontFamily: 'Times New Roman, serif' }}>INTRODUCTION</h3>
+              <p className="text-xl font-light leading-relaxed">
                 Cybersecurity is the practice of protecting digital systems, networks, and sensitive data from unauthorized access, breaches, and cyberattacks.
                 It plays a vital role in ensuring the safety of individuals and organizations in an increasingly digital world.
                 <br /><br />
@@ -241,17 +108,17 @@ function Home() {
         </section>
 
         {/* Section 2 */}
-        <section className="relative flex flex-col lg:flex-row items-center justify-evenly min-h-[100vh] py-8 md:py-16 px-4 md:px-8">
-          <div ref={sectionRefs[1]} className="text-white w-full lg:w-[50%] px-4 md:px-12 order-1 lg:order-1 mb-8 lg:mb-0">
-            <div className="relative bg-black bg-opacity-30 backdrop-blur-md rounded-2xl p-6 md:p-8 border border-white border-opacity-20 shadow-2xl max-h-full overflow-auto">
+        <section className="relative flex items-center justify-evenly h-[100vh] py-16">
+          <div ref={sectionRefs[1]} className="text-white w-[50%] px-12">
+            <div className="relative bg-black bg-opacity-30 backdrop-blur-md rounded-2xl p-8 border border-white border-opacity-20 shadow-2xl max-h-full overflow-auto">
               <div className="absolute top-6 -left-2 w-4 h-4 bg-purple-500 rounded-full animate-ping"></div>
-              <div className="flex items-center mb-4 md:mb-6">
-                <div className="w-8 md:w-10 h-0.5 bg-purple-500 mr-3 md:mr-4"></div>
-                <h2 className="text-purple-400 text-base md:text-lg font-semibold tracking-wider">INDUSTRY-READY SKILLS</h2>
+              <div className="flex items-center mb-6">
+                <div className="w-10 h-0.5 bg-purple-500 mr-4"></div>
+                <h2 className="text-purple-400 text-lg font-semibold tracking-wider">INDUSTRY-READY SKILLS</h2>
               </div>
-              <h3 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6" style={{ fontFamily: 'Times New Roman, serif' }}>WHY US?</h3>
+              <h3 className="text-3xl font-bold mb-6" style={{ fontFamily: 'Times New Roman, serif' }}>WHY US?</h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 {[
                   { title: "Instructors", desc: "Certified & Experienced Instructors" },
                   { title: "Affordable", desc: "Most affordable & quality content" },
@@ -270,21 +137,21 @@ function Home() {
               </div>
             </div>
           </div>
-          <div className="w-full lg:w-[50%] order-2 lg:order-2"></div>
+          <div className="w-[50%]"></div>
         </section>
 
         {/* Section 3 */}
-        <section className="relative flex flex-col lg:flex-row items-center justify-evenly min-h-[100vh] py-8 md:py-16 px-4 md:px-8">
-          <div className="w-full lg:w-[50%] order-2 lg:order-1"></div>
-          <div ref={sectionRefs[2]} className="text-white w-full lg:w-[50%] px-4 md:px-12 order-1 lg:order-2 mb-8 lg:mb-0">
-            <div className="relative bg-black bg-opacity-30 backdrop-blur-md rounded-2xl p-6 md:p-10 border border-white border-opacity-20 shadow-2xl">
+        <section className="relative flex items-center justify-evenly h-[100vh] py-16">
+          <div className="w-[50%]"></div>
+          <div ref={sectionRefs[2]} className="text-white w-[50%] px-12">
+            <div className="relative bg-black bg-opacity-30 backdrop-blur-md rounded-2xl p-10 border border-white border-opacity-20 shadow-2xl">
               <div className="absolute top-6 -left-2 w-4 h-4 bg-emerald-500 rounded-full animate-ping"></div>
-              <div className="flex items-center mb-6 md:mb-8">
-                <div className="w-8 md:w-12 h-0.5 bg-emerald-500 mr-3 md:mr-4"></div>
-                <h2 className="text-emerald-400 text-lg md:text-xl font-semibold tracking-wider">CAREER ACCELERATION</h2>
+              <div className="flex items-center mb-8">
+                <div className="w-12 h-0.5 bg-emerald-500 mr-4"></div>
+                <h2 className="text-emerald-400 text-xl font-semibold tracking-wider">CAREER ACCELERATION</h2>
               </div>
-              <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6" style={{ fontFamily: 'Times New Roman, serif' }}>Your Cybersecurity Journey</h3>
-              <p className="text-base md:text-lg lg:text-xl font-light leading-relaxed">
+              <h3 className="text-4xl font-bold mb-6" style={{ fontFamily: 'Times New Roman, serif' }}>Your Cybersecurity Journey</h3>
+              <p className="text-xl font-light leading-relaxed">
                 Join our global community of cybersecurity professionals and take the next step toward a rewarding, future-proof career. 
                 Gain access to industry-recognized certifications, personalized career mentorship, hands-on labs, and job placement assistance 
                 that connects you with leading employers. We don't just teach — we guide, support, and empower you to succeed.

@@ -69,6 +69,7 @@ const schema = new mongoose.Schema({
   },
   purchasers: {
     type: [mongoose.Schema.Types.ObjectId],
+    ref: "User",
     default: [],
   },
 });
