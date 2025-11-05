@@ -39,8 +39,20 @@ export default function PaymentCallback() {
         // Verify payment status with backend in background (do not block redirect)
         console.log('🔎 Verifying payment status with backend...', { merchantTransactionId, type });
         ApiService.phonepeStatus(type || 'course', merchantTransactionId, 1)
-          .catch((verifyErr) => {
+          .catch(async (verifyErr) => {
             console.warn('Payment verification failed (will still redirect):', verifyErr?.message || verifyErr);
+            // Fallback: direct POST to ensure correct method reaches backend
+            try {
+              const apiBase = import.meta.env.VITE_API_URL || '/api';
+              const endpoint = `${apiBase}/api/${(type || 'course')}/phonepe/status/${merchantTransactionId}`;
+              await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+              });
+            } catch (fallbackErr) {
+              console.warn('Fallback status POST failed (continuing):', fallbackErr?.message || fallbackErr);
+            }
           });
 
         // Brief confirmation toast, then redirect shortly after
