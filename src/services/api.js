@@ -37,24 +37,24 @@ class ApiService {
     const url = `${baseURL}/${cleanEndpoint}${cacheBusted}`;
     console.log('🌐 Making API request to:', url);
     
-    // Create AbortController for request cancellation
-    const controller = new AbortController();
-    const timeout = options.timeout || 30000; // Default 30 seconds, customizable
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-    
-    const config = {
-      headers: this.getHeaders(options.headers),
-      credentials: 'include', // Include cookies for session management
-      mode: 'cors', // Explicitly set CORS mode
-      signal: controller.signal, // Add abort signal
-      ...options,
-      method,
-    };
-
     // Lightweight retry for transient network errors (e.g., ERR_NETWORK_CHANGED)
     const maxNetworkRetries = options.networkRetries ?? 2;
     let attempt = 0;
     while (true) {
+      // Create AbortController for each attempt so retries don't inherit aborted signals
+      const controller = new AbortController();
+      const timeout = options.timeout || 30000; // Default 30 seconds, customizable
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+      
+      const config = {
+        headers: this.getHeaders(options.headers),
+        credentials: 'include', // Include cookies for session management
+        mode: 'cors', // Explicitly set CORS mode
+        signal: controller.signal, // Add abort signal
+        cache: method === 'GET' ? 'no-store' : undefined,
+        ...options,
+        method,
+      };
       try {
         const response = await fetch(url, config);
         clearTimeout(timeoutId); // Clear timeout on successful response
@@ -254,8 +254,8 @@ class ApiService {
         console.log(`🔄 Payment status check attempt ${attempt}/${retries} for ${merchantOrderId}`);
         
         const result = await this.makeRequest(endpoint, {
-          method: 'POST',
-          timeout: 60000, // 60 seconds for payment status checks
+          method: 'GET',
+          timeout: 120000, // Allow up to 120s; gateways can be slow
         });
         
         console.log(`✅ Payment status check successful on attempt ${attempt}`);

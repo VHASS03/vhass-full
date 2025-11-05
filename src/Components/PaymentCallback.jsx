@@ -10,6 +10,7 @@ export default function PaymentCallback() {
   const [paymentStatus, setPaymentStatus] = useState('processing');
   const [paymentDetails, setPaymentDetails] = useState(null);
   const [countdown, setCountdown] = useState(3);
+  const [toastMsg, setToastMsg] = useState('');
 
   useEffect(() => {
     const handlePaymentCallback = async () => {
@@ -35,16 +36,18 @@ export default function PaymentCallback() {
           return;
         }
 
-        // Verify payment status with backend without surfacing UI status
+        // Verify payment status with backend in background (do not block redirect)
         console.log('🔎 Verifying payment status with backend...', { merchantTransactionId, type });
-        try {
-          await ApiService.phonepeStatus(type || 'course', merchantTransactionId);
-        } catch (verifyErr) {
-          console.warn('Payment verification failed (will still redirect):', verifyErr?.message || verifyErr);
-        }
+        ApiService.phonepeStatus(type || 'course', merchantTransactionId, 1)
+          .catch((verifyErr) => {
+            console.warn('Payment verification failed (will still redirect):', verifyErr?.message || verifyErr);
+          });
 
-        // Always redirect to dashboard silently after verification attempt
-        navigate('/dashboard', { replace: true });
+        // Brief confirmation toast, then redirect shortly after
+        setToastMsg('Payment received. Redirecting to your dashboard...');
+        setTimeout(() => {
+          navigate('/dashboard', { replace: true });
+        }, 1500);
         return;
         
       } catch (error) {
@@ -105,6 +108,11 @@ export default function PaymentCallback() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900">
+      {toastMsg && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded-md shadow-lg z-50">
+          {toastMsg}
+        </div>
+      )}
       <div className="bg-gray-800 rounded-2xl p-8 max-w-md w-full border-2 border-purple-500 text-center">
         <div className="mb-6">
           {statusContent.icon}
