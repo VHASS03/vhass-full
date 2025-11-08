@@ -311,6 +311,10 @@ export const phonepeStatus = TryCatch(async (req, res) => {
       txnid: transactionID,
       stat: transactionStatus,
       time: updatedTxn.updatedAt,
+      amount: updatedTxn.finalAmount || updatedTxn.transactionAmount || 0,
+      phone: user.phone || 'Not provided',
+      paymentMethod: transactionMode || 'PhonePe',
+      orderId: merchantOrderId
     };
 
     await sendTransactMailAdmin("Someone registered for your workshop", data);
@@ -322,6 +326,10 @@ export const phonepeStatus = TryCatch(async (req, res) => {
       txnid: transactionID,
       stat: transactionStatus,
       time: updatedTxn.updatedAt,
+      amount: updatedTxn.finalAmount || updatedTxn.transactionAmount || 0,
+      phone: user.phone || 'Not provided',
+      paymentMethod: transactionMode || 'PhonePe',
+      orderId: merchantOrderId
     };
 
     await sendTransactMailUser("Your workshop registration was successful! Welcome aboard 🚀", data_user);

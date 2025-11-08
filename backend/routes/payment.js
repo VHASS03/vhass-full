@@ -3,6 +3,7 @@ import { Transaction } from '../models/Transaction.js';
 import { User } from '../models/User.js';
 import { Courses } from '../models/Courses.js';
 import { Workshop } from '../models/Workshop.js';
+import { sendTransactMailAdmin, sendTransactMailUser } from '../middlewares/sendMail.js';
 import crypto from 'crypto';
 
 const router = express.Router();
@@ -53,10 +54,11 @@ router.post('/phonepe/webhook', async (req, res) => {
       responseCodeDescription
     });
 
-    // If payment successful, enroll user in course/workshop
+    // If payment successful, enroll user in course/workshop and send emails
     if (status === 'SUCCESS') {
       try {
         const user = await User.findById(transaction.userID);
+        
         if (user && transaction.courseID) {
           // Enroll in course (idempotent)
           await User.findByIdAndUpdate(user._id, {
@@ -70,10 +72,76 @@ router.post('/phonepe/webhook', async (req, res) => {
             user: user.email,
             course: String(transaction.courseID)
           });
+
+          // Send email notifications
+          const course = await Courses.findById(transaction.courseID);
+          if (course) {
+            const paymentAmount = transaction.finalAmount || transaction.transactionAmount || (amount ? amount / 100 : 0);
+            const mailData = {
+              name: user.name,
+              email: user.email,
+              course: course.title,
+              txnid: transactionId || transaction.merchantOrderID,
+              stat: status,
+              time: transaction.updatedAt || new Date(),
+              amount: paymentAmount,
+              phone: user.phone || 'Not provided',
+              paymentMethod: 'PhonePe',
+              orderId: transaction.merchantOrderID
+            };
+            
+            try {
+              await sendTransactMailAdmin("Someone bought your course", mailData);
+              await sendTransactMailUser("Your course purchase was successful! Welcome aboard 🚀", mailData);
+              console.log('✅ Emails sent successfully for course purchase');
+            } catch (emailErr) {
+              console.error('❌ Email send failed:', emailErr.message);
+            }
+          }
+        } else if (user && transaction.workshopID) {
+          // Enroll in workshop (idempotent)
+          await User.findByIdAndUpdate(user._id, {
+            $addToSet: { workshopSubscription: transaction.workshopID }
+          });
+          // Add purchaser to workshop (idempotent)
+          await Workshop.findByIdAndUpdate(transaction.workshopID, {
+            $addToSet: { purchasers: user._id }
+          });
+          console.log('✅ Enrollment synced for user and workshop:', {
+            user: user.email,
+            workshop: String(transaction.workshopID)
+          });
+
+          // Send email notifications
+          const workshop = await Workshop.findById(transaction.workshopID);
+          if (workshop) {
+            const paymentAmount = transaction.finalAmount || transaction.transactionAmount || (amount ? amount / 100 : 0);
+            const mailData = {
+              name: user.name,
+              email: user.email,
+              course: workshop.title,
+              txnid: transactionId || transaction.merchantOrderID,
+              stat: status,
+              time: transaction.updatedAt || new Date(),
+              amount: paymentAmount,
+              phone: user.phone || 'Not provided',
+              paymentMethod: 'PhonePe',
+              orderId: transaction.merchantOrderID
+            };
+            
+            try {
+              await sendTransactMailAdmin("Someone registered for your workshop", mailData);
+              await sendTransactMailUser("Your workshop registration was successful! Welcome aboard 🚀", mailData);
+              console.log('✅ Emails sent successfully for workshop registration');
+            } catch (emailErr) {
+              console.error('❌ Email send failed:', emailErr.message);
+            }
+          }
         } else {
-          console.log('⚠️ Cannot enroll - missing user or course on transaction', {
+          console.log('⚠️ Cannot enroll - missing user or course/workshop on transaction', {
             hasUser: !!transaction.userID,
-            hasCourse: !!transaction.courseID
+            hasCourse: !!transaction.courseID,
+            hasWorkshop: !!transaction.workshopID
           });
         }
       } catch (enrollErr) {

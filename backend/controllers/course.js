@@ -428,9 +428,13 @@ export const phonepeStatus = TryCatch(async (req, res) => {
         txnid: transactionID,
         stat: transactionStatus,
         time: updatedTxn.updatedAt,
+        amount: updatedTxn.finalAmount || updatedTxn.transactionAmount || 0,
+        phone: user.phone || 'Not provided',
+        paymentMethod: transactionMode || 'PhonePe',
+        orderId: merchantOrderId
       };
       try {
-        await sendTransactMailAdmin("Somone Bought your course", mailData);
+        await sendTransactMailAdmin("Someone bought your course", mailData);
         await sendTransactMailUser("Your course purchase was successful! Welcome aboard 🚀", mailData);
       } catch (e) {
         console.error('Email send failed:', e.message);

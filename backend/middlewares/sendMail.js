@@ -259,6 +259,10 @@ export const sendTransactMailAdmin = async (subject, data) => {
   const primaryEmail = "vhass0310@gmail.com";
   const bccEmails = ["info@vhassacademy.com", "kandregulanuraj@gmail.com"];
 
+  // Format amount
+  const formattedAmount = data.amount ? `₹${Number(data.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'N/A';
+  const formattedTime = data.time ? new Date(data.time).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) : new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -270,36 +274,52 @@ export const sendTransactMailAdmin = async (subject, data) => {
       font-family: Arial, sans-serif;
       background-color: #f3f3f3;
       margin: 0;
-      padding: 0;
+      padding: 20px;
     }
     .container {
       background-color: #ffffff;
-      padding: 20px;
-      margin: 20px auto;
+      padding: 30px;
+      margin: 0 auto;
       border-radius: 8px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       max-width: 600px;
     }
     h1 {
       color: #5a2d82;
+      margin-top: 0;
     }
-    p {
+    .bill-section {
+      background-color: #f9f9f9;
+      padding: 20px;
+      border-radius: 6px;
+      margin: 20px 0;
+    }
+    .bill-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .bill-row:last-child {
+      border-bottom: none;
+    }
+    .bill-label {
+      font-weight: bold;
+      color: #333333;
+    }
+    .bill-value {
       color: #666666;
     }
-    .button {
-      display: inline-block;
-      padding: 15px 25px;
-      margin: 20px 0;
-      background-color: #5a2d82;
-      color: white;
-      text-decoration: none;
-      border-radius: 4px;
-      font-size: 16px;
+    .amount-highlight {
+      font-size: 24px;
+      font-weight: bold;
+      color: #5a2d82;
     }
     .footer {
-      margin-top: 20px;
+      margin-top: 30px;
       color: #999999;
       text-align: center;
+      font-size: 14px;
     }
     .footer a {
       color: #5a2d82;
@@ -310,12 +330,48 @@ export const sendTransactMailAdmin = async (subject, data) => {
 <body>
   <div class="container">
     <h1>${subject}</h1>
-    <p>Name : ${data.name}</p>
-    <p>Email : ${data.email}</p>
-    <p>Item name : ${data.course}</p>
-    <p>TRANSACTION ID : ${data.txnid}</p>
-    <p>Payment Status : ${data.stat}</p>
-    <p>Date & Time : ${data.time}</p>
+    <div class="bill-section">
+      <div class="bill-row">
+        <span class="bill-label">Customer Name:</span>
+        <span class="bill-value">${data.name || 'N/A'}</span>
+      </div>
+      <div class="bill-row">
+        <span class="bill-label">Email:</span>
+        <span class="bill-value">${data.email || 'N/A'}</span>
+      </div>
+      ${data.phone ? `<div class="bill-row">
+        <span class="bill-label">Phone:</span>
+        <span class="bill-value">${data.phone}</span>
+      </div>` : ''}
+      <div class="bill-row">
+        <span class="bill-label">Item Purchased:</span>
+        <span class="bill-value">${data.course || 'N/A'}</span>
+      </div>
+      <div class="bill-row">
+        <span class="bill-label">Order ID:</span>
+        <span class="bill-value">${data.orderId || data.txnid || 'N/A'}</span>
+      </div>
+      <div class="bill-row">
+        <span class="bill-label">Transaction ID:</span>
+        <span class="bill-value">${data.txnid || 'N/A'}</span>
+      </div>
+      <div class="bill-row">
+        <span class="bill-label">Payment Method:</span>
+        <span class="bill-value">${data.paymentMethod || 'PhonePe'}</span>
+      </div>
+      <div class="bill-row">
+        <span class="bill-label">Payment Status:</span>
+        <span class="bill-value" style="color: #28a745; font-weight: bold;">${data.stat || 'SUCCESS'}</span>
+      </div>
+      <div class="bill-row">
+        <span class="bill-label">Date & Time:</span>
+        <span class="bill-value">${formattedTime}</span>
+      </div>
+      <div class="bill-row" style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #5a2d82;">
+        <span class="bill-label" style="font-size: 18px;">Amount Paid:</span>
+        <span class="amount-highlight">${formattedAmount}</span>
+      </div>
+    </div>
     <div class="footer">
       <p>Thank you,<br>Your Website Team</p>
       <p><a href="https://vhass.in">vhass.in</a></p>
@@ -337,6 +393,10 @@ export const sendTransactMailAdmin = async (subject, data) => {
 export const sendTransactMailUser = async (subject, data) => {
   const transport = buildTransport();
 
+  // Format amount
+  const formattedAmount = data.amount ? `₹${Number(data.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'N/A';
+  const formattedTime = data.time ? new Date(data.time).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) : new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -348,36 +408,60 @@ export const sendTransactMailUser = async (subject, data) => {
       font-family: Arial, sans-serif;
       background-color: #f3f3f3;
       margin: 0;
-      padding: 0;
+      padding: 20px;
     }
     .container {
       background-color: #ffffff;
-      padding: 20px;
-      margin: 20px auto;
+      padding: 30px;
+      margin: 0 auto;
       border-radius: 8px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       max-width: 600px;
     }
     h1 {
       color: #5a2d82;
+      margin-top: 0;
     }
-    p {
+    .success-message {
+      background-color: #d4edda;
+      color: #155724;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 20px 0;
+      border-left: 4px solid #28a745;
+    }
+    .bill-section {
+      background-color: #f9f9f9;
+      padding: 20px;
+      border-radius: 6px;
+      margin: 20px 0;
+    }
+    .bill-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .bill-row:last-child {
+      border-bottom: none;
+    }
+    .bill-label {
+      font-weight: bold;
+      color: #333333;
+    }
+    .bill-value {
       color: #666666;
     }
-    .button {
-      display: inline-block;
-      padding: 15px 25px;
-      margin: 20px 0;
-      background-color: #5a2d82;
-      color: white;
-      text-decoration: none;
-      border-radius: 4px;
-      font-size: 16px;
+    .amount-highlight {
+      font-size: 24px;
+      font-weight: bold;
+      color: #5a2d82;
     }
     .footer {
-      margin-top: 20px;
+      margin-top: 30px;
       color: #999999;
       text-align: center;
+      font-size: 14px;
     }
     .footer a {
       color: #5a2d82;
@@ -388,13 +472,45 @@ export const sendTransactMailUser = async (subject, data) => {
 <body>
   <div class="container">
     <h1>${subject}</h1>
-    <p>Name : ${data.name}</p>
-    <p>Item name : ${data.course}</p>
-    <p>TRANSACTION ID : ${data.txnid}</p>
-    <p>Payment Status : ${data.stat}</p>
-    <p>Date & Time : ${data.time}</p>
+    <div class="success-message">
+      <strong>✅ Payment Successful!</strong> Your purchase has been confirmed. Please find your bill details below.
+    </div>
+    <div class="bill-section">
+      <div class="bill-row">
+        <span class="bill-label">Name:</span>
+        <span class="bill-value">${data.name || 'N/A'}</span>
+      </div>
+      <div class="bill-row">
+        <span class="bill-label">Item Purchased:</span>
+        <span class="bill-value">${data.course || 'N/A'}</span>
+      </div>
+      <div class="bill-row">
+        <span class="bill-label">Order ID:</span>
+        <span class="bill-value">${data.orderId || data.txnid || 'N/A'}</span>
+      </div>
+      <div class="bill-row">
+        <span class="bill-label">Transaction ID:</span>
+        <span class="bill-value">${data.txnid || 'N/A'}</span>
+      </div>
+      <div class="bill-row">
+        <span class="bill-label">Payment Method:</span>
+        <span class="bill-value">${data.paymentMethod || 'PhonePe'}</span>
+      </div>
+      <div class="bill-row">
+        <span class="bill-label">Payment Status:</span>
+        <span class="bill-value" style="color: #28a745; font-weight: bold;">${data.stat || 'SUCCESS'}</span>
+      </div>
+      <div class="bill-row">
+        <span class="bill-label">Date & Time:</span>
+        <span class="bill-value">${formattedTime}</span>
+      </div>
+      <div class="bill-row" style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #5a2d82;">
+        <span class="bill-label" style="font-size: 18px;">Amount Paid:</span>
+        <span class="amount-highlight">${formattedAmount}</span>
+      </div>
+    </div>
     <div class="footer">
-      <p>Thank you,<br>Vhass</p>
+      <p>Thank you for your purchase!<br><strong>Vhass Academy</strong></p>
       <p>✉️ info@vhassacademy.com</p>
       <p>📞 +91 8985320226</p>
       <p><a href="https://vhass.in">vhass.in</a></p>
