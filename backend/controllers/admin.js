@@ -1046,16 +1046,133 @@ export const sendBillsToSpecificUsers = async (req, res) => {
     if (!targetTransactionIds || targetTransactionIds.length === 0) {
       console.log('📧 No specific transaction IDs provided, sending to all successful transactions...');
       
-      // Find all successful transactions
+      // Find all successful transactions with populated userID
       const allSuccessfulTransactions = await Transaction.find({
-        transactionStatus: { $in: ['SUCCESS', 'COMPLETED', 'PAYMENT_SUCCESS'] }
-      }).select('merchantOrderID transactionID');
+        transactionStatus: { $in: ['SUCCESS', 'COMPLETED', 'PAYMENT_SUCCESS'] },
+        userID: { $exists: true, $ne: null }
+      })
+      .populate('userID', 'name email phone')
+      .populate('courseID', 'title')
+      .populate('workshopID', 'title');
       
-      targetTransactionIds = allSuccessfulTransactions.map(txn => 
-        txn.transactionID || txn.merchantOrderID
-      ).filter(id => id); // Remove any null/undefined values
+      console.log(`Found ${allSuccessfulTransactions.length} successful transactions with users`);
       
-      console.log(`Found ${targetTransactionIds.length} successful transactions to process`);
+      // Filter to only include transactions with valid user emails and process directly
+      const validTransactions = allSuccessfulTransactions.filter(txn => {
+        const user = txn.userID;
+        return user && user.email && user.email.trim() !== '';
+      });
+      
+      console.log(`Found ${validTransactions.length} transactions with valid user emails`);
+      
+      // Process transactions directly instead of looking them up again
+      for (const transaction of validTransactions) {
+        try {
+          const transactionId = transaction.transactionID || transaction.merchantOrderID;
+          const user = transaction.userID;
+
+          if (!user || !user.email) {
+            results.skipped++;
+            results.details.push({
+              transactionId,
+              status: 'skipped',
+              reason: 'User has no email'
+            });
+            continue;
+          }
+
+          // Get item details
+          let itemTitle = '';
+          let itemType = '';
+          
+          if (transaction.courseID) {
+            const course = typeof transaction.courseID === 'object' ? transaction.courseID : await Courses.findById(transaction.courseID);
+            itemTitle = course?.title || 'Course';
+            itemType = 'course';
+          } else if (transaction.workshopID) {
+            const workshop = typeof transaction.workshopID === 'object' ? transaction.workshopID : await Workshop.findById(transaction.workshopID);
+            itemTitle = workshop?.title || 'Workshop';
+            itemType = 'workshop';
+          } else {
+            itemTitle = 'Course/Workshop';
+            itemType = 'unknown';
+          }
+
+          const amount = transaction.finalAmount || transaction.transactionAmount || 0;
+          const formattedTime = transaction.updatedAt || transaction.createdAt || new Date();
+
+          // Prepare email data
+          const mailData = {
+            name: user.name,
+            email: user.email,
+            course: itemTitle,
+            txnid: transaction.transactionID || transaction.merchantOrderID,
+            stat: transaction.transactionStatus,
+            time: formattedTime,
+            amount: amount,
+            phone: user.phone || 'Not provided',
+            paymentMethod: transaction.transactionType || 'PhonePe',
+            orderId: transaction.merchantOrderID
+          };
+
+          // Send email
+          let emailStatus = 'failed';
+          try {
+            await sendTransactMailUser("Your purchase bill - Vhass Academy", mailData);
+            console.log(`✅ Email sent to ${user.email} for transaction ${transactionId}`);
+            results.emailsSent++;
+            emailStatus = 'sent';
+          } catch (emailError) {
+            console.error(`❌ Failed to send email to ${user.email}:`, emailError.message);
+            console.error(`Email error details:`, emailError);
+            results.failed++;
+            emailStatus = 'failed';
+          }
+
+          results.details.push({
+            transactionId,
+            userEmail: user.email,
+            userPhone: user.phone || 'Not provided',
+            item: itemTitle,
+            type: itemType,
+            amount: amount,
+            emailStatus: emailStatus
+          });
+
+          // Small delay between sends to avoid overwhelming email service
+          await new Promise(resolve => setTimeout(resolve, 200));
+
+        } catch (error) {
+          const transactionId = transaction.transactionID || transaction.merchantOrderID;
+          console.error(`❌ Error processing transaction ${transactionId}:`, error.message);
+          results.failed++;
+          results.details.push({
+            transactionId,
+            status: 'failed',
+            error: error.message
+          });
+        }
+      }
+
+      // Return early since we've processed all transactions
+      console.log(`📧 Bill sending completed: ${results.emailsSent} emails sent, ${results.failed} failed, ${results.skipped} skipped`);
+
+      const skippedReasons = {};
+      results.details.forEach(detail => {
+        if (detail.status === 'skipped' || detail.emailStatus === 'failed') {
+          const reason = detail.reason || detail.error || 'Unknown';
+          skippedReasons[reason] = (skippedReasons[reason] || 0) + 1;
+        }
+      });
+
+      return res.json({
+        success: true,
+        message: `Bills sent: ${results.emailsSent} emails sent out of ${validTransactions.length} transactions`,
+        results: {
+          ...results,
+          skippedReasons: Object.keys(skippedReasons).length > 0 ? skippedReasons : undefined
+        }
+      });
     } else {
       console.log(`📧 Sending bills to ${targetTransactionIds.length} specific transactions...`);
     }
@@ -1098,13 +1215,27 @@ export const sendBillsToSpecificUsers = async (req, res) => {
           user = await User.findById(transaction.userID);
         }
 
-        if (!user || !user.email) {
-          console.log(`⚠️ User not found for transaction: ${transactionId}`);
+        if (!user) {
+          console.log(`⚠️ User not found for transaction: ${transactionId}, userID: ${transaction.userID}`);
           results.skipped++;
           results.details.push({
             transactionId,
             status: 'skipped',
-            reason: 'User not found or no email'
+            reason: 'User not found',
+            userID: transaction.userID ? String(transaction.userID) : 'missing'
+          });
+          continue;
+        }
+
+        if (!user.email) {
+          console.log(`⚠️ User has no email for transaction: ${transactionId}, user: ${user.name || user._id}`);
+          results.skipped++;
+          results.details.push({
+            transactionId,
+            status: 'skipped',
+            reason: 'User has no email',
+            userName: user.name,
+            userId: String(user._id)
           });
           continue;
         }
@@ -1148,13 +1279,17 @@ export const sendBillsToSpecificUsers = async (req, res) => {
         };
 
         // Send email
+        let emailStatus = 'failed';
         try {
           await sendTransactMailUser("Your purchase bill - Vhass Academy", mailData);
           console.log(`✅ Email sent to ${user.email} for transaction ${transactionId}`);
           results.emailsSent++;
+          emailStatus = 'sent';
         } catch (emailError) {
           console.error(`❌ Failed to send email to ${user.email}:`, emailError.message);
+          console.error(`Email error details:`, emailError);
           results.failed++;
+          emailStatus = 'failed';
         }
 
         results.details.push({
@@ -1164,7 +1299,7 @@ export const sendBillsToSpecificUsers = async (req, res) => {
           item: itemTitle,
           type: itemType,
           amount: amount,
-          emailStatus: 'sent'
+          emailStatus: emailStatus
         });
 
         // Small delay between sends to avoid overwhelming email service
@@ -1183,10 +1318,22 @@ export const sendBillsToSpecificUsers = async (req, res) => {
 
     console.log(`📧 Bill sending completed: ${results.emailsSent} emails sent, ${results.failed} failed, ${results.skipped} skipped`);
 
+    // Add summary of skipped reasons
+    const skippedReasons = {};
+    results.details.forEach(detail => {
+      if (detail.status === 'skipped' || detail.emailStatus === 'failed') {
+        const reason = detail.reason || detail.error || 'Unknown';
+        skippedReasons[reason] = (skippedReasons[reason] || 0) + 1;
+      }
+    });
+
     res.json({
       success: true,
       message: `Bills sent: ${results.emailsSent} emails sent out of ${results.total} transactions`,
-      results
+      results: {
+        ...results,
+        skippedReasons: Object.keys(skippedReasons).length > 0 ? skippedReasons : undefined
+      }
     });
 
   } catch (error) {
