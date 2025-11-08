@@ -1037,6 +1037,15 @@ export const syncPurchasersArrays = async () => {
 // Send bills to all users (or specific users if transaction IDs provided)
 export const sendBillsToSpecificUsers = async (req, res) => {
   try {
+    // Initialize results object first
+    const results = {
+      total: 0,
+      emailsSent: 0,
+      failed: 0,
+      skipped: 0,
+      details: []
+    };
+
     // Get transaction IDs from request body, or use default three if not provided
     const { transactionIds } = req.body;
     
@@ -1064,6 +1073,8 @@ export const sendBillsToSpecificUsers = async (req, res) => {
       });
       
       console.log(`Found ${validTransactions.length} transactions with valid user emails`);
+      
+      results.total = validTransactions.length;
       
       // Process transactions directly instead of looking them up again
       for (const transaction of validTransactions) {
@@ -1173,30 +1184,26 @@ export const sendBillsToSpecificUsers = async (req, res) => {
           skippedReasons: Object.keys(skippedReasons).length > 0 ? skippedReasons : undefined
         }
       });
-    } else {
-      console.log(`📧 Sending bills to ${targetTransactionIds.length} specific transactions...`);
     }
+    
+    // If specific transaction IDs provided, process them
+    if (targetTransactionIds && targetTransactionIds.length > 0) {
+      console.log(`📧 Sending bills to ${targetTransactionIds.length} specific transactions...`);
+      
+      results.total = targetTransactionIds.length;
 
-    const results = {
-      total: targetTransactionIds.length,
-      emailsSent: 0,
-      failed: 0,
-      skipped: 0,
-      details: []
-    };
-
-    for (const transactionId of targetTransactionIds) {
-      try {
-        // Find transaction by merchantOrderID (transaction ID)
-        const transaction = await Transaction.findOne({
-          $or: [
-            { merchantOrderID: transactionId },
-            { transactionID: transactionId }
-          ]
-        })
-          .populate('userID', 'name email phone')
-          .populate('courseID', 'title')
-          .populate('workshopID', 'title');
+      for (const transactionId of targetTransactionIds) {
+        try {
+          // Find transaction by merchantOrderID (transaction ID)
+          const transaction = await Transaction.findOne({
+            $or: [
+              { merchantOrderID: transactionId },
+              { transactionID: transactionId }
+            ]
+          })
+            .populate('userID', 'name email phone')
+            .populate('courseID', 'title')
+            .populate('workshopID', 'title');
 
         if (!transaction) {
           console.log(`⚠️ Transaction not found: ${transactionId}`);
@@ -1316,25 +1323,26 @@ export const sendBillsToSpecificUsers = async (req, res) => {
       }
     }
 
-    console.log(`📧 Bill sending completed: ${results.emailsSent} emails sent, ${results.failed} failed, ${results.skipped} skipped`);
+      console.log(`📧 Bill sending completed: ${results.emailsSent} emails sent, ${results.failed} failed, ${results.skipped} skipped`);
 
-    // Add summary of skipped reasons
-    const skippedReasons = {};
-    results.details.forEach(detail => {
-      if (detail.status === 'skipped' || detail.emailStatus === 'failed') {
-        const reason = detail.reason || detail.error || 'Unknown';
-        skippedReasons[reason] = (skippedReasons[reason] || 0) + 1;
-      }
-    });
+      // Add summary of skipped reasons
+      const skippedReasons = {};
+      results.details.forEach(detail => {
+        if (detail.status === 'skipped' || detail.emailStatus === 'failed') {
+          const reason = detail.reason || detail.error || 'Unknown';
+          skippedReasons[reason] = (skippedReasons[reason] || 0) + 1;
+        }
+      });
 
-    res.json({
-      success: true,
-      message: `Bills sent: ${results.emailsSent} emails sent out of ${results.total} transactions`,
-      results: {
-        ...results,
-        skippedReasons: Object.keys(skippedReasons).length > 0 ? skippedReasons : undefined
-      }
-    });
+      res.json({
+        success: true,
+        message: `Bills sent: ${results.emailsSent} emails sent out of ${results.total} transactions`,
+        results: {
+          ...results,
+          skippedReasons: Object.keys(skippedReasons).length > 0 ? skippedReasons : undefined
+        }
+      });
+    }
 
   } catch (error) {
     console.error('❌ Error sending bills to users:', error);
