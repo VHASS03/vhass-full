@@ -8,7 +8,7 @@ import { User } from "../models/User.js";
 import path from "path";
 import { Workshop } from "../models/Workshop.js";
 import { Transaction } from "../models/Transaction.js";
-import { sendContactMail, sendContactAck } from "../middlewares/sendMail.js";
+import { sendContactMail, sendContactAck, sendTransactMailAdmin, sendTransactMailUser } from "../middlewares/sendMail.js";
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(process.cwd(), 'uploads');
@@ -785,5 +785,152 @@ export const contactMessage = async (req, res) => {
       return res.status(200).json({ success: true, message: "Message accepted (dev mode). Email delivery disabled.", devNote: error?.message });
     }
     return res.status(500).json({ success: false, message: error?.message || "Failed to send message" });
+  }
+};
+
+// Send emails to all existing purchasers
+export const sendEmailsToExistingPurchasers = async (req, res) => {
+  try {
+    console.log('📧 Starting bulk email send to existing purchasers...');
+    
+    // Find all successful transactions
+    const successfulTransactions = await Transaction.find({
+      transactionStatus: { $in: ['SUCCESS', 'COMPLETED', 'PAYMENT_SUCCESS'] }
+    })
+      .populate('userID', 'name email phone')
+      .populate('courseID', 'title')
+      .populate('workshopID', 'title')
+      .sort({ createdAt: 1 }); // Oldest first
+
+    console.log(`Found ${successfulTransactions.length} successful transactions`);
+
+    const results = {
+      total: successfulTransactions.length,
+      sent: 0,
+      failed: 0,
+      skipped: 0,
+      details: []
+    };
+
+    // Process each transaction
+    for (const transaction of successfulTransactions) {
+      try {
+        const user = transaction.userID;
+        if (!user || !user.email) {
+          console.log(`⚠️ Skipping transaction ${transaction.merchantOrderID} - no user or email`);
+          results.skipped++;
+          results.details.push({
+            transactionId: transaction.merchantOrderID,
+            status: 'skipped',
+            reason: 'No user or email found'
+          });
+          continue;
+        }
+
+        let itemTitle = '';
+        let itemType = '';
+        let mailData = null;
+
+        // Handle course purchase
+        if (transaction.courseID) {
+          const course = transaction.courseID;
+          itemTitle = course.title || 'Course';
+          itemType = 'course';
+          
+          mailData = {
+            name: user.name,
+            email: user.email,
+            course: itemTitle,
+            txnid: transaction.transactionID || transaction.merchantOrderID,
+            stat: transaction.transactionStatus,
+            time: transaction.updatedAt || transaction.createdAt,
+            amount: transaction.finalAmount || transaction.transactionAmount || 0,
+            phone: user.phone || 'Not provided',
+            paymentMethod: transaction.transactionType || 'PhonePe',
+            orderId: transaction.merchantOrderID
+          };
+
+          // Send emails
+          await sendTransactMailUser("Your course purchase confirmation - Vhass Academy", mailData);
+          console.log(`✅ Email sent to ${user.email} for course: ${itemTitle}`);
+          results.sent++;
+          results.details.push({
+            transactionId: transaction.merchantOrderID,
+            userEmail: user.email,
+            item: itemTitle,
+            type: itemType,
+            status: 'sent'
+          });
+
+        } 
+        // Handle workshop purchase
+        else if (transaction.workshopID) {
+          const workshop = transaction.workshopID;
+          itemTitle = workshop.title || 'Workshop';
+          itemType = 'workshop';
+          
+          mailData = {
+            name: user.name,
+            email: user.email,
+            course: itemTitle, // Using 'course' field for template compatibility
+            txnid: transaction.transactionID || transaction.merchantOrderID,
+            stat: transaction.transactionStatus,
+            time: transaction.updatedAt || transaction.createdAt,
+            amount: transaction.finalAmount || transaction.transactionAmount || 0,
+            phone: user.phone || 'Not provided',
+            paymentMethod: transaction.transactionType || 'PhonePe',
+            orderId: transaction.merchantOrderID
+          };
+
+          // Send emails
+          await sendTransactMailUser("Your workshop registration confirmation - Vhass Academy", mailData);
+          console.log(`✅ Email sent to ${user.email} for workshop: ${itemTitle}`);
+          results.sent++;
+          results.details.push({
+            transactionId: transaction.merchantOrderID,
+            userEmail: user.email,
+            item: itemTitle,
+            type: itemType,
+            status: 'sent'
+          });
+        } else {
+          console.log(`⚠️ Skipping transaction ${transaction.merchantOrderID} - no course or workshop`);
+          results.skipped++;
+          results.details.push({
+            transactionId: transaction.merchantOrderID,
+            status: 'skipped',
+            reason: 'No course or workshop found'
+          });
+        }
+
+        // Small delay to avoid overwhelming email service
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+      } catch (error) {
+        console.error(`❌ Failed to send email for transaction ${transaction.merchantOrderID}:`, error.message);
+        results.failed++;
+        results.details.push({
+          transactionId: transaction.merchantOrderID,
+          status: 'failed',
+          error: error.message
+        });
+      }
+    }
+
+    console.log(`📧 Bulk email send completed: ${results.sent} sent, ${results.failed} failed, ${results.skipped} skipped`);
+
+    res.json({
+      success: true,
+      message: `Email sending completed: ${results.sent} emails sent, ${results.failed} failed, ${results.skipped} skipped`,
+      results
+    });
+
+  } catch (error) {
+    console.error('❌ Error sending emails to existing purchasers:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send emails to existing purchasers',
+      error: error.message
+    });
   }
 };

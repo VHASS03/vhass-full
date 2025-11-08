@@ -18,6 +18,7 @@ import {
   getUserDetails,
   getAllEnrollments,
   getCourseEnrollments,
+  sendEmailsToExistingPurchasers,
 } from "../controllers/admin.js";
 import { uploadFiles, handleMulterError } from "../middlewares/multer.js";
 import { User } from "../models/User.js";
@@ -168,6 +169,9 @@ router.get("/user/:id", isAuth, isAdmin, getUserDetails);
 // Enrollment management routes
 router.get("/enrollments", isAuth, isAdmin, getAllEnrollments);
 router.get("/course/:courseId/enrollments", isAuth, isAdmin, getCourseEnrollments);
+
+// Send emails to existing purchasers
+router.post("/send-emails-to-purchasers", isAuth, isAdmin, sendEmailsToExistingPurchasers);
 
 // Catch-all 404 handler
 router.use((req, res) => {
