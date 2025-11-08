@@ -8,20 +8,30 @@ const buildTransport = () => {
   const user = process.env.SMTP_USER || process.env.Gmail;
   const pass = process.env.SMTP_PASS || process.env.Password;
 
+  console.log('📧 Building email transport:', {
+    host,
+    port,
+    hasUser: !!user,
+    hasPass: !!pass,
+    user: user ? `${user.substring(0, 3)}***` : 'missing'
+  });
+
   const looksPlaceholder = (val) => !val || /your-.*password|your-email|example\.com/i.test(String(val));
   const devMode = (process.env.NODE_ENV || 'development') !== 'production';
   if (devMode && (looksPlaceholder(user) || looksPlaceholder(pass))) {
-    console.warn("Using mock email transport (jsonTransport) due to missing/placeholder SMTP creds in dev mode.");
+    console.warn("⚠️ Using mock email transport (jsonTransport) due to missing/placeholder SMTP creds in dev mode.");
     return createTransport({ jsonTransport: true });
   }
 
   if (!user || !pass) {
-    console.warn("Email credentials missing. Using jsonTransport for development.");
+    console.warn("⚠️ Email credentials missing. Using jsonTransport for development.");
     return createTransport({ jsonTransport: true });
   }
 
   const secure = port === 465;
-  return createTransport({ host, port, secure, auth: { user, pass } });
+  const transport = createTransport({ host, port, secure, auth: { user, pass } });
+  console.log('✅ Real email transport created (SMTP)');
+  return transport;
 };
 
 const fromAddress = () => (process.env.SMTP_USER || process.env.Gmail || "no-reply@vhassacademy.com");
@@ -391,7 +401,15 @@ export const sendTransactMailAdmin = async (subject, data) => {
 };
 
 export const sendTransactMailUser = async (subject, data) => {
+  console.log('📧 sendTransactMailUser called:', { subject, userEmail: data.email });
   const transport = buildTransport();
+  console.log('📧 Email transport built, checking credentials...');
+  
+  // Check if using mock transport
+  if (transport.transporter && transport.transporter.name === 'JSONTransport') {
+    console.warn('⚠️ WARNING: Using mock email transport (jsonTransport). Emails will NOT be sent!');
+    console.warn('⚠️ Please check SMTP credentials in environment variables.');
+  }
 
   // Format amount
   const formattedAmount = data.amount ? `₹${Number(data.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'N/A';
@@ -520,10 +538,24 @@ export const sendTransactMailUser = async (subject, data) => {
 </html>
 `;
 
-  await transport.sendMail({
-    from: fromAddress(),
-    to: data.email,
-    subject,
-    html,
-  });
+  console.log('📧 Preparing to send email to user:', data.email);
+  console.log('📧 Email subject:', subject);
+  console.log('📧 From address:', fromAddress());
+  
+  try {
+    const result = await transport.sendMail({
+      from: fromAddress(),
+      to: data.email,
+      subject,
+      html,
+    });
+    console.log('✅ Email sent successfully to:', data.email);
+    console.log('📧 Email result:', result);
+    return result;
+  } catch (error) {
+    console.error('❌ Error sending email to user:', data.email);
+    console.error('❌ Email error:', error.message);
+    console.error('❌ Email error stack:', error.stack);
+    throw error;
+  }
 };

@@ -434,10 +434,19 @@ export const phonepeStatus = TryCatch(async (req, res) => {
         orderId: merchantOrderId
       };
       try {
+        console.log('📧 Attempting to send emails for course purchase:', {
+          userEmail: user.email,
+          course: course.title,
+          transactionId: transactionID
+        });
         await sendTransactMailAdmin("Someone bought your course", mailData);
+        console.log('✅ Admin email sent successfully');
         await sendTransactMailUser("Your course purchase was successful! Welcome aboard 🚀", mailData);
+        console.log('✅ User email sent successfully');
       } catch (e) {
-        console.error('Email send failed:', e.message);
+        console.error('❌ Email send failed:', e.message);
+        console.error('Email error stack:', e.stack);
+        console.error('Email error details:', e);
       }
     }
 

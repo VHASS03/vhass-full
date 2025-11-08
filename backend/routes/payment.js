@@ -91,11 +91,19 @@ router.post('/phonepe/webhook', async (req, res) => {
             };
             
             try {
+              console.log('📧 Attempting to send emails via webhook for course purchase:', {
+                userEmail: user.email,
+                course: course.title,
+                transactionId: transactionId || transaction.merchantOrderID
+              });
               await sendTransactMailAdmin("Someone bought your course", mailData);
+              console.log('✅ Admin email sent successfully via webhook');
               await sendTransactMailUser("Your course purchase was successful! Welcome aboard 🚀", mailData);
-              console.log('✅ Emails sent successfully for course purchase');
+              console.log('✅ User email sent successfully via webhook');
             } catch (emailErr) {
-              console.error('❌ Email send failed:', emailErr.message);
+              console.error('❌ Email send failed via webhook:', emailErr.message);
+              console.error('Email error stack:', emailErr.stack);
+              console.error('Email error details:', emailErr);
             }
           }
         } else if (user && transaction.workshopID) {
