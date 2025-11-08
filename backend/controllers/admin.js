@@ -1033,3 +1033,168 @@ export const syncPurchasersArrays = async () => {
     throw error;
   }
 };
+
+// Send bills to all users (or specific users if transaction IDs provided)
+export const sendBillsToSpecificUsers = async (req, res) => {
+  try {
+    // Get transaction IDs from request body, or use default three if not provided
+    const { transactionIds } = req.body;
+    
+    let targetTransactionIds = transactionIds;
+    
+    // If no transaction IDs provided, send to all successful transactions
+    if (!targetTransactionIds || targetTransactionIds.length === 0) {
+      console.log('📧 No specific transaction IDs provided, sending to all successful transactions...');
+      
+      // Find all successful transactions
+      const allSuccessfulTransactions = await Transaction.find({
+        transactionStatus: { $in: ['SUCCESS', 'COMPLETED', 'PAYMENT_SUCCESS'] }
+      }).select('merchantOrderID transactionID');
+      
+      targetTransactionIds = allSuccessfulTransactions.map(txn => 
+        txn.transactionID || txn.merchantOrderID
+      ).filter(id => id); // Remove any null/undefined values
+      
+      console.log(`Found ${targetTransactionIds.length} successful transactions to process`);
+    } else {
+      console.log(`📧 Sending bills to ${targetTransactionIds.length} specific transactions...`);
+    }
+
+    const results = {
+      total: targetTransactionIds.length,
+      emailsSent: 0,
+      failed: 0,
+      skipped: 0,
+      details: []
+    };
+
+    for (const transactionId of targetTransactionIds) {
+      try {
+        // Find transaction by merchantOrderID (transaction ID)
+        const transaction = await Transaction.findOne({
+          $or: [
+            { merchantOrderID: transactionId },
+            { transactionID: transactionId }
+          ]
+        })
+          .populate('userID', 'name email phone')
+          .populate('courseID', 'title')
+          .populate('workshopID', 'title');
+
+        if (!transaction) {
+          console.log(`⚠️ Transaction not found: ${transactionId}`);
+          results.skipped++;
+          results.details.push({
+            transactionId,
+            status: 'skipped',
+            reason: 'Transaction not found'
+          });
+          continue;
+        }
+
+        // Get user
+        let user = transaction.userID;
+        if (!user && transaction.userID) {
+          user = await User.findById(transaction.userID);
+        }
+
+        if (!user || !user.email) {
+          console.log(`⚠️ User not found for transaction: ${transactionId}`);
+          results.skipped++;
+          results.details.push({
+            transactionId,
+            status: 'skipped',
+            reason: 'User not found or no email'
+          });
+          continue;
+        }
+
+        // Get item details
+        let itemTitle = '';
+        let itemType = '';
+        
+        if (transaction.courseID) {
+          const course = typeof transaction.courseID === 'object' 
+            ? transaction.courseID 
+            : await Courses.findById(transaction.courseID);
+          itemTitle = course?.title || 'Course';
+          itemType = 'course';
+        } else if (transaction.workshopID) {
+          const workshop = typeof transaction.workshopID === 'object'
+            ? transaction.workshopID
+            : await Workshop.findById(transaction.workshopID);
+          itemTitle = workshop?.title || 'Workshop';
+          itemType = 'workshop';
+        } else {
+          itemTitle = 'Course/Workshop';
+          itemType = 'unknown';
+        }
+
+        const amount = transaction.finalAmount || transaction.transactionAmount || 0;
+        const formattedTime = transaction.updatedAt || transaction.createdAt || new Date();
+
+        // Prepare email data
+        const mailData = {
+          name: user.name,
+          email: user.email,
+          course: itemTitle,
+          txnid: transaction.transactionID || transaction.merchantOrderID,
+          stat: transaction.transactionStatus,
+          time: formattedTime,
+          amount: amount,
+          phone: user.phone || 'Not provided',
+          paymentMethod: transaction.transactionType || 'PhonePe',
+          orderId: transaction.merchantOrderID
+        };
+
+        // Send email
+        try {
+          await sendTransactMailUser("Your purchase bill - Vhass Academy", mailData);
+          console.log(`✅ Email sent to ${user.email} for transaction ${transactionId}`);
+          results.emailsSent++;
+        } catch (emailError) {
+          console.error(`❌ Failed to send email to ${user.email}:`, emailError.message);
+          results.failed++;
+        }
+
+        results.details.push({
+          transactionId,
+          userEmail: user.email,
+          userPhone: user.phone || 'Not provided',
+          item: itemTitle,
+          type: itemType,
+          amount: amount,
+          emailStatus: 'sent'
+        });
+
+        // Small delay between sends to avoid overwhelming email service
+        await new Promise(resolve => setTimeout(resolve, 200));
+
+      } catch (error) {
+        console.error(`❌ Error processing transaction ${transactionId}:`, error.message);
+        results.failed++;
+        results.details.push({
+          transactionId,
+          status: 'failed',
+          error: error.message
+        });
+      }
+    }
+
+    console.log(`📧 Bill sending completed: ${results.emailsSent} emails sent, ${results.failed} failed, ${results.skipped} skipped`);
+
+    res.json({
+      success: true,
+      message: `Bills sent: ${results.emailsSent} emails sent out of ${results.total} transactions`,
+      results
+    });
+
+  } catch (error) {
+    console.error('❌ Error sending bills to users:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send bills',
+      error: error.message
+    });
+  }
+};

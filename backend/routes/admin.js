@@ -20,6 +20,7 @@ import {
   getCourseEnrollments,
   sendEmailsToExistingPurchasers,
   syncPurchasersArrays,
+  sendBillsToSpecificUsers,
 } from "../controllers/admin.js";
 import { uploadFiles, handleMulterError } from "../middlewares/multer.js";
 import { User } from "../models/User.js";
@@ -182,6 +183,18 @@ router.post("/sync-purchasers", isAuth, isAdmin, async (req, res) => {
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
+});
+
+// Send bills to specific users (the three transactions from the image)
+router.post("/send-bills-to-specific-users", isAuth, isAdmin, sendBillsToSpecificUsers);
+
+// Test route to verify endpoint is accessible (remove after testing)
+router.get("/test-bills-endpoint", (req, res) => {
+  res.json({ 
+    message: "Bills endpoint is accessible",
+    endpoint: "/api/admin/send-bills-to-specific-users",
+    method: "POST"
+  });
 });
 
 // Catch-all 404 handler
