@@ -19,6 +19,7 @@ import {
   getAllEnrollments,
   getCourseEnrollments,
   sendEmailsToExistingPurchasers,
+  syncPurchasersArrays,
 } from "../controllers/admin.js";
 import { uploadFiles, handleMulterError } from "../middlewares/multer.js";
 import { User } from "../models/User.js";
@@ -172,6 +173,16 @@ router.get("/course/:courseId/enrollments", isAuth, isAdmin, getCourseEnrollment
 
 // Send emails to existing purchasers
 router.post("/send-emails-to-purchasers", isAuth, isAdmin, sendEmailsToExistingPurchasers);
+
+// Sync purchasers arrays (helper endpoint)
+router.post("/sync-purchasers", isAuth, isAdmin, async (req, res) => {
+  try {
+    await syncPurchasersArrays();
+    res.json({ success: true, message: "Purchasers arrays synced successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
 
 // Catch-all 404 handler
 router.use((req, res) => {

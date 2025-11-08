@@ -809,7 +809,7 @@ export default function AdminDashboard() {
                     <p className="text-sm mb-2" style={{ color: "#B88AFF" }}>{course.duration} hours</p>
                     <p className="text-xl font-bold mb-2" style={{ color: "#B88AFF" }}>₹{course.price}</p>
                     <p className="text-sm mb-4" style={{ color: "#10b981" }}>
-                      {enrollments.filter(e => e.course?._id === course._id).length} enrollments
+                      {course.enrollmentCount || course.purchasersCount || enrollments.filter(e => e.course?._id === course._id || e.course === course._id).length} enrollments
                     </p>
                     <div className="flex gap-2">
                       <Button

@@ -403,8 +403,31 @@ export const updateUser = async (req, res, next) => {
 // Enhanced admin functions
 export const getAllCourses = async (req, res) => {
   try {
-    const courses = await Courses.find().populate('createdBy', 'name email');
-    res.json({ courses });
+    const courses = await Courses.find().populate('createdBy', 'name email').populate('purchasers', 'name email');
+    
+    // Add enrollment count to each course
+    const coursesWithEnrollments = await Promise.all(courses.map(async (course) => {
+      // Get enrollment count from purchasers array
+      const enrollmentCount = course.purchasers ? course.purchasers.length : 0;
+      
+      // Also get count from transactions as backup
+      const transactionCount = await Transaction.countDocuments({
+        courseID: course._id,
+        transactionStatus: { $in: ['SUCCESS', 'COMPLETED', 'PAYMENT_SUCCESS'] }
+      });
+      
+      // Use the higher count (in case purchasers array is not synced)
+      const finalCount = Math.max(enrollmentCount, transactionCount);
+      
+      return {
+        ...course.toObject(),
+        enrollmentCount: finalCount,
+        purchasersCount: enrollmentCount,
+        transactionCount: transactionCount
+      };
+    }));
+    
+    res.json({ courses: coursesWithEnrollments });
   } catch (error) {
     console.error('Error getting courses:', error);
     res.status(500).json({
@@ -793,6 +816,10 @@ export const sendEmailsToExistingPurchasers = async (req, res) => {
   try {
     console.log('📧 Starting bulk email send to existing purchasers...');
     
+    // First, sync purchasers arrays to ensure data is accurate
+    console.log('🔄 Syncing purchasers arrays...');
+    await syncPurchasersArrays();
+    
     // Find all successful transactions
     const successfulTransactions = await Transaction.find({
       transactionStatus: { $in: ['SUCCESS', 'COMPLETED', 'PAYMENT_SUCCESS'] }
@@ -815,7 +842,12 @@ export const sendEmailsToExistingPurchasers = async (req, res) => {
     // Process each transaction
     for (const transaction of successfulTransactions) {
       try {
-        const user = transaction.userID;
+        // Get user - try populated first, then fetch if needed
+        let user = transaction.userID;
+        if (!user && transaction.userID) {
+          user = await User.findById(transaction.userID);
+        }
+        
         if (!user || !user.email) {
           console.log(`⚠️ Skipping transaction ${transaction.merchantOrderID} - no user or email`);
           results.skipped++;
@@ -834,7 +866,9 @@ export const sendEmailsToExistingPurchasers = async (req, res) => {
         // Handle course purchase
         if (transaction.courseID) {
           const course = transaction.courseID;
-          itemTitle = course.title || 'Course';
+          // If courseID is just an ID, fetch the full course
+          const courseObj = typeof course === 'object' ? course : await Courses.findById(course);
+          itemTitle = courseObj?.title || 'Course';
           itemType = 'course';
           
           mailData = {
@@ -866,7 +900,9 @@ export const sendEmailsToExistingPurchasers = async (req, res) => {
         // Handle workshop purchase
         else if (transaction.workshopID) {
           const workshop = transaction.workshopID;
-          itemTitle = workshop.title || 'Workshop';
+          // If workshopID is just an ID, fetch the full workshop
+          const workshopObj = typeof workshop === 'object' ? workshop : await Workshop.findById(workshop);
+          itemTitle = workshopObj?.title || 'Workshop';
           itemType = 'workshop';
           
           mailData = {
@@ -932,5 +968,68 @@ export const sendEmailsToExistingPurchasers = async (req, res) => {
       message: 'Failed to send emails to existing purchasers',
       error: error.message
     });
+  }
+};
+
+// Helper function to sync purchasers arrays for courses and workshops
+export const syncPurchasersArrays = async () => {
+  try {
+    console.log('🔄 Syncing purchasers arrays...');
+    
+    // Sync course purchasers
+    const courseTransactions = await Transaction.find({
+      courseID: { $exists: true, $ne: null },
+      transactionStatus: { $in: ['SUCCESS', 'COMPLETED', 'PAYMENT_SUCCESS'] }
+    }).select('courseID userID');
+    
+    const coursePurchasersMap = new Map();
+    courseTransactions.forEach(txn => {
+      if (txn.courseID && txn.userID) {
+        const courseId = String(txn.courseID);
+        if (!coursePurchasersMap.has(courseId)) {
+          coursePurchasersMap.set(courseId, new Set());
+        }
+        coursePurchasersMap.get(courseId).add(String(txn.userID));
+      }
+    });
+    
+    // Update each course's purchasers array
+    for (const [courseId, userIds] of coursePurchasersMap.entries()) {
+      await Courses.findByIdAndUpdate(courseId, {
+        purchasers: Array.from(userIds)
+      });
+    }
+    
+    console.log(`✅ Synced purchasers for ${coursePurchasersMap.size} courses`);
+    
+    // Sync workshop purchasers
+    const workshopTransactions = await Transaction.find({
+      workshopID: { $exists: true, $ne: null },
+      transactionStatus: { $in: ['SUCCESS', 'COMPLETED', 'PAYMENT_SUCCESS'] }
+    }).select('workshopID userID');
+    
+    const workshopPurchasersMap = new Map();
+    workshopTransactions.forEach(txn => {
+      if (txn.workshopID && txn.userID) {
+        const workshopId = String(txn.workshopID);
+        if (!workshopPurchasersMap.has(workshopId)) {
+          workshopPurchasersMap.set(workshopId, new Set());
+        }
+        workshopPurchasersMap.get(workshopId).add(String(txn.userID));
+      }
+    });
+    
+    // Update each workshop's purchasers array
+    for (const [workshopId, userIds] of workshopPurchasersMap.entries()) {
+      await Workshop.findByIdAndUpdate(workshopId, {
+        purchasers: Array.from(userIds)
+      });
+    }
+    
+    console.log(`✅ Synced purchasers for ${workshopPurchasersMap.size} workshops`);
+    
+  } catch (error) {
+    console.error('❌ Error syncing purchasers arrays:', error);
+    throw error;
   }
 };
