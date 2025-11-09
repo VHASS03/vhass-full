@@ -295,15 +295,15 @@ export const sendTransactMailAdmin = async (subject, data) => {
   const transport = buildTransport();
   
   // Check if using mock transport - improved detection
-  const isMockTransport = transport.transporter && (
-    transport.transporter.name === 'JSONTransport' ||
-    transport.transporter.transporter === 'JSONTransport' ||
-    !transport.transporter.transporter
-  );
+  // Real SMTP transports have transporter.name === 'SMTP' or 'SMTPPool' or 'SMTPS'
+  // JSONTransport has transporter.name === 'JSONTransport'
+  const transportName = transport.transporter?.name || '';
+  const isMockTransport = transportName === 'JSONTransport';
   
   if (isMockTransport) {
     const errorMsg = '⚠️ WARNING: Using mock email transport (jsonTransport). Emails will NOT be sent! Please check SMTP credentials in environment variables.';
     console.error('❌', errorMsg);
+    console.error('❌ Transport name:', transportName);
     console.error('❌ SMTP Config:', {
       host: process.env.SMTP_HOST,
       port: process.env.SMTP_PORT,
@@ -313,6 +313,8 @@ export const sendTransactMailAdmin = async (subject, data) => {
     });
     throw new Error(errorMsg);
   }
+  
+  console.log('✅ Using real SMTP transport:', transportName);
 
   const primaryEmail = "vhass0310@gmail.com";
   const bccEmails = ["info@vhassacademy.com", "kandregulanuraj@gmail.com"];
@@ -482,15 +484,15 @@ export const sendTransactMailUser = async (subject, data) => {
   console.log('📧 Email transport built, checking credentials...');
   
   // Check if using mock transport - improved detection
-  const isMockTransport = transport.transporter && (
-    transport.transporter.name === 'JSONTransport' ||
-    transport.transporter.transporter === 'JSONTransport' ||
-    !transport.transporter.transporter
-  );
+  // Real SMTP transports have transporter.name === 'SMTP' or 'SMTPPool' or 'SMTPS'
+  // JSONTransport has transporter.name === 'JSONTransport'
+  const transportName = transport.transporter?.name || '';
+  const isMockTransport = transportName === 'JSONTransport';
   
   if (isMockTransport) {
     const errorMsg = '⚠️ WARNING: Using mock email transport (jsonTransport). Emails will NOT be sent! Please check SMTP credentials in environment variables.';
     console.error('❌', errorMsg);
+    console.error('❌ Transport name:', transportName);
     console.error('❌ SMTP Config:', {
       host: process.env.SMTP_HOST,
       port: process.env.SMTP_PORT,
@@ -500,6 +502,8 @@ export const sendTransactMailUser = async (subject, data) => {
     });
     throw new Error(errorMsg);
   }
+  
+  console.log('✅ Using real SMTP transport:', transportName);
 
   // Format amount
   const formattedAmount = data.amount ? `₹${Number(data.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'N/A';
