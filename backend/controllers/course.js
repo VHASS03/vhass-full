@@ -439,14 +439,31 @@ export const phonepeStatus = TryCatch(async (req, res) => {
           course: course.title,
           transactionId: transactionID
         });
-        await sendTransactMailAdmin("Someone bought your course", mailData);
-        console.log('✅ Admin email sent successfully');
-        await sendTransactMailUser("Your course purchase was successful! Welcome aboard 🚀", mailData);
-        console.log('✅ User email sent successfully');
+        
+        // Send admin email
+        try {
+          await sendTransactMailAdmin("Someone bought your course", mailData);
+          console.log('✅ Admin email sent successfully');
+        } catch (adminEmailErr) {
+          console.error('❌ CRITICAL: Admin email send failed:', adminEmailErr.message);
+          console.error('Admin email error stack:', adminEmailErr.stack);
+          // Don't throw - continue to try user email
+        }
+        
+        // Send user email
+        try {
+          await sendTransactMailUser("Your course purchase was successful! Welcome aboard 🚀", mailData);
+          console.log('✅ User email sent successfully');
+        } catch (userEmailErr) {
+          console.error('❌ CRITICAL: User email send failed:', userEmailErr.message);
+          console.error('User email error stack:', userEmailErr.stack);
+          // Log but don't fail the payment
+        }
       } catch (e) {
-        console.error('❌ Email send failed:', e.message);
+        console.error('❌ CRITICAL: Email send failed:', e.message);
         console.error('Email error stack:', e.stack);
         console.error('Email error details:', e);
+        // Don't throw - payment succeeded, email failure shouldn't fail payment
       }
     }
 

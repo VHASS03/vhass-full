@@ -5,33 +5,53 @@ import { createTransport } from "nodemailer";
 const buildTransport = () => {
   const host = process.env.SMTP_HOST || "smtp.gmail.com";
   const port = Number(process.env.SMTP_PORT || 465);
-  const user = process.env.SMTP_USER || process.env.Gmail;
-  const pass = process.env.SMTP_PASS || process.env.Password;
+  // Trim whitespace and remove trailing commas from credentials
+  const user = (process.env.SMTP_USER || process.env.Gmail || '').trim().replace(/,$/, '');
+  const pass = (process.env.SMTP_PASS || process.env.Password || '').trim().replace(/,$/, '');
 
   console.log('📧 Building email transport:', {
     host,
     port,
     hasUser: !!user,
     hasPass: !!pass,
-    user: user ? `${user.substring(0, 3)}***` : 'missing'
+    user: user ? `${user.substring(0, 3)}***` : 'missing',
+    nodeEnv: process.env.NODE_ENV || 'development'
   });
 
   const looksPlaceholder = (val) => !val || /your-.*password|your-email|example\.com/i.test(String(val));
   const devMode = (process.env.NODE_ENV || 'development') !== 'production';
+  
   if (devMode && (looksPlaceholder(user) || looksPlaceholder(pass))) {
     console.warn("⚠️ Using mock email transport (jsonTransport) due to missing/placeholder SMTP creds in dev mode.");
     return createTransport({ jsonTransport: true });
   }
 
   if (!user || !pass) {
-    console.warn("⚠️ Email credentials missing. Using jsonTransport for development.");
+    console.error("❌ Email credentials missing. Using jsonTransport.");
+    console.error("❌ SMTP_USER:", user ? 'SET' : 'MISSING');
+    console.error("❌ SMTP_PASS:", pass ? 'SET' : 'MISSING');
     return createTransport({ jsonTransport: true });
   }
 
   const secure = port === 465;
-  const transport = createTransport({ host, port, secure, auth: { user, pass } });
-  console.log('✅ Real email transport created (SMTP)');
-  return transport;
+  try {
+    const transport = createTransport({ 
+      host, 
+      port, 
+      secure, 
+      auth: { user, pass },
+      // Add connection timeout
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000
+    });
+    console.log('✅ Real email transport created (SMTP)');
+    return transport;
+  } catch (error) {
+    console.error('❌ Failed to create email transport:', error.message);
+    console.error('❌ Falling back to jsonTransport');
+    return createTransport({ jsonTransport: true });
+  }
 };
 
 const fromAddress = () => (process.env.SMTP_USER || process.env.Gmail || "no-reply@vhassacademy.com");
@@ -264,7 +284,35 @@ export const sendContactAck = async (data) => {
 };
 
 export const sendTransactMailAdmin = async (subject, data) => {
+  console.log('📧 sendTransactMailAdmin called:', { subject });
+  
+  // Validate email data
+  if (!data) {
+    console.error('❌ Email data missing:', data);
+    throw new Error('Email data is missing');
+  }
+  
   const transport = buildTransport();
+  
+  // Check if using mock transport - improved detection
+  const isMockTransport = transport.transporter && (
+    transport.transporter.name === 'JSONTransport' ||
+    transport.transporter.transporter === 'JSONTransport' ||
+    !transport.transporter.transporter
+  );
+  
+  if (isMockTransport) {
+    const errorMsg = '⚠️ WARNING: Using mock email transport (jsonTransport). Emails will NOT be sent! Please check SMTP credentials in environment variables.';
+    console.error('❌', errorMsg);
+    console.error('❌ SMTP Config:', {
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      user: process.env.SMTP_USER ? `${process.env.SMTP_USER.substring(0, 3)}***` : 'MISSING',
+      hasPass: !!process.env.SMTP_PASS,
+      nodeEnv: process.env.NODE_ENV
+    });
+    throw new Error(errorMsg);
+  }
 
   const primaryEmail = "vhass0310@gmail.com";
   const bccEmails = ["info@vhassacademy.com", "kandregulanuraj@gmail.com"];
@@ -391,24 +439,66 @@ export const sendTransactMailAdmin = async (subject, data) => {
 </html>
 `;
 
-  await transport.sendMail({
-    from: fromAddress(),
-    to: primaryEmail,
-    bcc: bccEmails,
-    subject,
-    html,
-  });
+  console.log('📧 Preparing to send admin email');
+  console.log('📧 To:', primaryEmail);
+  console.log('📧 BCC:', bccEmails);
+  console.log('📧 Subject:', subject);
+  
+  try {
+    const result = await transport.sendMail({
+      from: fromAddress(),
+      to: primaryEmail,
+      bcc: bccEmails,
+      subject,
+      html,
+    });
+    console.log('✅ Admin email sent successfully');
+    console.log('📧 Email result:', {
+      messageId: result.messageId,
+      accepted: result.accepted,
+      rejected: result.rejected
+    });
+    return result;
+  } catch (error) {
+    console.error('❌ CRITICAL: Error sending admin email');
+    console.error('❌ Email error message:', error.message);
+    console.error('❌ Email error code:', error.code);
+    console.error('❌ Email error command:', error.command);
+    console.error('❌ Email error stack:', error.stack);
+    throw error;
+  }
 };
 
 export const sendTransactMailUser = async (subject, data) => {
   console.log('📧 sendTransactMailUser called:', { subject, userEmail: data.email });
+  
+  // Validate email data
+  if (!data || !data.email) {
+    console.error('❌ Email data missing or invalid:', data);
+    throw new Error('Email data is missing or invalid');
+  }
+  
   const transport = buildTransport();
   console.log('📧 Email transport built, checking credentials...');
   
-  // Check if using mock transport
-  if (transport.transporter && transport.transporter.name === 'JSONTransport') {
-    console.warn('⚠️ WARNING: Using mock email transport (jsonTransport). Emails will NOT be sent!');
-    console.warn('⚠️ Please check SMTP credentials in environment variables.');
+  // Check if using mock transport - improved detection
+  const isMockTransport = transport.transporter && (
+    transport.transporter.name === 'JSONTransport' ||
+    transport.transporter.transporter === 'JSONTransport' ||
+    !transport.transporter.transporter
+  );
+  
+  if (isMockTransport) {
+    const errorMsg = '⚠️ WARNING: Using mock email transport (jsonTransport). Emails will NOT be sent! Please check SMTP credentials in environment variables.';
+    console.error('❌', errorMsg);
+    console.error('❌ SMTP Config:', {
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      user: process.env.SMTP_USER ? `${process.env.SMTP_USER.substring(0, 3)}***` : 'MISSING',
+      hasPass: !!process.env.SMTP_PASS,
+      nodeEnv: process.env.NODE_ENV
+    });
+    throw new Error(errorMsg);
   }
 
   // Format amount
@@ -541,21 +631,46 @@ export const sendTransactMailUser = async (subject, data) => {
   console.log('📧 Preparing to send email to user:', data.email);
   console.log('📧 Email subject:', subject);
   console.log('📧 From address:', fromAddress());
+  console.log('📧 SMTP Config:', {
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
+    user: process.env.SMTP_USER,
+    hasPass: !!process.env.SMTP_PASS
+  });
   
   try {
-    const result = await transport.sendMail({
+    const mailOptions = {
       from: fromAddress(),
       to: data.email,
       subject,
       html,
+    };
+    
+    console.log('📧 Sending email with options:', {
+      from: mailOptions.from,
+      to: mailOptions.to,
+      subject: mailOptions.subject,
+      htmlLength: mailOptions.html?.length || 0
     });
+    
+    const result = await transport.sendMail(mailOptions);
     console.log('✅ Email sent successfully to:', data.email);
-    console.log('📧 Email result:', result);
+    console.log('📧 Email result:', {
+      messageId: result.messageId,
+      accepted: result.accepted,
+      rejected: result.rejected,
+      response: result.response
+    });
     return result;
   } catch (error) {
-    console.error('❌ Error sending email to user:', data.email);
-    console.error('❌ Email error:', error.message);
+    console.error('❌ CRITICAL: Error sending email to user:', data.email);
+    console.error('❌ Email error message:', error.message);
+    console.error('❌ Email error code:', error.code);
+    console.error('❌ Email error command:', error.command);
     console.error('❌ Email error stack:', error.stack);
+    console.error('❌ Full error object:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+    
+    // Re-throw the error so calling code knows email failed
     throw error;
   }
 };

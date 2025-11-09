@@ -96,14 +96,31 @@ router.post('/phonepe/webhook', async (req, res) => {
                 course: course.title,
                 transactionId: transactionId || transaction.merchantOrderID
               });
-              await sendTransactMailAdmin("Someone bought your course", mailData);
-              console.log('✅ Admin email sent successfully via webhook');
-              await sendTransactMailUser("Your course purchase was successful! Welcome aboard 🚀", mailData);
-              console.log('✅ User email sent successfully via webhook');
+              
+              // Send admin email
+              try {
+                await sendTransactMailAdmin("Someone bought your course", mailData);
+                console.log('✅ Admin email sent successfully via webhook');
+              } catch (adminEmailErr) {
+                console.error('❌ CRITICAL: Admin email send failed via webhook:', adminEmailErr.message);
+                console.error('Admin email error stack:', adminEmailErr.stack);
+                // Don't throw - continue to try user email
+              }
+              
+              // Send user email
+              try {
+                await sendTransactMailUser("Your course purchase was successful! Welcome aboard 🚀", mailData);
+                console.log('✅ User email sent successfully via webhook');
+              } catch (userEmailErr) {
+                console.error('❌ CRITICAL: User email send failed via webhook:', userEmailErr.message);
+                console.error('User email error stack:', userEmailErr.stack);
+                // Log but don't fail the payment
+              }
             } catch (emailErr) {
-              console.error('❌ Email send failed via webhook:', emailErr.message);
+              console.error('❌ CRITICAL: Email send failed via webhook:', emailErr.message);
               console.error('Email error stack:', emailErr.stack);
               console.error('Email error details:', emailErr);
+              // Don't throw - payment succeeded, email failure shouldn't fail payment
             }
           }
         } else if (user && transaction.workshopID) {
@@ -138,11 +155,32 @@ router.post('/phonepe/webhook', async (req, res) => {
             };
             
             try {
-              await sendTransactMailAdmin("Someone registered for your workshop", mailData);
-              await sendTransactMailUser("Your workshop registration was successful! Welcome aboard 🚀", mailData);
-              console.log('✅ Emails sent successfully for workshop registration');
+              console.log('📧 Attempting to send emails via webhook for workshop registration:', {
+                userEmail: user.email,
+                workshop: workshop.title,
+                transactionId: transactionId || transaction.merchantOrderID
+              });
+              
+              // Send admin email
+              try {
+                await sendTransactMailAdmin("Someone registered for your workshop", mailData);
+                console.log('✅ Admin email sent successfully for workshop');
+              } catch (adminEmailErr) {
+                console.error('❌ CRITICAL: Admin email send failed for workshop:', adminEmailErr.message);
+                console.error('Admin email error stack:', adminEmailErr.stack);
+              }
+              
+              // Send user email
+              try {
+                await sendTransactMailUser("Your workshop registration was successful! Welcome aboard 🚀", mailData);
+                console.log('✅ User email sent successfully for workshop');
+              } catch (userEmailErr) {
+                console.error('❌ CRITICAL: User email send failed for workshop:', userEmailErr.message);
+                console.error('User email error stack:', userEmailErr.stack);
+              }
             } catch (emailErr) {
-              console.error('❌ Email send failed:', emailErr.message);
+              console.error('❌ CRITICAL: Email send failed for workshop:', emailErr.message);
+              console.error('Email error stack:', emailErr.stack);
             }
           }
         } else {

@@ -39,4 +39,4 @@ services:
       - key: SMTP_USER
         value: info@vhassacademy.com
       - key: SMTP_PASS
-        value: Hemanth@123,
+        value: Hemanth@123
