@@ -50,26 +50,31 @@ const buildTransport = async () => {
       port, 
       secure, 
       auth: { user, pass },
-      // Add connection timeout
-      connectionTimeout: 15000,
-      greetingTimeout: 15000,
-      socketTimeout: 15000,
+      // Reduced connection timeouts to prevent hanging
+      connectionTimeout: 10000, // 10 seconds
+      greetingTimeout: 5000,   // 5 seconds
+      socketTimeout: 10000,     // 10 seconds
       // Add debug logging
       debug: true,
       logger: true
     });
     
-    // Verify connection
+    // Verify connection with timeout (non-blocking - don't wait too long)
+    // Some SMTP servers don't support verify but can still send emails
     try {
-      await transport.verify();
+      const verifyPromise = transport.verify();
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('SMTP verify timeout')), 5000)
+      );
+      await Promise.race([verifyPromise, timeoutPromise]);
       console.log('✅ SMTP connection verified successfully');
     } catch (verifyError) {
-      console.error('❌ SMTP verification failed:', verifyError.message);
-      console.error('❌ Verify error code:', verifyError.code);
-      console.error('❌ Verify error command:', verifyError.command);
-      // Don't return mock transport - let it try to send anyway
-      // Some SMTP servers don't support verify but can still send emails
-      console.log('⚠️ Continuing despite verification failure - some SMTP servers skip verify');
+      if (verifyError.message === 'SMTP verify timeout') {
+        console.warn('⚠️ SMTP verify timed out after 5s - continuing anyway (some servers skip verify)');
+      } else {
+        console.warn('⚠️ SMTP verification failed:', verifyError.message);
+        console.warn('⚠️ Continuing anyway - some SMTP servers skip verify but can still send emails');
+      }
     }
     
     console.log('✅ Real email transport created (SMTP)');
@@ -261,13 +266,20 @@ export const sendContactMail = async (data) => {
   </body>
 </html>`;
 
-  await transport.sendMail({
+  // Add timeout to prevent hanging
+  const sendPromise = transport.sendMail({
     from: fromAddress(),
     to: "info@vhassacademy.com",
     subject: `New contact message from ${name || email || "Website"}`,
     replyTo: email,
     html,
   });
+  
+  const timeoutPromise = new Promise((_, reject) => 
+    setTimeout(() => reject(new Error('Email send timeout after 30 seconds')), 30000)
+  );
+  
+  await Promise.race([sendPromise, timeoutPromise]);
 };
 
 // Send acknowledgement email back to the sender of the contact form
@@ -295,7 +307,7 @@ export const sendContactAck = async (data) => {
     <div class="container">
       <h1>Thanks${name ? `, ${name}` : ''} — we received your message</h1>
       <p>Our team at VHASS Academy has received your inquiry. We typically reply within 24–48 hours.</p>
-      <p>If you didn’t submit this request, please ignore this email.</p>
+      <p>If you didn't submit this request, please ignore this email.</p>
       <div class="footer">
         <p>✉️ info@vhassacademy.com</p>
         <p>📞 +91 8985380266</p>
@@ -304,12 +316,19 @@ export const sendContactAck = async (data) => {
   </body>
 </html>`;
 
-  await transport.sendMail({
+  // Add timeout to prevent hanging
+  const sendPromise = transport.sendMail({
     from: fromAddress(),
     to: email,
     subject: "We received your message — VHASS Academy",
     html,
   });
+  
+  const timeoutPromise = new Promise((_, reject) => 
+    setTimeout(() => reject(new Error('Email send timeout after 30 seconds')), 30000)
+  );
+  
+  await Promise.race([sendPromise, timeoutPromise]);
 };
 
 export const sendTransactMailAdmin = async (subject, data) => {
