@@ -802,21 +802,28 @@ export const contactMessage = async (req, res) => {
     // Send emails asynchronously (fire-and-forget) after response is sent
     // This prevents blocking the user's request
     setImmediate(async () => {
+      console.log('📧 Starting async email sending for contact form:', { name, email });
+      
       // Send main contact email with timeout handling
       try {
         await sendContactMail({ name, email, message });
-        console.log('✅ Contact email sent successfully');
+        console.log('✅ Contact email sent successfully to info@vhassacademy.com and vhass0310@gmail.com');
       } catch (emailError) {
-        console.error('❌ Contact email send failed:', emailError?.message || emailError);
+        console.error('❌ CRITICAL: Contact email send failed!');
+        console.error('❌ Error message:', emailError?.message);
+        console.error('❌ Error code:', emailError?.code);
+        console.error('❌ Error stack:', emailError?.stack);
+        console.error('❌ Full error:', JSON.stringify(emailError, Object.getOwnPropertyNames(emailError)));
         // Log but don't fail - email is sent asynchronously
       }
       
       // Fire-and-forget acknowledgement to sender (non-blocking, with timeout)
       try { 
         await sendContactAck({ name, email });
-        console.log('✅ Contact acknowledgement email sent successfully');
+        console.log('✅ Contact acknowledgement email sent successfully to:', email);
       } catch (ackError) {
         console.error('❌ Contact acknowledgement email failed:', ackError?.message || ackError);
+        console.error('❌ Acknowledgement error stack:', ackError?.stack);
         // Ignore acknowledgement failures
       }
     });

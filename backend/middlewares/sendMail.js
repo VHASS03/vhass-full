@@ -288,9 +288,15 @@ export const sendContactMail = async (data) => {
   </body>
 </html>`;
 
+  // Send to multiple recipients to ensure delivery
+  const recipients = [
+    "info@vhassacademy.com",
+    "vhass0310@gmail.com"  // Add backup recipient
+  ];
+  
   const mailOptions = {
     from: fromAddress(),
-    to: "info@vhassacademy.com",
+    to: recipients.join(', '), // Send to multiple recipients
     subject: `New contact message from ${name || email || "Website"}`,
     replyTo: email,
     html,
@@ -299,6 +305,7 @@ export const sendContactMail = async (data) => {
   console.log('📧 Attempting to send contact email:', {
     from: mailOptions.from,
     to: mailOptions.to,
+    recipients: recipients,
     subject: mailOptions.subject,
     transportType: transportName
   });
