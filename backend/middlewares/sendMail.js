@@ -5,15 +5,13 @@ import { createTransport } from "nodemailer";
 export const buildTransport = async () => {
   const host = process.env.SMTP_HOST || "smtp.gmail.com";
   const port = Number(process.env.SMTP_PORT || 465);
-  // Trim whitespace only - preserve password exactly as specified (including trailing comma if present)
-  // The comma might be part of the actual password from Hostinger
+  // Trim whitespace from credentials
   const rawUser = (process.env.SMTP_USER || process.env.Gmail || '').trim();
   const rawPass = (process.env.SMTP_PASS || process.env.Password || '').trim();
   
-  // Keep password exactly as specified - don't remove trailing comma
-  // The comma might be part of the actual password from Hostinger
+  // Remove any trailing commas or spaces that might have been accidentally added
   const user = rawUser;
-  const pass = rawPass;
+  const pass = rawPass.replace(/[, ]+$/, ''); // Remove trailing commas and spaces
 
   console.log('📧 Building email transport:', {
     host,
