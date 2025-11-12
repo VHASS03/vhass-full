@@ -36,13 +36,27 @@ body::before {
 /* Gradient Animated Tag Box */
 .tag-box {
   position: relative;
-  width: 18rem;
-  height: 2.5rem;
+  width: 12rem;
+  height: 2rem;
   border-radius: 50px;
   background: linear-gradient(to right, #656565, #7f42a7, #6600c5, #5300a0, #757575, #656565);
   background-size: 200%;
   animation: landing-page-animationGradient 2.5s linear infinite;
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+@media (min-width: 640px) {
+  .tag-box {
+    width: 15rem;
+    height: 2.25rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .tag-box {
+    width: 18rem;
+    height: 2.5rem;
+  }
 }
 
 .landing-page .tag-box .tag {
@@ -59,6 +73,19 @@ body::before {
   font-weight: 500;
   letter-spacing: 0.1em;
   font-family: "Times New Roman", Times, serif;
+  font-size: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .landing-page .tag-box .tag {
+    font-size: 0.875rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .landing-page .tag-box .tag {
+    font-size: 1rem;
+  }
 }
 
 .landing-page .tag-box .tag:hover {

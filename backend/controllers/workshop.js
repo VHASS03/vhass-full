@@ -317,22 +317,51 @@ export const phonepeStatus = TryCatch(async (req, res) => {
       orderId: merchantOrderId
     };
 
-    await sendTransactMailAdmin("Someone registered for your workshop", data);
-
-    const data_user = {
-      name: user.name,
-      email: user.email,
-      course: workshop.title,
-      txnid: transactionID,
-      stat: transactionStatus,
-      time: updatedTxn.updatedAt,
-      amount: updatedTxn.finalAmount || updatedTxn.transactionAmount || 0,
-      phone: user.phone || 'Not provided',
-      paymentMethod: transactionMode || 'PhonePe',
-      orderId: merchantOrderId
-    };
-
-    await sendTransactMailUser("Your workshop registration was successful! Welcome aboard 🚀", data_user);
+    // Send email notifications
+    try {
+      console.log('📧 Attempting to send emails for workshop registration:', {
+        userEmail: user.email,
+        workshop: workshop.title,
+        transactionId: transactionID
+      });
+      
+      // Send admin email
+      try {
+        await sendTransactMailAdmin("Someone registered for your workshop", data);
+        console.log('✅ Admin email sent successfully for workshop');
+      } catch (adminEmailErr) {
+        console.error('❌ CRITICAL: Admin email send failed for workshop:', adminEmailErr.message);
+        console.error('Admin email error stack:', adminEmailErr.stack);
+        // Don't throw - continue to try user email
+      }
+      
+      // Send user email
+      try {
+        const data_user = {
+          name: user.name,
+          email: user.email,
+          course: workshop.title,
+          txnid: transactionID,
+          stat: transactionStatus,
+          time: updatedTxn.updatedAt,
+          amount: updatedTxn.finalAmount || updatedTxn.transactionAmount || 0,
+          phone: user.phone || 'Not provided',
+          paymentMethod: transactionMode || 'PhonePe',
+          orderId: merchantOrderId
+        };
+        await sendTransactMailUser("Your workshop registration was successful! Welcome aboard 🚀", data_user);
+        console.log('✅ User email sent successfully for workshop');
+      } catch (userEmailErr) {
+        console.error('❌ CRITICAL: User email send failed for workshop:', userEmailErr.message);
+        console.error('User email error stack:', userEmailErr.stack);
+        // Log but don't fail the payment
+      }
+    } catch (emailErr) {
+      console.error('❌ CRITICAL: Email send failed for workshop:', emailErr.message);
+      console.error('Email error stack:', emailErr.stack);
+      console.error('Email error details:', emailErr);
+      // Don't throw - payment succeeded, email failure shouldn't fail payment
+    }
 
     return res.json({ message: "nice", status: "SUCCESS", merchantOrderId, txnid: transactionID });
   } else if (statusResponse.state === "FAILED") {
@@ -368,7 +397,13 @@ export const phonepeStatus = TryCatch(async (req, res) => {
       time: updatedTxn.updatedAt,
     };
 
-    await sendTransactMailUser("Your workshop registration failed", data_user);
+    try {
+      await sendTransactMailUser("Your workshop registration failed", data_user);
+      console.log('✅ Failure email sent successfully for workshop');
+    } catch (emailErr) {
+      console.error('❌ Email send failed for workshop failure notification:', emailErr.message);
+      // Don't throw - payment already failed, email failure is secondary
+    }
 
     return res.json({ message: "Payment failed", status: "FAILED", merchantOrderId, txnid: transactionID });
   } else {

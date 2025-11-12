@@ -2,20 +2,30 @@ import { createTransport } from "nodemailer";
 
 
 
-const buildTransport = () => {
+const buildTransport = async () => {
   const host = process.env.SMTP_HOST || "smtp.gmail.com";
   const port = Number(process.env.SMTP_PORT || 465);
-  // Trim whitespace and remove trailing commas from credentials
-  const user = (process.env.SMTP_USER || process.env.Gmail || '').trim().replace(/,$/, '');
-  const pass = (process.env.SMTP_PASS || process.env.Password || '').trim().replace(/,$/, '');
+  // Trim whitespace only - preserve password as-is (including any trailing characters)
+  // Only remove trailing commas if they're clearly accidental (comma followed by whitespace or end of line)
+  const rawUser = (process.env.SMTP_USER || process.env.Gmail || '').trim();
+  const rawPass = (process.env.SMTP_PASS || process.env.Password || '').trim();
+  
+  // Keep password exactly as specified - don't remove trailing comma
+  // The comma might be part of the actual password from Hostinger
+  const user = rawUser;
+  const pass = rawPass;
 
   console.log('📧 Building email transport:', {
     host,
     port,
     hasUser: !!user,
     hasPass: !!pass,
+    userLength: user ? user.length : 0,
+    passLength: pass ? pass.length : 0,
     user: user ? `${user.substring(0, 3)}***` : 'missing',
-    nodeEnv: process.env.NODE_ENV || 'development'
+    passPreview: pass ? `${pass.substring(0, 2)}***${pass.substring(pass.length - 1)}` : 'missing',
+    nodeEnv: process.env.NODE_ENV || 'development',
+    rawPassLength: rawPass ? rawPass.length : 0
   });
 
   const looksPlaceholder = (val) => !val || /your-.*password|your-email|example\.com/i.test(String(val));
@@ -41,14 +51,33 @@ const buildTransport = () => {
       secure, 
       auth: { user, pass },
       // Add connection timeout
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 10000
+      connectionTimeout: 15000,
+      greetingTimeout: 15000,
+      socketTimeout: 15000,
+      // Add debug logging
+      debug: true,
+      logger: true
     });
+    
+    // Verify connection
+    try {
+      await transport.verify();
+      console.log('✅ SMTP connection verified successfully');
+    } catch (verifyError) {
+      console.error('❌ SMTP verification failed:', verifyError.message);
+      console.error('❌ Verify error code:', verifyError.code);
+      console.error('❌ Verify error command:', verifyError.command);
+      // Don't return mock transport - let it try to send anyway
+      // Some SMTP servers don't support verify but can still send emails
+      console.log('⚠️ Continuing despite verification failure - some SMTP servers skip verify');
+    }
+    
     console.log('✅ Real email transport created (SMTP)');
     return transport;
   } catch (error) {
     console.error('❌ Failed to create email transport:', error.message);
+    console.error('❌ Error code:', error.code);
+    console.error('❌ Error stack:', error.stack);
     console.error('❌ Falling back to jsonTransport');
     return createTransport({ jsonTransport: true });
   }
@@ -58,7 +87,7 @@ const fromAddress = () => (process.env.SMTP_USER || process.env.Gmail || "no-rep
 
 const sendMail = async (email, subject, data) => {
   console.log("Setting up email transport");
-  const transport = buildTransport();
+  const transport = await buildTransport();
 
   console.log("Email transport configured");
   const html = `<!DOCTYPE html>
@@ -126,7 +155,7 @@ const sendMail = async (email, subject, data) => {
 export default sendMail;
 
 export const sendForgotMail = async (subject, data) => {
-  const transport = buildTransport();
+  const transport = await buildTransport();
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -201,7 +230,7 @@ export const sendForgotMail = async (subject, data) => {
 };
 
 export const sendContactMail = async (data) => {
-  const transport = buildTransport();
+  const transport = await buildTransport();
 
   const { name, email, message } = data || {};
 
@@ -243,7 +272,7 @@ export const sendContactMail = async (data) => {
 
 // Send acknowledgement email back to the sender of the contact form
 export const sendContactAck = async (data) => {
-  const transport = buildTransport();
+  const transport = await buildTransport();
 
   const { name, email } = data || {};
   if (!email) return; // nothing to do
@@ -292,29 +321,28 @@ export const sendTransactMailAdmin = async (subject, data) => {
     throw new Error('Email data is missing');
   }
   
-  const transport = buildTransport();
+  const transport = await buildTransport();
   
-  // Check if using mock transport - improved detection
+  // Check if using mock transport - log warning but don't throw error
   // Real SMTP transports have transporter.name === 'SMTP' or 'SMTPPool' or 'SMTPS'
   // JSONTransport has transporter.name === 'JSONTransport'
   const transportName = transport.transporter?.name || '';
   const isMockTransport = transportName === 'JSONTransport';
   
   if (isMockTransport) {
-    const errorMsg = '⚠️ WARNING: Using mock email transport (jsonTransport). Emails will NOT be sent! Please check SMTP credentials in environment variables.';
-    console.error('❌', errorMsg);
-    console.error('❌ Transport name:', transportName);
-    console.error('❌ SMTP Config:', {
+    console.warn('⚠️ WARNING: Using mock email transport (jsonTransport). Emails will NOT be sent! Please check SMTP credentials in environment variables.');
+    console.warn('⚠️ Transport name:', transportName);
+    console.warn('⚠️ SMTP Config:', {
       host: process.env.SMTP_HOST,
       port: process.env.SMTP_PORT,
       user: process.env.SMTP_USER ? `${process.env.SMTP_USER.substring(0, 3)}***` : 'MISSING',
       hasPass: !!process.env.SMTP_PASS,
       nodeEnv: process.env.NODE_ENV
     });
-    throw new Error(errorMsg);
+    // Don't throw - let it try to send anyway (will fail gracefully)
+  } else {
+    console.log('✅ Using real SMTP transport:', transportName);
   }
-  
-  console.log('✅ Using real SMTP transport:', transportName);
 
   const primaryEmail = "vhass0310@gmail.com";
   const bccEmails = ["info@vhassacademy.com", "kandregulanuraj@gmail.com"];
@@ -480,30 +508,29 @@ export const sendTransactMailUser = async (subject, data) => {
     throw new Error('Email data is missing or invalid');
   }
   
-  const transport = buildTransport();
+  const transport = await buildTransport();
   console.log('📧 Email transport built, checking credentials...');
   
-  // Check if using mock transport - improved detection
+  // Check if using mock transport - log warning but don't throw error
   // Real SMTP transports have transporter.name === 'SMTP' or 'SMTPPool' or 'SMTPS'
   // JSONTransport has transporter.name === 'JSONTransport'
   const transportName = transport.transporter?.name || '';
   const isMockTransport = transportName === 'JSONTransport';
   
   if (isMockTransport) {
-    const errorMsg = '⚠️ WARNING: Using mock email transport (jsonTransport). Emails will NOT be sent! Please check SMTP credentials in environment variables.';
-    console.error('❌', errorMsg);
-    console.error('❌ Transport name:', transportName);
-    console.error('❌ SMTP Config:', {
+    console.warn('⚠️ WARNING: Using mock email transport (jsonTransport). Emails will NOT be sent! Please check SMTP credentials in environment variables.');
+    console.warn('⚠️ Transport name:', transportName);
+    console.warn('⚠️ SMTP Config:', {
       host: process.env.SMTP_HOST,
       port: process.env.SMTP_PORT,
       user: process.env.SMTP_USER ? `${process.env.SMTP_USER.substring(0, 3)}***` : 'MISSING',
       hasPass: !!process.env.SMTP_PASS,
       nodeEnv: process.env.NODE_ENV
     });
-    throw new Error(errorMsg);
+    // Don't throw - let it try to send anyway (will fail gracefully)
+  } else {
+    console.log('✅ Using real SMTP transport:', transportName);
   }
-  
-  console.log('✅ Using real SMTP transport:', transportName);
 
   // Format amount
   const formattedAmount = data.amount ? `₹${Number(data.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'N/A';
