@@ -235,6 +235,7 @@ class ApiService {
     return this.makeRequest('/api/contact', {
       method: 'POST',
       body: JSON.stringify(payload),
+      timeout: 60000, // 60 seconds timeout for contact form (email sending can be slow)
     });
   }
 

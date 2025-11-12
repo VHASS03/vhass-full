@@ -796,27 +796,30 @@ export const contactMessage = async (req, res) => {
       return res.status(400).json({ success: false, message: "Email and message are required" });
     }
 
-    // Send main contact email with timeout handling
-    try {
-      await sendContactMail({ name, email, message });
-      console.log('✅ Contact email sent successfully');
-    } catch (emailError) {
-      console.error('❌ Contact email send failed:', emailError?.message || emailError);
-      // Don't fail the request if email fails - log it but continue
-      // In production, we still want to accept the message even if email fails
-    }
-    
-    // Fire-and-forget acknowledgement to sender (non-blocking, with timeout)
-    try { 
-      await sendContactAck({ name, email });
-      console.log('✅ Contact acknowledgement email sent successfully');
-    } catch (ackError) {
-      console.error('❌ Contact acknowledgement email failed:', ackError?.message || ackError);
-      // Ignore acknowledgement failures
-    }
-    
-    // Always return success - email failures shouldn't block the contact form
-    return res.status(200).json({ success: true, message: "Message sent successfully" });
+    // Return success immediately - don't wait for emails
+    res.status(200).json({ success: true, message: "Message sent successfully" });
+
+    // Send emails asynchronously (fire-and-forget) after response is sent
+    // This prevents blocking the user's request
+    setImmediate(async () => {
+      // Send main contact email with timeout handling
+      try {
+        await sendContactMail({ name, email, message });
+        console.log('✅ Contact email sent successfully');
+      } catch (emailError) {
+        console.error('❌ Contact email send failed:', emailError?.message || emailError);
+        // Log but don't fail - email is sent asynchronously
+      }
+      
+      // Fire-and-forget acknowledgement to sender (non-blocking, with timeout)
+      try { 
+        await sendContactAck({ name, email });
+        console.log('✅ Contact acknowledgement email sent successfully');
+      } catch (ackError) {
+        console.error('❌ Contact acknowledgement email failed:', ackError?.message || ackError);
+        // Ignore acknowledgement failures
+      }
+    });
   } catch (error) {
     console.error('Contact message error:', error?.message || error);
     // Even on unexpected errors, return success to avoid blocking users
