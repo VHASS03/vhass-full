@@ -24,6 +24,7 @@ import {
 } from "../controllers/admin.js";
 import { uploadFiles, handleMulterError } from "../middlewares/multer.js";
 import { User } from "../models/User.js";
+import { testSMTPConnection } from "../middlewares/sendMail.js";
 
 const router = express.Router();
 
@@ -195,6 +196,20 @@ router.get("/test-bills-endpoint", (req, res) => {
     endpoint: "/api/admin/send-bills-to-specific-users",
     method: "POST"
   });
+});
+
+// Test SMTP connection endpoint
+router.get("/test-smtp", async (req, res) => {
+  try {
+    const result = await testSMTPConnection();
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
 });
 
 // Catch-all 404 handler

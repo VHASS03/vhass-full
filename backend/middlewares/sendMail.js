@@ -810,3 +810,69 @@ export const sendTransactMailUser = async (subject, data) => {
     throw error;
   }
 };
+
+// Test SMTP connection and credentials
+export const testSMTPConnection = async () => {
+  try {
+    console.log('🧪 Testing SMTP connection...');
+    const transport = await buildTransport();
+    
+    // Check transport type
+    const transportName = transport.transporter?.name || 'unknown';
+    console.log('📧 Transport type:', transportName);
+    
+    if (transportName === 'JSONTransport') {
+      return {
+        success: false,
+        error: 'Using mock transport (JSONTransport) - SMTP credentials not configured properly',
+        transportType: transportName,
+        config: {
+          host: process.env.SMTP_HOST,
+          port: process.env.SMTP_PORT,
+          user: process.env.SMTP_USER ? `${process.env.SMTP_USER.substring(0, 3)}***` : 'MISSING',
+          hasPass: !!process.env.SMTP_PASS,
+          nodeEnv: process.env.NODE_ENV
+        }
+      };
+    }
+    
+    // Try to verify connection
+    try {
+      await transport.verify();
+      console.log('✅ SMTP connection verified successfully');
+      return {
+        success: true,
+        message: 'SMTP connection verified successfully',
+        transportType: transportName,
+        config: {
+          host: process.env.SMTP_HOST,
+          port: process.env.SMTP_PORT,
+          user: process.env.SMTP_USER,
+          fromAddress: fromAddress()
+        }
+      };
+    } catch (verifyError) {
+      console.warn('⚠️ SMTP verification failed:', verifyError.message);
+      // Some servers don't support verify but can still send emails
+      return {
+        success: true,
+        warning: 'SMTP verify failed but transport created (some servers skip verify)',
+        error: verifyError.message,
+        transportType: transportName,
+        config: {
+          host: process.env.SMTP_HOST,
+          port: process.env.SMTP_PORT,
+          user: process.env.SMTP_USER,
+          fromAddress: fromAddress()
+        }
+      };
+    }
+  } catch (error) {
+    console.error('❌ SMTP test failed:', error.message);
+    return {
+      success: false,
+      error: error.message,
+      stack: error.stack
+    };
+  }
+};
