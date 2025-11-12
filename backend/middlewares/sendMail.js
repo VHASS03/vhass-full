@@ -2,21 +2,16 @@ import { createTransport } from "nodemailer";
 
 
 
-const buildTransport = async () => {
+export const buildTransport = async () => {
   const host = process.env.SMTP_HOST || "smtp.gmail.com";
   const port = Number(process.env.SMTP_PORT || 465);
-  // Trim whitespace only - preserve password as-is (including any trailing characters)
-  // Only remove trailing commas if they're clearly accidental (comma followed by whitespace or end of line)
+  // Trim whitespace only - preserve password exactly as specified (including trailing comma if present)
+  // The comma might be part of the actual password from Hostinger
   const rawUser = (process.env.SMTP_USER || process.env.Gmail || '').trim();
-  let rawPass = (process.env.SMTP_PASS || process.env.Password || '').trim();
+  const rawPass = (process.env.SMTP_PASS || process.env.Password || '').trim();
   
-  // Remove trailing comma if it exists (common config file mistake)
-  // Check if password ends with comma and remove it
-  if (rawPass.endsWith(',')) {
-    console.warn('⚠️ Password ends with comma - removing it (likely config file mistake)');
-    rawPass = rawPass.slice(0, -1);
-  }
-  
+  // Keep password exactly as specified - don't remove trailing comma
+  // The comma might be part of the actual password from Hostinger
   const user = rawUser;
   const pass = rawPass;
 

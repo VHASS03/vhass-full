@@ -13,6 +13,7 @@ import {
 import { isAuth } from "../middlewares/isAuth.js";
 import { addProgress, getYourProgress, getUserCourses, getUserWorkshops, getEnrollmentHistory } from "../controllers/course.js";
 import { contactMessage } from "../controllers/admin.js";
+import { sendContactMail, buildTransport } from '../middlewares/sendMail.js';
 
 const router = express.Router();
 
@@ -33,6 +34,70 @@ router.get("/user/enrollments", isAuth, getEnrollmentHistory);
 
 // Contact form endpoint (no auth required)
 router.post("/contact", contactMessage);
+
+// Test email endpoint (for debugging - remove in production)
+router.get("/test-email", async (req, res) => {
+  try {
+    // Check SMTP config
+    const host = process.env.SMTP_HOST || "smtp.gmail.com";
+    const port = Number(process.env.SMTP_PORT || 465);
+    const user = (process.env.SMTP_USER || '').trim();
+    const hasPass = !!process.env.SMTP_PASS;
+    
+    // Build transport to check what we're using
+    const transport = await buildTransport();
+    const transportName = transport.transporter?.name || 'unknown';
+    
+    const configInfo = {
+      smtpHost: host,
+      smtpPort: port,
+      smtpUser: user ? `${user.substring(0, 3)}***` : 'MISSING',
+      hasPassword: hasPass,
+      transportType: transportName,
+      isMockTransport: transportName === 'JSONTransport',
+      nodeEnv: process.env.NODE_ENV || 'development'
+    };
+    
+    // Try to send a test email
+    let testResult = null;
+    if (transportName !== 'JSONTransport') {
+      try {
+        await sendContactMail({
+          name: 'Test User',
+          email: 'test@example.com',
+          message: 'This is a test email from the SMTP test endpoint.'
+        });
+        testResult = { success: true, message: 'Test email sent successfully' };
+      } catch (emailError) {
+        testResult = {
+          success: false,
+          error: emailError.message,
+          code: emailError.code,
+          command: emailError.command
+        };
+      }
+    } else {
+      testResult = {
+        success: false,
+        error: 'Using mock transport - emails will not be sent',
+        message: 'Check SMTP credentials in config.env'
+      };
+    }
+    
+    res.json({
+      success: true,
+      config: configInfo,
+      testResult: testResult,
+      message: 'Check server logs for detailed SMTP information'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      stack: error.stack
+    });
+  }
+});
 
 // PhonePe proxy routes to avoid CORS issues
 router.post("/phonepe/initiate", isAuth, async (req, res) => {
