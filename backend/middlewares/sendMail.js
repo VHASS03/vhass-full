@@ -8,10 +8,15 @@ const buildTransport = async () => {
   // Trim whitespace only - preserve password as-is (including any trailing characters)
   // Only remove trailing commas if they're clearly accidental (comma followed by whitespace or end of line)
   const rawUser = (process.env.SMTP_USER || process.env.Gmail || '').trim();
-  const rawPass = (process.env.SMTP_PASS || process.env.Password || '').trim();
+  let rawPass = (process.env.SMTP_PASS || process.env.Password || '').trim();
   
-  // Keep password exactly as specified - don't remove trailing comma
-  // The comma might be part of the actual password from Hostinger
+  // Remove trailing comma if it exists (common config file mistake)
+  // Check if password ends with comma and remove it
+  if (rawPass.endsWith(',')) {
+    console.warn('⚠️ Password ends with comma - removing it (likely config file mistake)');
+    rawPass = rawPass.slice(0, -1);
+  }
+  
   const user = rawUser;
   const pass = rawPass;
 
@@ -235,7 +240,24 @@ export const sendForgotMail = async (subject, data) => {
 };
 
 export const sendContactMail = async (data) => {
+  console.log('📧 sendContactMail called with data:', { 
+    name: data?.name, 
+    email: data?.email, 
+    hasMessage: !!data?.message 
+  });
+  
   const transport = await buildTransport();
+  
+  // Check what transport we're using
+  const transportName = transport.transporter?.name || 'unknown';
+  console.log('📧 Transport type:', transportName);
+  
+  if (transportName === 'JSONTransport') {
+    const errorMsg = '❌ CRITICAL: Using mock transport (JSONTransport) - emails will NOT be sent!';
+    console.error(errorMsg);
+    console.error('❌ Check SMTP credentials in config.env');
+    throw new Error('Email transport not configured - using mock transport');
+  }
 
   const { name, email, message } = data || {};
 
@@ -266,28 +288,69 @@ export const sendContactMail = async (data) => {
   </body>
 </html>`;
 
-  // Add timeout to prevent hanging
-  const sendPromise = transport.sendMail({
+  const mailOptions = {
     from: fromAddress(),
     to: "info@vhassacademy.com",
     subject: `New contact message from ${name || email || "Website"}`,
     replyTo: email,
     html,
+  };
+  
+  console.log('📧 Attempting to send contact email:', {
+    from: mailOptions.from,
+    to: mailOptions.to,
+    subject: mailOptions.subject,
+    transportType: transportName
   });
-  
-  const timeoutPromise = new Promise((_, reject) => 
-    setTimeout(() => reject(new Error('Email send timeout after 30 seconds')), 30000)
-  );
-  
-  await Promise.race([sendPromise, timeoutPromise]);
+
+  try {
+    // Add timeout to prevent hanging
+    const sendPromise = transport.sendMail(mailOptions);
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Email send timeout after 30 seconds')), 30000)
+    );
+    
+    const result = await Promise.race([sendPromise, timeoutPromise]);
+    
+    console.log('✅ Contact email sent successfully!');
+    console.log('📧 Email result:', {
+      messageId: result.messageId,
+      accepted: result.accepted,
+      rejected: result.rejected,
+      response: result.response
+    });
+    
+    return result;
+  } catch (error) {
+    console.error('❌ CRITICAL: Failed to send contact email');
+    console.error('❌ Error message:', error.message);
+    console.error('❌ Error code:', error.code);
+    console.error('❌ Error command:', error.command);
+    console.error('❌ Error stack:', error.stack);
+    throw error;
+  }
 };
 
 // Send acknowledgement email back to the sender of the contact form
 export const sendContactAck = async (data) => {
-  const transport = await buildTransport();
-
   const { name, email } = data || {};
-  if (!email) return; // nothing to do
+  if (!email) {
+    console.log('⚠️ sendContactAck: No email provided, skipping');
+    return; // nothing to do
+  }
+
+  console.log('📧 sendContactAck called for:', email);
+  
+  const transport = await buildTransport();
+  
+  // Check what transport we're using
+  const transportName = transport.transporter?.name || 'unknown';
+  console.log('📧 Acknowledgement transport type:', transportName);
+  
+  if (transportName === 'JSONTransport') {
+    console.error('❌ CRITICAL: Using mock transport for acknowledgement - email will NOT be sent!');
+    throw new Error('Email transport not configured - using mock transport');
+  }
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -316,19 +379,42 @@ export const sendContactAck = async (data) => {
   </body>
 </html>`;
 
-  // Add timeout to prevent hanging
-  const sendPromise = transport.sendMail({
+  const mailOptions = {
     from: fromAddress(),
     to: email,
     subject: "We received your message — VHASS Academy",
     html,
+  };
+  
+  console.log('📧 Attempting to send acknowledgement email:', {
+    from: mailOptions.from,
+    to: mailOptions.to,
+    transportType: transportName
   });
-  
-  const timeoutPromise = new Promise((_, reject) => 
-    setTimeout(() => reject(new Error('Email send timeout after 30 seconds')), 30000)
-  );
-  
-  await Promise.race([sendPromise, timeoutPromise]);
+
+  try {
+    // Add timeout to prevent hanging
+    const sendPromise = transport.sendMail(mailOptions);
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Email send timeout after 30 seconds')), 30000)
+    );
+    
+    const result = await Promise.race([sendPromise, timeoutPromise]);
+    
+    console.log('✅ Acknowledgement email sent successfully!');
+    console.log('📧 Email result:', {
+      messageId: result.messageId,
+      accepted: result.accepted,
+      rejected: result.rejected
+    });
+    
+    return result;
+  } catch (error) {
+    console.error('❌ CRITICAL: Failed to send acknowledgement email');
+    console.error('❌ Error message:', error.message);
+    console.error('❌ Error code:', error.code);
+    throw error;
+  }
 };
 
 export const sendTransactMailAdmin = async (subject, data) => {
