@@ -11,7 +11,13 @@ export const buildTransport = async () => {
   
   // Remove any trailing commas or spaces that might have been accidentally added
   const user = rawUser;
-  const pass = rawPass.replace(/[, ]+$/, ''); // Remove trailing commas and spaces
+  // Handle password - remove trailing spaces/commas, but preserve special characters
+  let pass = rawPass.replace(/[, ]+$/, ''); // Remove trailing commas and spaces
+  
+  // If password is wrapped in quotes, remove them (common in env files)
+  if ((pass.startsWith('"') && pass.endsWith('"')) || (pass.startsWith("'") && pass.endsWith("'"))) {
+    pass = pass.slice(1, -1);
+  }
 
   console.log('📧 Building email transport:', {
     host,

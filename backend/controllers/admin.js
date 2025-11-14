@@ -800,7 +800,7 @@ export const contactMessage = async (req, res) => {
     
     // Send emails with proper error handling - wait for them to complete
     let emailSent = false;
-    let emailError = null;
+    let emailErrorObj = null;
     
     try {
       // Send main contact email with timeout handling
@@ -808,15 +808,25 @@ export const contactMessage = async (req, res) => {
       await sendContactMail({ name, email, message });
       console.log('✅ Contact email sent successfully to info@vhassacademy.com and vhass0310@gmail.com');
       emailSent = true;
-    } catch (emailError) {
+    } catch (err) {
+      emailErrorObj = err;
       console.error('❌ CRITICAL: Contact email send failed!');
-      console.error('❌ Error message:', emailError?.message);
-      console.error('❌ Error code:', emailError?.code);
-      console.error('❌ Error command:', emailError?.command);
-      console.error('❌ Error response:', emailError?.response);
-      console.error('❌ Error stack:', emailError?.stack);
-      console.error('❌ Full error:', JSON.stringify(emailError, Object.getOwnPropertyNames(emailError)));
-      emailError = emailError;
+      console.error('❌ Error message:', err?.message);
+      console.error('❌ Error code:', err?.code);
+      console.error('❌ Error command:', err?.command);
+      console.error('❌ Error response:', err?.response);
+      console.error('❌ Error responseCode:', err?.responseCode);
+      console.error('❌ Error stack:', err?.stack);
+      console.error('❌ Full error:', JSON.stringify(err, Object.getOwnPropertyNames(err)));
+      
+      // Log SMTP config for debugging
+      console.error('❌ SMTP Config Check:', {
+        host: process.env.SMTP_HOST,
+        port: process.env.SMTP_PORT,
+        user: process.env.SMTP_USER ? `${process.env.SMTP_USER.substring(0, 3)}***` : 'MISSING',
+        hasPass: !!process.env.SMTP_PASS,
+        nodeEnv: process.env.NODE_ENV
+      });
     }
     
     // Send acknowledgement email (non-blocking - don't fail if this fails)
@@ -840,10 +850,16 @@ export const contactMessage = async (req, res) => {
     } else {
       // Email failed - return error so user knows
       console.error('❌ Returning error response to user because email failed');
+      const errorMessage = emailErrorObj?.message || 'Unknown error';
+      const errorCode = emailErrorObj?.code || 'UNKNOWN';
+      
       return res.status(500).json({ 
         success: false, 
         message: "Failed to send message. Please try again or contact us directly at info@vhassacademy.com",
-        error: process.env.NODE_ENV === 'development' ? emailError?.message : undefined
+        // Include error details in production for debugging (remove sensitive info)
+        error: process.env.NODE_ENV === 'production' 
+          ? `SMTP Error: ${errorCode} - ${errorMessage.substring(0, 100)}`
+          : errorMessage
       });
     }
   } catch (error) {
