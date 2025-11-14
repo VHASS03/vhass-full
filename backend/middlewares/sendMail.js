@@ -56,9 +56,9 @@ export const buildTransport = async () => {
       secure, // true for port 465 (SSL), false for port 587 (STARTTLS)
       auth: { user, pass },
       // Reduced connection timeouts to prevent hanging
-      connectionTimeout: 10000, // 10 seconds (reduced for faster fallback)
-      greetingTimeout: 8000,   // 8 seconds
-      socketTimeout: 10000,     // 10 seconds
+      connectionTimeout: 8000, // 8 seconds (reduced for faster fallback)
+      greetingTimeout: 5000,   // 5 seconds
+      socketTimeout: 8000,     // 8 seconds
       // Add debug logging
       debug: true,
       logger: true
@@ -73,18 +73,20 @@ export const buildTransport = async () => {
     console.log(`🔄 Attempting SMTP connection on port ${tryPort}...`);
     const transport = createTransport(transportConfig);
     
-    // Verify connection with timeout (non-blocking - don't wait too long)
+    // Skip verification if it times out - just create the transport and try sending
     // Some SMTP servers don't support verify but can still send emails
     try {
       const verifyPromise = transport.verify();
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('SMTP verify timeout')), 8000)
+        setTimeout(() => reject(new Error('SMTP verify timeout')), 5000)
       );
       await Promise.race([verifyPromise, timeoutPromise]);
       console.log(`✅ SMTP connection verified successfully on port ${tryPort}`);
     } catch (verifyError) {
-      if (verifyError.message === 'SMTP verify timeout') {
-        console.warn(`⚠️ SMTP verify timed out after 8s on port ${tryPort} - continuing anyway (some servers skip verify)`);
+      // Don't fail on verify timeout - just log and continue
+      // The actual send will tell us if there's a real problem
+      if (verifyError.message === 'SMTP verify timeout' || verifyError.code === 'ETIMEDOUT') {
+        console.warn(`⚠️ SMTP verify timed out on port ${tryPort} - skipping verify, will try sending anyway`);
       } else {
         console.warn(`⚠️ SMTP verification failed on port ${tryPort}:`, verifyError.message);
         console.warn('⚠️ Error details:', {
@@ -113,13 +115,17 @@ export const buildTransport = async () => {
     ? [587, 465]  // Try 587 first, then 465 as fallback
     : [port];     // Otherwise just try the configured port
   
+  let lastError = null;
+  
   for (let i = 0; i < portsToTry.length; i++) {
     const tryPort = portsToTry[i];
     try {
       console.log(`📧 Attempting to create SMTP transport (attempt ${i + 1}/${portsToTry.length}) on port ${tryPort}...`);
       const transport = await tryCreateTransport(tryPort);
+      // If we got here, transport was created successfully (even if verify timed out)
       return transport;
     } catch (error) {
+      lastError = error;
       console.error(`❌ Failed to create email transport on port ${tryPort}:`, error.message);
       console.error('❌ Error code:', error.code);
       
@@ -130,7 +136,7 @@ export const buildTransport = async () => {
       }
       
       // If all ports failed, fall back to jsonTransport
-      console.error('❌ All SMTP ports failed, falling back to jsonTransport');
+      console.error('❌ All SMTP ports failed during transport creation, falling back to jsonTransport');
       console.error('❌ Error stack:', error.stack);
       return createTransport({ jsonTransport: true });
     }
@@ -374,11 +380,13 @@ export const sendContactMail = async (data) => {
         transportType: transportName
       });
 
-      // Add timeout to prevent hanging
+      // Add timeout to prevent hanging - reduced timeout for faster retry
       const sendPromise = transport.sendMail(mailOptions);
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Email send timeout after 25 seconds')), 25000)
-      );
+      const timeoutPromise = new Promise((_, reject) => {
+        const timeoutError = new Error('Email send timeout after 20 seconds');
+        timeoutError.code = 'ETIMEDOUT';
+        setTimeout(() => reject(timeoutError), 20000);
+      });
       
       const result = await Promise.race([sendPromise, timeoutPromise]);
       
