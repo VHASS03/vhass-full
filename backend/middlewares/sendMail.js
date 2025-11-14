@@ -41,41 +41,65 @@ export const buildTransport = async () => {
     return createTransport({ jsonTransport: true });
   }
 
-  const secure = port === 465;
+  // Determine secure/TLS settings based on port
+  const secure = port === 465; // SSL for port 465
+  const requireTLS = port === 587; // STARTTLS for port 587
+  
   try {
-    const transport = createTransport({ 
+    const transportConfig = { 
       host, 
       port, 
-      secure, 
+      secure, // true for port 465 (SSL), false for port 587 (STARTTLS)
       auth: { user, pass },
       // Reduced connection timeouts to prevent hanging
-      connectionTimeout: 10000, // 10 seconds
-      greetingTimeout: 5000,   // 5 seconds
-      socketTimeout: 10000,     // 10 seconds
+      connectionTimeout: 15000, // 15 seconds
+      greetingTimeout: 10000,   // 10 seconds
+      socketTimeout: 15000,     // 15 seconds
       // Add debug logging
       debug: true,
       logger: true
-    });
+    };
+    
+    // For port 587, we need requireTLS instead of secure
+    if (port === 587) {
+      transportConfig.secure = false;
+      transportConfig.requireTLS = true;
+    }
+    
+    const transport = createTransport(transportConfig);
     
     // Verify connection with timeout (non-blocking - don't wait too long)
     // Some SMTP servers don't support verify but can still send emails
     try {
       const verifyPromise = transport.verify();
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('SMTP verify timeout')), 5000)
+        setTimeout(() => reject(new Error('SMTP verify timeout')), 10000)
       );
       await Promise.race([verifyPromise, timeoutPromise]);
       console.log('✅ SMTP connection verified successfully');
     } catch (verifyError) {
       if (verifyError.message === 'SMTP verify timeout') {
-        console.warn('⚠️ SMTP verify timed out after 5s - continuing anyway (some servers skip verify)');
+        console.warn('⚠️ SMTP verify timed out after 10s - continuing anyway (some servers skip verify)');
       } else {
         console.warn('⚠️ SMTP verification failed:', verifyError.message);
+        console.warn('⚠️ Error details:', {
+          code: verifyError.code,
+          command: verifyError.command,
+          response: verifyError.response,
+          responseCode: verifyError.responseCode
+        });
         console.warn('⚠️ Continuing anyway - some SMTP servers skip verify but can still send emails');
       }
     }
     
     console.log('✅ Real email transport created (SMTP)');
+    console.log('📧 SMTP Configuration:', {
+      host,
+      port,
+      secure,
+      requireTLS: port === 587,
+      user: user ? `${user.substring(0, 3)}***` : 'missing'
+    });
     return transport;
   } catch (error) {
     console.error('❌ Failed to create email transport:', error.message);
