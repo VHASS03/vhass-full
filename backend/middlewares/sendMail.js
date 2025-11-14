@@ -56,9 +56,9 @@ export const buildTransport = async () => {
       secure, // true for port 465 (SSL), false for port 587 (STARTTLS)
       auth: { user, pass },
       // Reduced connection timeouts to prevent hanging
-      connectionTimeout: 15000, // 15 seconds
-      greetingTimeout: 10000,   // 10 seconds
-      socketTimeout: 15000,     // 15 seconds
+      connectionTimeout: 10000, // 10 seconds (reduced for faster fallback)
+      greetingTimeout: 8000,   // 8 seconds
+      socketTimeout: 10000,     // 10 seconds
       // Add debug logging
       debug: true,
       logger: true
@@ -70,6 +70,7 @@ export const buildTransport = async () => {
       transportConfig.requireTLS = true;
     }
     
+    console.log(`🔄 Attempting SMTP connection on port ${tryPort}...`);
     const transport = createTransport(transportConfig);
     
     // Verify connection with timeout (non-blocking - don't wait too long)
@@ -77,13 +78,13 @@ export const buildTransport = async () => {
     try {
       const verifyPromise = transport.verify();
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('SMTP verify timeout')), 10000)
+        setTimeout(() => reject(new Error('SMTP verify timeout')), 8000)
       );
       await Promise.race([verifyPromise, timeoutPromise]);
       console.log(`✅ SMTP connection verified successfully on port ${tryPort}`);
     } catch (verifyError) {
       if (verifyError.message === 'SMTP verify timeout') {
-        console.warn(`⚠️ SMTP verify timed out after 10s on port ${tryPort} - continuing anyway (some servers skip verify)`);
+        console.warn(`⚠️ SMTP verify timed out after 8s on port ${tryPort} - continuing anyway (some servers skip verify)`);
       } else {
         console.warn(`⚠️ SMTP verification failed on port ${tryPort}:`, verifyError.message);
         console.warn('⚠️ Error details:', {
@@ -107,30 +108,37 @@ export const buildTransport = async () => {
     return transport;
   };
   
-  // Try the configured port first
-  try {
-    return await tryCreateTransport(port);
-  } catch (error) {
-    console.error(`❌ Failed to create email transport on port ${port}:`, error.message);
-    console.error('❌ Error code:', error.code);
-    
-    // If port 587 failed and we're using Hostinger, try port 465 as fallback
-    if (port === 587 && host.includes('hostinger')) {
-      console.log('🔄 Attempting fallback to port 465 for Hostinger SMTP...');
-      try {
-        return await tryCreateTransport(465);
-      } catch (fallbackError) {
-        console.error('❌ Fallback to port 465 also failed:', fallbackError.message);
-        console.error('❌ Error stack:', fallbackError.stack);
-        console.error('❌ Falling back to jsonTransport');
-        return createTransport({ jsonTransport: true });
+  // Try the configured port first, with automatic fallback for Hostinger
+  const portsToTry = host.includes('hostinger') && port === 587 
+    ? [587, 465]  // Try 587 first, then 465 as fallback
+    : [port];     // Otherwise just try the configured port
+  
+  for (let i = 0; i < portsToTry.length; i++) {
+    const tryPort = portsToTry[i];
+    try {
+      console.log(`📧 Attempting to create SMTP transport (attempt ${i + 1}/${portsToTry.length}) on port ${tryPort}...`);
+      const transport = await tryCreateTransport(tryPort);
+      return transport;
+    } catch (error) {
+      console.error(`❌ Failed to create email transport on port ${tryPort}:`, error.message);
+      console.error('❌ Error code:', error.code);
+      
+      // If this is not the last port to try, continue to next port
+      if (i < portsToTry.length - 1) {
+        console.log(`🔄 Port ${tryPort} failed, trying next port...`);
+        continue;
       }
-    } else {
+      
+      // If all ports failed, fall back to jsonTransport
+      console.error('❌ All SMTP ports failed, falling back to jsonTransport');
       console.error('❌ Error stack:', error.stack);
-      console.error('❌ Falling back to jsonTransport');
       return createTransport({ jsonTransport: true });
     }
   }
+  
+  // Should never reach here, but just in case
+  console.error('❌ Unexpected error in transport creation, falling back to jsonTransport');
+  return createTransport({ jsonTransport: true });
 };
 
 const fromAddress = () => (process.env.SMTP_USER || process.env.Gmail || "no-reply@vhassacademy.com");
@@ -286,19 +294,6 @@ export const sendContactMail = async (data) => {
     hasMessage: !!data?.message 
   });
   
-  const transport = await buildTransport();
-  
-  // Check what transport we're using
-  const transportName = transport.transporter?.name || 'unknown';
-  console.log('📧 Transport type:', transportName);
-  
-  if (transportName === 'JSONTransport') {
-    const errorMsg = '❌ CRITICAL: Using mock transport (JSONTransport) - emails will NOT be sent!';
-    console.error(errorMsg);
-    console.error('❌ Check SMTP credentials in config.env');
-    throw new Error('Email transport not configured - using mock transport');
-  }
-
   const { name, email, message } = data || {};
 
   const html = `<!DOCTYPE html>
@@ -342,40 +337,93 @@ export const sendContactMail = async (data) => {
     html,
   };
   
-  console.log('📧 Attempting to send contact email:', {
-    from: mailOptions.from,
-    to: mailOptions.to,
-    recipients: recipients,
-    subject: mailOptions.subject,
-    transportType: transportName
-  });
+  // Try sending with current transport, retry with port 465 if timeout
+  const host = process.env.SMTP_HOST || '';
+  const originalPort = process.env.SMTP_PORT;
+  const currentPort = Number(process.env.SMTP_PORT || 587);
+  
+  let lastError = null;
+  
+  // Try sending email - if timeout on port 587, retry with port 465
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      // On retry attempt, use port 465
+      if (attempt === 1 && host.includes('hostinger') && currentPort === 587) {
+        console.log('🔄 Retry attempt: Switching to port 465...');
+        process.env.SMTP_PORT = '465';
+      }
+      
+      const transport = await buildTransport();
+      
+      // Check what transport we're using
+      const transportName = transport.transporter?.name || 'unknown';
+      console.log(`📧 Transport type (attempt ${attempt + 1}):`, transportName);
+      
+      if (transportName === 'JSONTransport') {
+        const errorMsg = '❌ CRITICAL: Using mock transport (JSONTransport) - emails will NOT be sent!';
+        console.error(errorMsg);
+        console.error('❌ Check SMTP credentials in config.env');
+        throw new Error('Email transport not configured - using mock transport');
+      }
+      
+      console.log('📧 Attempting to send contact email:', {
+        from: mailOptions.from,
+        to: mailOptions.to,
+        recipients: recipients,
+        subject: mailOptions.subject,
+        transportType: transportName
+      });
 
-  try {
-    // Add timeout to prevent hanging
-    const sendPromise = transport.sendMail(mailOptions);
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Email send timeout after 30 seconds')), 30000)
-    );
-    
-    const result = await Promise.race([sendPromise, timeoutPromise]);
-    
-    console.log('✅ Contact email sent successfully!');
-    console.log('📧 Email result:', {
-      messageId: result.messageId,
-      accepted: result.accepted,
-      rejected: result.rejected,
-      response: result.response
-    });
-    
-    return result;
-  } catch (error) {
-    console.error('❌ CRITICAL: Failed to send contact email');
-    console.error('❌ Error message:', error.message);
-    console.error('❌ Error code:', error.code);
-    console.error('❌ Error command:', error.command);
-    console.error('❌ Error stack:', error.stack);
-    throw error;
+      // Add timeout to prevent hanging
+      const sendPromise = transport.sendMail(mailOptions);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Email send timeout after 25 seconds')), 25000)
+      );
+      
+      const result = await Promise.race([sendPromise, timeoutPromise]);
+      
+      // Restore original port if we changed it
+      if (attempt === 1 && originalPort) {
+        process.env.SMTP_PORT = originalPort;
+      }
+      
+      console.log('✅ Contact email sent successfully!');
+      console.log('📧 Email result:', {
+        messageId: result.messageId,
+        accepted: result.accepted,
+        rejected: result.rejected,
+        response: result.response
+      });
+      
+      return result;
+    } catch (error) {
+      lastError = error;
+      const isTimeout = error.code === 'ETIMEDOUT' || error.message.includes('timeout');
+      const shouldRetry = attempt === 0 && isTimeout && host.includes('hostinger') && currentPort === 587;
+      
+      console.error(`❌ Attempt ${attempt + 1} failed to send contact email`);
+      console.error('❌ Error message:', error.message);
+      console.error('❌ Error code:', error.code);
+      console.error('❌ Error command:', error.command);
+      
+      // Restore original port before retry or throw
+      if (attempt === 1 && originalPort) {
+        process.env.SMTP_PORT = originalPort;
+      }
+      
+      if (shouldRetry) {
+        console.log('🔄 Timeout detected, will retry with port 465 on next attempt...');
+        continue;
+      } else {
+        console.error('❌ Error stack:', error.stack);
+        throw error;
+      }
+    }
   }
+  
+  // If we get here, all attempts failed
+  console.error('❌ CRITICAL: All attempts to send contact email failed');
+  throw lastError || new Error('Failed to send email after all retry attempts');
 };
 
 // Send acknowledgement email back to the sender of the contact form
