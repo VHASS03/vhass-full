@@ -54,20 +54,34 @@ export const buildTransport = async () => {
       host, 
       port: tryPort, 
       secure, // true for port 465 (SSL), false for port 587 (STARTTLS)
-      auth: { user, pass },
-      // Reduced connection timeouts to prevent hanging
-      connectionTimeout: 8000, // 8 seconds (reduced for faster fallback)
-      greetingTimeout: 5000,   // 5 seconds
-      socketTimeout: 8000,     // 8 seconds
+      auth: { 
+        user, 
+        pass 
+      },
+      // Increased timeouts for Hostinger (may be slower)
+      connectionTimeout: 15000, // 15 seconds
+      greetingTimeout: 10000,   // 10 seconds
+      socketTimeout: 15000,     // 15 seconds
       // Add debug logging
       debug: true,
-      logger: true
+      logger: true,
+      // TLS options for better compatibility
+      tls: {
+        rejectUnauthorized: false, // Some hosts have self-signed certs
+        minVersion: 'TLSv1'
+      }
     };
     
     // For port 587, we need requireTLS instead of secure
     if (tryPort === 587) {
       transportConfig.secure = false;
-      transportConfig.requireTLS = true;
+      transportConfig.requireTLS = false; // Let it auto-negotiate TLS
+      transportConfig.ignoreTLS = false;
+    }
+    
+    // For port 465, ensure SSL is used
+    if (tryPort === 465) {
+      transportConfig.secure = true;
     }
     
     console.log(`🔄 Attempting SMTP connection on port ${tryPort}...`);
@@ -111,8 +125,11 @@ export const buildTransport = async () => {
   };
   
   // Try the configured port first, with automatic fallback for Hostinger
+  // For Hostinger, try both ports - start with 465 (more reliable) if configured port is 587
   const portsToTry = host.includes('hostinger') && port === 587 
-    ? [587, 465]  // Try 587 first, then 465 as fallback
+    ? [465, 587]  // Try 465 FIRST (more reliable for Hostinger), then 587 as fallback
+    : host.includes('hostinger') && port === 465
+    ? [465, 587]  // If 465 is configured, try it first, then 587
     : [port];     // Otherwise just try the configured port
   
   let lastError = null;
