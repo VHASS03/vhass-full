@@ -47,14 +47,12 @@ export const buildTransport = async () => {
     return createTransport({ jsonTransport: true });
   }
 
-  // Determine secure/TLS settings based on port
-  const secure = port === 465; // SSL for port 465
-  const requireTLS = port === 587; // STARTTLS for port 587
-  
-  try {
+  // Try to create transport - if port 587 fails, try 465 as fallback
+  const tryCreateTransport = async (tryPort) => {
+    const secure = tryPort === 465; // SSL for port 465
     const transportConfig = { 
       host, 
-      port, 
+      port: tryPort, 
       secure, // true for port 465 (SSL), false for port 587 (STARTTLS)
       auth: { user, pass },
       // Reduced connection timeouts to prevent hanging
@@ -67,7 +65,7 @@ export const buildTransport = async () => {
     };
     
     // For port 587, we need requireTLS instead of secure
-    if (port === 587) {
+    if (tryPort === 587) {
       transportConfig.secure = false;
       transportConfig.requireTLS = true;
     }
@@ -82,12 +80,12 @@ export const buildTransport = async () => {
         setTimeout(() => reject(new Error('SMTP verify timeout')), 10000)
       );
       await Promise.race([verifyPromise, timeoutPromise]);
-      console.log('✅ SMTP connection verified successfully');
+      console.log(`✅ SMTP connection verified successfully on port ${tryPort}`);
     } catch (verifyError) {
       if (verifyError.message === 'SMTP verify timeout') {
-        console.warn('⚠️ SMTP verify timed out after 10s - continuing anyway (some servers skip verify)');
+        console.warn(`⚠️ SMTP verify timed out after 10s on port ${tryPort} - continuing anyway (some servers skip verify)`);
       } else {
-        console.warn('⚠️ SMTP verification failed:', verifyError.message);
+        console.warn(`⚠️ SMTP verification failed on port ${tryPort}:`, verifyError.message);
         console.warn('⚠️ Error details:', {
           code: verifyError.code,
           command: verifyError.command,
@@ -98,21 +96,40 @@ export const buildTransport = async () => {
       }
     }
     
-    console.log('✅ Real email transport created (SMTP)');
+    console.log(`✅ Real email transport created (SMTP) on port ${tryPort}`);
     console.log('📧 SMTP Configuration:', {
       host,
-      port,
+      port: tryPort,
       secure,
-      requireTLS: port === 587,
+      requireTLS: tryPort === 587,
       user: user ? `${user.substring(0, 3)}***` : 'missing'
     });
     return transport;
+  };
+  
+  // Try the configured port first
+  try {
+    return await tryCreateTransport(port);
   } catch (error) {
-    console.error('❌ Failed to create email transport:', error.message);
+    console.error(`❌ Failed to create email transport on port ${port}:`, error.message);
     console.error('❌ Error code:', error.code);
-    console.error('❌ Error stack:', error.stack);
-    console.error('❌ Falling back to jsonTransport');
-    return createTransport({ jsonTransport: true });
+    
+    // If port 587 failed and we're using Hostinger, try port 465 as fallback
+    if (port === 587 && host.includes('hostinger')) {
+      console.log('🔄 Attempting fallback to port 465 for Hostinger SMTP...');
+      try {
+        return await tryCreateTransport(465);
+      } catch (fallbackError) {
+        console.error('❌ Fallback to port 465 also failed:', fallbackError.message);
+        console.error('❌ Error stack:', fallbackError.stack);
+        console.error('❌ Falling back to jsonTransport');
+        return createTransport({ jsonTransport: true });
+      }
+    } else {
+      console.error('❌ Error stack:', error.stack);
+      console.error('❌ Falling back to jsonTransport');
+      return createTransport({ jsonTransport: true });
+    }
   }
 };
 

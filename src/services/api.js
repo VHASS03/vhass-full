@@ -74,7 +74,11 @@ class ApiService {
           const data = await response.json();
           
           if (!response.ok) {
-            throw new Error(data.message || 'API request failed');
+            // Include error details if available for better debugging
+            const errorMsg = data.error 
+              ? `${data.message || 'API request failed'}\n\nError details: ${data.error}`
+              : (data.message || 'API request failed');
+            throw new Error(errorMsg);
           }
           
           return data;
