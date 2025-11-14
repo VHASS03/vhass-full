@@ -2,12 +2,55 @@ import { createTransport } from "nodemailer";
 
 
 
+import net from 'net';
+
+// Test network connectivity to SMTP host
+const testNetworkConnectivity = async (host, port) => {
+  return new Promise((resolve) => {
+    const socket = new net.Socket();
+    const timeout = 5000; // 5 seconds
+    
+    socket.setTimeout(timeout);
+    
+    socket.once('connect', () => {
+      socket.destroy();
+      resolve({ success: true, message: `Port ${port} is reachable` });
+    });
+    
+    socket.once('timeout', () => {
+      socket.destroy();
+      resolve({ success: false, message: `Connection timeout to ${host}:${port}` });
+    });
+    
+    socket.once('error', (err) => {
+      resolve({ success: false, message: `Connection error: ${err.message}`, code: err.code });
+    });
+    
+    socket.connect(port, host);
+  });
+};
+
 export const buildTransport = async () => {
   const host = process.env.SMTP_HOST || "smtp.gmail.com";
   const port = Number(process.env.SMTP_PORT || 465);
   // Trim whitespace from credentials
   const rawUser = (process.env.SMTP_USER || process.env.Gmail || '').trim();
   const rawPass = (process.env.SMTP_PASS || process.env.Password || '').trim();
+  
+  // Test network connectivity first
+  console.log(`🔍 Testing network connectivity to ${host}:${port}...`);
+  const connectivityTest = await testNetworkConnectivity(host, port);
+  console.log(`📡 Network test result:`, connectivityTest);
+  
+  if (!connectivityTest.success) {
+    console.error(`❌ CRITICAL: Cannot reach ${host}:${port}`);
+    console.error(`❌ This suggests a firewall/network issue, not an SMTP configuration problem`);
+    console.error(`❌ Possible causes:`);
+    console.error(`   - Your hosting provider (Render/Hostinger) blocks outbound SMTP connections`);
+    console.error(`   - Hostinger SMTP server blocks connections from your server's IP`);
+    console.error(`   - Firewall rules preventing SMTP access`);
+    console.error(`❌ Solution: Contact your hosting provider or use an email service API instead`);
+  }
   
   // Remove any trailing commas or spaces that might have been accidentally added
   const user = rawUser;
