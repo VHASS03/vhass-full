@@ -796,42 +796,64 @@ export const contactMessage = async (req, res) => {
       return res.status(400).json({ success: false, message: "Email and message are required" });
     }
 
-    // Return success immediately - don't wait for emails
-    res.status(200).json({ success: true, message: "Message sent successfully" });
-
-    // Send emails asynchronously (fire-and-forget) after response is sent
-    // This prevents blocking the user's request
-    setImmediate(async () => {
-      console.log('📧 Starting async email sending for contact form:', { name, email });
-      
+    console.log('📧 Contact form submission received:', { name, email, messageLength: message?.length });
+    
+    // Send emails with proper error handling - wait for them to complete
+    let emailSent = false;
+    let emailError = null;
+    
+    try {
       // Send main contact email with timeout handling
-      try {
-        await sendContactMail({ name, email, message });
-        console.log('✅ Contact email sent successfully to info@vhassacademy.com and vhass0310@gmail.com');
-      } catch (emailError) {
-        console.error('❌ CRITICAL: Contact email send failed!');
-        console.error('❌ Error message:', emailError?.message);
-        console.error('❌ Error code:', emailError?.code);
-        console.error('❌ Error stack:', emailError?.stack);
-        console.error('❌ Full error:', JSON.stringify(emailError, Object.getOwnPropertyNames(emailError)));
-        // Log but don't fail - email is sent asynchronously
-      }
-      
-      // Fire-and-forget acknowledgement to sender (non-blocking, with timeout)
-      try { 
-        await sendContactAck({ name, email });
-        console.log('✅ Contact acknowledgement email sent successfully to:', email);
-      } catch (ackError) {
-        console.error('❌ Contact acknowledgement email failed:', ackError?.message || ackError);
-        console.error('❌ Acknowledgement error stack:', ackError?.stack);
-        // Ignore acknowledgement failures
-      }
-    });
+      console.log('📧 Attempting to send contact email...');
+      await sendContactMail({ name, email, message });
+      console.log('✅ Contact email sent successfully to info@vhassacademy.com and vhass0310@gmail.com');
+      emailSent = true;
+    } catch (emailError) {
+      console.error('❌ CRITICAL: Contact email send failed!');
+      console.error('❌ Error message:', emailError?.message);
+      console.error('❌ Error code:', emailError?.code);
+      console.error('❌ Error command:', emailError?.command);
+      console.error('❌ Error response:', emailError?.response);
+      console.error('❌ Error stack:', emailError?.stack);
+      console.error('❌ Full error:', JSON.stringify(emailError, Object.getOwnPropertyNames(emailError)));
+      emailError = emailError;
+    }
+    
+    // Send acknowledgement email (non-blocking - don't fail if this fails)
+    let ackSent = false;
+    try { 
+      await sendContactAck({ name, email });
+      console.log('✅ Contact acknowledgement email sent successfully to:', email);
+      ackSent = true;
+    } catch (ackError) {
+      console.error('❌ Contact acknowledgement email failed:', ackError?.message || ackError);
+      console.error('❌ Acknowledgement error stack:', ackError?.stack);
+      // Don't fail the whole request if acknowledgement fails
+    }
+
+    // Return response based on email sending result
+    if (emailSent) {
+      return res.status(200).json({ 
+        success: true, 
+        message: "Message sent successfully. We'll get back to you soon!" 
+      });
+    } else {
+      // Email failed - return error so user knows
+      console.error('❌ Returning error response to user because email failed');
+      return res.status(500).json({ 
+        success: false, 
+        message: "Failed to send message. Please try again or contact us directly at info@vhassacademy.com",
+        error: process.env.NODE_ENV === 'development' ? emailError?.message : undefined
+      });
+    }
   } catch (error) {
-    console.error('Contact message error:', error?.message || error);
-    // Even on unexpected errors, return success to avoid blocking users
-    // Log the error for debugging but don't expose it to users
-    return res.status(200).json({ success: true, message: "Message received. We'll get back to you soon." });
+    console.error('❌ Contact message error:', error?.message || error);
+    console.error('❌ Error stack:', error?.stack);
+    return res.status(500).json({ 
+      success: false, 
+      message: "An error occurred. Please try again or contact us directly at info@vhassacademy.com",
+      error: process.env.NODE_ENV === 'development' ? error?.message : undefined
+    });
   }
 };
 
