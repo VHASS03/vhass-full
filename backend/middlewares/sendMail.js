@@ -482,7 +482,8 @@ export const sendContactMail = async (data) => {
         continue;
       } else {
         console.error('❌ Error stack:', error.stack);
-        throw error;
+        // Don't throw here - let it fall through to Resend fallback check
+        break; // Exit the loop to check for Resend fallback
       }
     }
   }
@@ -631,6 +632,18 @@ export const sendContactAck = async (data) => {
     console.error('❌ CRITICAL: Failed to send acknowledgement email');
     console.error('❌ Error message:', error.message);
     console.error('❌ Error code:', error.code);
+    
+    // If SMTP failed due to network/firewall, try Resend API as fallback
+    if (error.code === 'ETIMEDOUT' || error.message.includes('timeout')) {
+      console.log('🔄 SMTP blocked by firewall, trying Resend API fallback for acknowledgement...');
+      try {
+        return await sendViaResendAPI(mailOptions, html);
+      } catch (resendError) {
+        console.error('❌ Resend API also failed for acknowledgement:', resendError.message);
+        throw error; // Throw original SMTP error
+      }
+    }
+    
     throw error;
   }
 };
@@ -818,6 +831,36 @@ export const sendTransactMailAdmin = async (subject, data) => {
     console.error('❌ Email error code:', error.code);
     console.error('❌ Email error command:', error.command);
     console.error('❌ Email error stack:', error.stack);
+    
+    // If SMTP failed due to network/firewall, try Resend API as fallback
+    if (error.code === 'ETIMEDOUT' || error.message.includes('timeout')) {
+      console.log('🔄 SMTP blocked by firewall, trying Resend API fallback for admin email...');
+      try {
+        // Resend API: Send to primary email, then send BCC emails separately
+        const mailOptions = {
+          from: fromAddress(),
+          to: primaryEmail,
+          subject,
+          html,
+        };
+        const result = await sendViaResendAPI(mailOptions, html);
+        
+        // Send BCC emails separately via Resend
+        for (const bccEmail of bccEmails) {
+          try {
+            await sendViaResendAPI({ ...mailOptions, to: bccEmail }, html);
+          } catch (bccError) {
+            console.error(`⚠️ Failed to send BCC to ${bccEmail}:`, bccError.message);
+          }
+        }
+        
+        return result;
+      } catch (resendError) {
+        console.error('❌ Resend API also failed for admin email:', resendError.message);
+        throw error; // Throw original SMTP error
+      }
+    }
+    
     throw error;
   }
 };
@@ -1023,6 +1066,23 @@ export const sendTransactMailUser = async (subject, data) => {
     console.error('❌ Email error command:', error.command);
     console.error('❌ Email error stack:', error.stack);
     console.error('❌ Full error object:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+    
+    // If SMTP failed due to network/firewall, try Resend API as fallback
+    if (error.code === 'ETIMEDOUT' || error.message.includes('timeout')) {
+      console.log('🔄 SMTP blocked by firewall, trying Resend API fallback for user email...');
+      try {
+        const mailOptions = {
+          from: fromAddress(),
+          to: data.email,
+          subject,
+          html,
+        };
+        return await sendViaResendAPI(mailOptions, html);
+      } catch (resendError) {
+        console.error('❌ Resend API also failed for user email:', resendError.message);
+        throw error; // Throw original SMTP error
+      }
+    }
     
     // Re-throw the error so calling code knows email failed
     throw error;
