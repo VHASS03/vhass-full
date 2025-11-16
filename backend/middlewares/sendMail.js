@@ -618,7 +618,7 @@ export const sendContactAck = async (data) => {
       <p>If you didn't submit this request, please ignore this email.</p>
       <div class="footer">
         <p>✉️ info@vhassacademy.com</p>
-        <p>📞 +91 8985380266</p>
+        <p>📞 +91 89853 20226</p>
       </div>
     </div>
   </body>
@@ -915,7 +915,7 @@ const generateInvoicePDF = async (data) => {
       const companyName = 'VHASS Academy';
       const companyAddress = '9-1-70, Brilliant\'s School Area\nIbrahimpatnam Krishna-521456\nAndhra Pradesh, India';
       const companyEmail = 'info@vhassacademy.com';
-      const companyPhone = '+91 8985380266';
+      const companyPhone = '+91 89853 20226';
       const companyWebsite = 'www.vhassacademy.com';
       
       // Invoice details
@@ -1297,7 +1297,7 @@ export const sendTransactMailUser = async (subject, data) => {
       <p>Empowering minds through quality education</p>
       <div class="footer-contact">
         <span>📧 info@vhassacademy.com</span>
-        <span>📞 +91 8985380266</span>
+        <span>📞 +91 89853 20226</span>
         <span>🌐 <a href="https://www.vhassacademy.com">www.vhassacademy.com</a></span>
       </div>
       <p style="margin-top: 20px; font-size: 11px; color: #7f8c8d;">
