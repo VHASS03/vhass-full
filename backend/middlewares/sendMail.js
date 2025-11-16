@@ -1,5 +1,5 @@
 import { createTransport } from "nodemailer";
-import { Resend } from '@resend/node';
+import { Resend } from 'resend';
 import net from 'net';
 
 // Test network connectivity to SMTP host
