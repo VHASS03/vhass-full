@@ -5,6 +5,8 @@ import PDFDocument from 'pdfkit';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import https from 'https';
+import http from 'http';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -900,9 +902,34 @@ const generateCourseSlug = (title) => {
     .replace(/(^-|-$)/g, "");
 };
 
+// Helper function to fetch image from URL
+const fetchImage = (url) => {
+  return new Promise((resolve, reject) => {
+    const protocol = url.startsWith('https') ? https : http;
+    const timeout = 5000; // 5 second timeout
+    
+    const request = protocol.get(url, (response) => {
+      if (response.statusCode !== 200) {
+        reject(new Error(`Failed to fetch image: ${response.statusCode}`));
+        return;
+      }
+      const chunks = [];
+      response.on('data', (chunk) => chunks.push(chunk));
+      response.on('end', () => resolve(Buffer.concat(chunks)));
+      response.on('error', reject);
+    });
+    
+    request.on('error', reject);
+    request.setTimeout(timeout, () => {
+      request.destroy();
+      reject(new Error('Image fetch timeout'));
+    });
+  });
+};
+
 // Generate PDF invoice
 const generateInvoicePDF = async (data) => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       const doc = new PDFDocument({ margin: 50, size: 'A4' });
       const chunks = [];
@@ -926,73 +953,112 @@ const generateInvoicePDF = async (data) => {
         day: 'numeric' 
       }) : new Date().toLocaleDateString('en-IN');
       
-      // Header
-      doc.fontSize(24).fillColor('#5a2d82').text(companyName, 50, 50, { align: 'left' });
-      doc.fontSize(10).fillColor('#666666').text('INVOICE', 450, 50, { align: 'right' });
+      // Get frontend URL for logo
+      const frontendUrl = process.env.FRONTEND_URL || 'https://www.vhassacademy.com';
+      const logoUrl = `${frontendUrl}/VHASS.png`;
       
-      // Company address
-      doc.fontSize(9).fillColor('#333333').text(companyAddress, 50, 90, { align: 'left' });
-      doc.text(`Email: ${companyEmail}`, 50, 140);
-      doc.text(`Phone: ${companyPhone}`, 50, 155);
-      doc.text(`Website: ${companyWebsite}`, 50, 170);
+      // Header section - Top of page
+      let currentY = 50;
+      let logoAdded = false;
       
-      // Invoice number and date
+      // Try to add logo, but continue if it fails
+      try {
+        const logoBuffer = await fetchImage(logoUrl);
+        // Add logo on the left side (max width 120px, maintain aspect ratio)
+        doc.image(logoBuffer, 50, currentY, { width: 120, fit: [120, 50] });
+        logoAdded = true;
+        currentY = 105; // Move down after logo (50 + 50 height + 5 spacing)
+      } catch (logoError) {
+        console.warn('⚠️ Could not load logo for PDF:', logoError.message);
+        // If logo fails, use company name as fallback
+        doc.fontSize(24).fillColor('#5a2d82').text(companyName, 50, currentY);
+        currentY = 90;
+      }
+      
+      // INVOICE label (right side, aligned with top)
+      doc.fontSize(16).fillColor('#666666').text('INVOICE', 450, 50, { align: 'right', width: 100 });
+      
+      // Company address (left side, below logo/name)
+      doc.fontSize(9).fillColor('#333333').text(companyAddress, 50, currentY, { width: 300 });
+      
+      // Invoice number and date on the right side - positioned to align with address
+      const invoiceInfoY = currentY;
       doc.fontSize(9).fillColor('#333333')
-        .text(`Invoice #: ${invoiceNumber}`, 400, 90, { align: 'right' })
-        .text(`Date: ${invoiceDate}`, 400, 105, { align: 'right' });
+        .text(`Invoice #:`, 400, invoiceInfoY, { align: 'right', width: 150 })
+        .text(invoiceNumber, 400, invoiceInfoY + 12, { align: 'right', width: 150 })
+        .text(`Date: ${invoiceDate}`, 400, invoiceInfoY + 28, { align: 'right', width: 150 });
       
-      // Bill to section
-      doc.fontSize(12).fillColor('#5a2d82').text('Bill To:', 50, 200);
+      // Company contact info (left side)
+      currentY = 140;
+      doc.fontSize(9).fillColor('#333333')
+        .text(`Email: ${companyEmail}`, 50, currentY)
+        .text(`Phone: ${companyPhone}`, 50, currentY + 12)
+        .text(`Website: ${companyWebsite}`, 50, currentY + 24);
+      
+      // Bill to section - moved down to avoid overlap
+      currentY = 200;
+      doc.fontSize(12).fillColor('#5a2d82').text('Bill To:', 50, currentY);
+      currentY = 220;
       doc.fontSize(10).fillColor('#333333')
-        .text(data.name || 'Customer', 50, 220)
-        .text(data.email || '', 50, 235);
+        .text(data.name || 'Customer', 50, currentY)
+        .text(data.email || '', 50, currentY + 15);
       if (data.phone && data.phone !== 'Not provided') {
-        doc.text(data.phone, 50, 250);
+        doc.text(data.phone, 50, currentY + 30);
       }
       
       // Line separator
-      doc.moveTo(50, 280).lineTo(550, 280).strokeColor('#e0e0e0').lineWidth(1).stroke();
+      currentY = 280;
+      doc.moveTo(50, currentY).lineTo(550, currentY).strokeColor('#e0e0e0').lineWidth(1).stroke();
       
-      // Item details
-      doc.fontSize(12).fillColor('#5a2d82').text('Item Details', 50, 300);
-      doc.moveTo(50, 320).lineTo(550, 320).strokeColor('#5a2d82').lineWidth(2).stroke();
+      // Item details section
+      currentY = 300;
+      doc.fontSize(12).fillColor('#5a2d82').text('Item Details', 50, currentY);
+      currentY = 320;
+      doc.moveTo(50, currentY).lineTo(550, currentY).strokeColor('#5a2d82').lineWidth(2).stroke();
       
       // Table headers
+      currentY = 340;
       doc.fontSize(10).fillColor('#333333')
-        .text('Description', 50, 340)
-        .text('Quantity', 400, 340)
-        .text('Amount', 480, 340);
+        .text('Description', 50, currentY)
+        .text('Quantity', 400, currentY)
+        .text('Amount', 480, currentY);
       
-      doc.moveTo(50, 360).lineTo(550, 360).strokeColor('#e0e0e0').lineWidth(1).stroke();
+      currentY = 360;
+      doc.moveTo(50, currentY).lineTo(550, currentY).strokeColor('#e0e0e0').lineWidth(1).stroke();
       
       // Item row
+      currentY = 375;
       doc.fontSize(10).fillColor('#333333')
-        .text(data.course || 'Course/Workshop', 50, 375, { width: 340 })
-        .text('1', 400, 375)
-        .text(`₹${Number(data.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 480, 375);
+        .text(data.course || 'Course/Workshop', 50, currentY, { width: 340 })
+        .text('1', 400, currentY)
+        .text(`₹${Number(data.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 480, currentY);
       
-      doc.moveTo(50, 400).lineTo(550, 400).strokeColor('#e0e0e0').lineWidth(1).stroke();
+      currentY = 400;
+      doc.moveTo(50, currentY).lineTo(550, currentY).strokeColor('#e0e0e0').lineWidth(1).stroke();
       
       // Payment details
+      currentY = 420;
       doc.fontSize(10).fillColor('#666666')
-        .text(`Transaction ID: ${data.txnid || 'N/A'}`, 50, 420)
-        .text(`Payment Method: ${data.paymentMethod || 'PhonePe'}`, 50, 435)
-        .text(`Payment Status: ${data.stat || 'SUCCESS'}`, 50, 450);
+        .text(`Transaction ID: ${data.txnid || 'N/A'}`, 50, currentY)
+        .text(`Payment Method: ${data.paymentMethod || 'PhonePe'}`, 50, currentY + 15)
+        .text(`Payment Status: ${data.stat || 'SUCCESS'}`, 50, currentY + 30);
       
       // Total section
-      const totalY = 480;
-      doc.moveTo(50, totalY).lineTo(550, totalY).strokeColor('#5a2d82').lineWidth(2).stroke();
+      currentY = 480;
+      doc.moveTo(50, currentY).lineTo(550, currentY).strokeColor('#5a2d82').lineWidth(2).stroke();
       
+      currentY = 495;
       doc.fontSize(14).fillColor('#5a2d82')
-        .text('Total Amount:', 350, totalY + 10)
+        .text('Total Amount:', 350, currentY)
         .fontSize(16)
-        .text(`₹${Number(data.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 480, totalY + 10);
+        .text(`₹${Number(data.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 480, currentY);
       
       // Footer
+      currentY = 650;
       doc.fontSize(8).fillColor('#999999')
-        .text('Thank you for your purchase!', 50, 600, { align: 'center' })
-        .text('This is a computer-generated invoice and does not require a signature.', 50, 615, { align: 'center' })
-        .text(`For any queries, contact us at ${companyEmail} or ${companyPhone}`, 50, 630, { align: 'center' });
+        .text('Thank you for your purchase!', 50, currentY, { align: 'center', width: 500 })
+        .text('This is a computer-generated invoice and does not require a signature.', 50, currentY + 15, { align: 'center', width: 500 })
+        .text(`For any queries, contact us at ${companyEmail} or ${companyPhone}`, 50, currentY + 30, { align: 'center', width: 500 });
       
       doc.end();
     } catch (error) {
