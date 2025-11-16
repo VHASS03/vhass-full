@@ -2,6 +2,8 @@ import React, { useLayoutEffect, useRef, Suspense, useState } from "react";
 
 import Navbar from "./Components/navbar";
 import Footer from "./Components/footer";
+import SEO from "./Components/SEO";
+import StructuredData, { generateOrganizationSchema, generateWebSiteSchema } from "./Components/StructuredData";
 import { Canvas } from "@react-three/fiber";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -64,6 +66,14 @@ function Home() {
 
   return (
     <main ref={mainRef} className="overflow-x-hidden">
+      <SEO
+        title="VHASS Academy - Learn Cybersecurity & Entrepreneurship from Industry Experts"
+        description="VHASS Academy offers comprehensive cybersecurity training and entrepreneurship courses. Learn from industry experts and transform your career with hands-on experience in cybersecurity, ethical hacking, and business development."
+        keywords="cybersecurity courses, entrepreneurship training, online courses, VHASS Academy, cybersecurity training India, learn cybersecurity, cybersecurity certification, ethical hacking course, online learning platform"
+        url="https://www.vhassacademy.com/"
+      />
+      <StructuredData data={generateOrganizationSchema()} />
+      <StructuredData data={generateWebSiteSchema()} />
       <Suspense fallback={<div className="fixed inset-0 grid place-items-center bg-black text-white">Loading...</div>}>
         <Navbar />
 
