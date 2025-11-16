@@ -1,6 +1,13 @@
 import { createTransport } from "nodemailer";
 import { Resend } from 'resend';
 import net from 'net';
+import PDFDocument from 'pdfkit';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Test network connectivity to SMTP host
 const testNetworkConnectivity = async (host, port) => {
@@ -520,13 +527,32 @@ const sendViaResendAPI = async (mailOptions, html) => {
   
   for (const recipient of recipients) {
     try {
-      const result = await resend.emails.send({
+      const emailData = {
         from: mailOptions.from || 'info@vhassacademy.com',
         to: recipient,
         subject: mailOptions.subject,
         html: html,
         replyTo: mailOptions.replyTo,
-      });
+      };
+      
+      // Add attachments if present (Resend API format - expects base64 string)
+      if (mailOptions.attachments && mailOptions.attachments.length > 0) {
+        emailData.attachments = mailOptions.attachments.map(att => {
+          // Convert buffer to base64 if needed
+          const contentBase64 = typeof att.content === 'string' 
+            ? att.content 
+            : Buffer.isBuffer(att.content) 
+              ? att.content.toString('base64')
+              : Buffer.from(att.content).toString('base64');
+          
+          return {
+            filename: att.filename,
+            content: contentBase64
+          };
+        });
+      }
+      
+      const result = await resend.emails.send(emailData);
       
       console.log(`✅ Email sent via Resend API to ${recipient}:`, result);
       results.push({ recipient, success: true, result });
@@ -865,6 +891,116 @@ export const sendTransactMailAdmin = async (subject, data) => {
   }
 };
 
+// Helper function to generate course slug from title
+const generateCourseSlug = (title) => {
+  if (!title) return '';
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+};
+
+// Generate PDF invoice
+const generateInvoicePDF = async (data) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const doc = new PDFDocument({ margin: 50, size: 'A4' });
+      const chunks = [];
+      
+      doc.on('data', chunk => chunks.push(chunk));
+      doc.on('end', () => resolve(Buffer.concat(chunks)));
+      doc.on('error', reject);
+      
+      // Company details
+      const companyName = 'VHASS Academy';
+      const companyAddress = '9-1-70, Brilliant\'s School Area\nIbrahimpatnam Krishna-521456\nAndhra Pradesh, India';
+      const companyEmail = 'info@vhassacademy.com';
+      const companyPhone = '+91 8985380266';
+      const companyWebsite = 'www.vhassacademy.com';
+      
+      // Invoice details
+      const invoiceNumber = data.orderId || data.txnid || `INV-${Date.now()}`;
+      const invoiceDate = data.time ? new Date(data.time).toLocaleDateString('en-IN', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      }) : new Date().toLocaleDateString('en-IN');
+      
+      // Header
+      doc.fontSize(24).fillColor('#5a2d82').text(companyName, 50, 50, { align: 'left' });
+      doc.fontSize(10).fillColor('#666666').text('INVOICE', 450, 50, { align: 'right' });
+      
+      // Company address
+      doc.fontSize(9).fillColor('#333333').text(companyAddress, 50, 90, { align: 'left' });
+      doc.text(`Email: ${companyEmail}`, 50, 140);
+      doc.text(`Phone: ${companyPhone}`, 50, 155);
+      doc.text(`Website: ${companyWebsite}`, 50, 170);
+      
+      // Invoice number and date
+      doc.fontSize(9).fillColor('#333333')
+        .text(`Invoice #: ${invoiceNumber}`, 400, 90, { align: 'right' })
+        .text(`Date: ${invoiceDate}`, 400, 105, { align: 'right' });
+      
+      // Bill to section
+      doc.fontSize(12).fillColor('#5a2d82').text('Bill To:', 50, 200);
+      doc.fontSize(10).fillColor('#333333')
+        .text(data.name || 'Customer', 50, 220)
+        .text(data.email || '', 50, 235);
+      if (data.phone && data.phone !== 'Not provided') {
+        doc.text(data.phone, 50, 250);
+      }
+      
+      // Line separator
+      doc.moveTo(50, 280).lineTo(550, 280).strokeColor('#e0e0e0').lineWidth(1).stroke();
+      
+      // Item details
+      doc.fontSize(12).fillColor('#5a2d82').text('Item Details', 50, 300);
+      doc.moveTo(50, 320).lineTo(550, 320).strokeColor('#5a2d82').lineWidth(2).stroke();
+      
+      // Table headers
+      doc.fontSize(10).fillColor('#333333')
+        .text('Description', 50, 340)
+        .text('Quantity', 400, 340)
+        .text('Amount', 480, 340);
+      
+      doc.moveTo(50, 360).lineTo(550, 360).strokeColor('#e0e0e0').lineWidth(1).stroke();
+      
+      // Item row
+      doc.fontSize(10).fillColor('#333333')
+        .text(data.course || 'Course/Workshop', 50, 375, { width: 340 })
+        .text('1', 400, 375)
+        .text(`₹${Number(data.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 480, 375);
+      
+      doc.moveTo(50, 400).lineTo(550, 400).strokeColor('#e0e0e0').lineWidth(1).stroke();
+      
+      // Payment details
+      doc.fontSize(10).fillColor('#666666')
+        .text(`Transaction ID: ${data.txnid || 'N/A'}`, 50, 420)
+        .text(`Payment Method: ${data.paymentMethod || 'PhonePe'}`, 50, 435)
+        .text(`Payment Status: ${data.stat || 'SUCCESS'}`, 50, 450);
+      
+      // Total section
+      const totalY = 480;
+      doc.moveTo(50, totalY).lineTo(550, totalY).strokeColor('#5a2d82').lineWidth(2).stroke();
+      
+      doc.fontSize(14).fillColor('#5a2d82')
+        .text('Total Amount:', 350, totalY + 10)
+        .fontSize(16)
+        .text(`₹${Number(data.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 480, totalY + 10);
+      
+      // Footer
+      doc.fontSize(8).fillColor('#999999')
+        .text('Thank you for your purchase!', 50, 600, { align: 'center' })
+        .text('This is a computer-generated invoice and does not require a signature.', 50, 615, { align: 'center' })
+        .text(`For any queries, contact us at ${companyEmail} or ${companyPhone}`, 50, 630, { align: 'center' });
+      
+      doc.end();
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 export const sendTransactMailUser = async (subject, data) => {
   console.log('📧 sendTransactMailUser called:', { subject, userEmail: data.email });
   
@@ -901,6 +1037,21 @@ export const sendTransactMailUser = async (subject, data) => {
   // Format amount
   const formattedAmount = data.amount ? `₹${Number(data.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'N/A';
   const formattedTime = data.time ? new Date(data.time).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) : new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+  
+  // Generate course slug and URL
+  const courseSlug = generateCourseSlug(data.course);
+  const frontendUrl = process.env.FRONTEND_URL || 'https://www.vhassacademy.com';
+  const courseUrl = courseSlug ? `${frontendUrl}/course/${courseSlug}` : `${frontendUrl}/course`;
+  
+  // Generate PDF invoice
+  let pdfBuffer = null;
+  try {
+    pdfBuffer = await generateInvoicePDF(data);
+    console.log('✅ PDF invoice generated successfully');
+  } catch (pdfError) {
+    console.error('❌ Failed to generate PDF invoice:', pdfError.message);
+    // Continue without PDF if generation fails
+  }
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -909,116 +1060,250 @@ export const sendTransactMailUser = async (subject, data) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${subject}</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f3f3f3;
+    * {
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      box-sizing: border-box;
     }
-    .container {
-      background-color: #ffffff;
-      padding: 30px;
-      margin: 0 auto;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+    .email-wrapper {
       max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
     }
-    h1 {
+    .header {
+      background: linear-gradient(135deg, #5a2d82 0%, #7b3fa3 100%);
+      padding: 40px 30px;
+      text-align: center;
+      color: #ffffff;
+    }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #ffffff;
+    }
+    .header p {
+      font-size: 16px;
+      opacity: 0.95;
+      color: #ffffff;
+    }
+    .content {
+      padding: 40px 30px;
+    }
+    .success-badge {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: #ffffff;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+    }
+    .success-badge h2 {
+      font-size: 22px;
+      margin-bottom: 8px;
+      color: #ffffff;
+    }
+    .success-badge p {
+      font-size: 14px;
+      opacity: 0.95;
+      color: #ffffff;
+    }
+    .invoice-section {
+      background-color: #f8f9fa;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 30px;
+      border: 1px solid #e9ecef;
+    }
+    .invoice-section h3 {
       color: #5a2d82;
-      margin-top: 0;
+      font-size: 18px;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #5a2d82;
     }
-    .success-message {
-      background-color: #d4edda;
-      color: #155724;
+    .invoice-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #e9ecef;
+    }
+    .invoice-row:last-child {
+      border-bottom: none;
+    }
+    .invoice-label {
+      font-weight: 600;
+      color: #495057;
+      font-size: 14px;
+    }
+    .invoice-value {
+      color: #6c757d;
+      font-size: 14px;
+      text-align: right;
+    }
+    .total-row {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 3px solid #5a2d82;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .total-label {
+      font-size: 20px;
+      font-weight: 700;
+      color: #5a2d82;
+    }
+    .total-amount {
+      font-size: 28px;
+      font-weight: 700;
+      color: #5a2d82;
+    }
+    .cta-section {
+      text-align: center;
+      margin: 35px 0;
+      padding: 30px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 12px;
+    }
+    .cta-button {
+      display: inline-block;
+      background: linear-gradient(135deg, #5a2d82 0%, #7b3fa3 100%);
+      color: #ffffff;
+      padding: 16px 40px;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 16px;
+      box-shadow: 0 4px 12px rgba(90, 45, 130, 0.3);
+      transition: transform 0.2s;
+    }
+    .cta-button:hover {
+      transform: translateY(-2px);
+    }
+    .pdf-notice {
+      background-color: #e7f3ff;
+      border-left: 4px solid #0066cc;
       padding: 15px;
       border-radius: 6px;
       margin: 20px 0;
-      border-left: 4px solid #28a745;
-    }
-    .bill-section {
-      background-color: #f9f9f9;
-      padding: 20px;
-      border-radius: 6px;
-      margin: 20px 0;
-    }
-    .bill-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid #e0e0e0;
-    }
-    .bill-row:last-child {
-      border-bottom: none;
-    }
-    .bill-label {
-      font-weight: bold;
-      color: #333333;
-    }
-    .bill-value {
-      color: #666666;
-    }
-    .amount-highlight {
-      font-size: 24px;
-      font-weight: bold;
-      color: #5a2d82;
+      font-size: 14px;
+      color: #004085;
     }
     .footer {
-      margin-top: 30px;
-      color: #999999;
+      background-color: #2c3e50;
+      color: #ecf0f1;
+      padding: 30px;
       text-align: center;
-      font-size: 14px;
+      font-size: 13px;
+    }
+    .footer h4 {
+      color: #ffffff;
+      font-size: 16px;
+      margin-bottom: 15px;
+    }
+    .footer p {
+      color: #bdc3c7;
+      margin: 8px 0;
     }
     .footer a {
-      color: #5a2d82;
+      color: #5a9;
       text-decoration: none;
+    }
+    .footer-contact {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #34495e;
+    }
+    .footer-contact span {
+      display: inline-block;
+      margin: 0 15px;
+      color: #95a5a6;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>${subject}</h1>
-    <div class="success-message">
-      <strong>✅ Payment Successful!</strong> Your purchase has been confirmed. Please find your bill details below.
+  <div class="email-wrapper">
+    <div class="header">
+      <h1>🎉 Purchase Confirmed!</h1>
+      <p>Thank you for choosing VHASS Academy</p>
     </div>
-    <div class="bill-section">
-      <div class="bill-row">
-        <span class="bill-label">Name:</span>
-        <span class="bill-value">${data.name || 'N/A'}</span>
+    
+    <div class="content">
+      <div class="success-badge">
+        <h2>✅ Payment Successful</h2>
+        <p>Your enrollment has been confirmed. Start learning right away!</p>
       </div>
-      <div class="bill-row">
-        <span class="bill-label">Item Purchased:</span>
-        <span class="bill-value">${data.course || 'N/A'}</span>
+      
+      <div class="invoice-section">
+        <h3>📋 Order Details</h3>
+        <div class="invoice-row">
+          <span class="invoice-label">Customer Name:</span>
+          <span class="invoice-value">${data.name || 'N/A'}</span>
+        </div>
+        <div class="invoice-row">
+          <span class="invoice-label">Course/Workshop:</span>
+          <span class="invoice-value">${data.course || 'N/A'}</span>
+        </div>
+        <div class="invoice-row">
+          <span class="invoice-label">Order ID:</span>
+          <span class="invoice-value">${data.orderId || data.txnid || 'N/A'}</span>
+        </div>
+        <div class="invoice-row">
+          <span class="invoice-label">Transaction ID:</span>
+          <span class="invoice-value">${data.txnid || 'N/A'}</span>
+        </div>
+        <div class="invoice-row">
+          <span class="invoice-label">Payment Method:</span>
+          <span class="invoice-value">${data.paymentMethod || 'PhonePe'}</span>
+        </div>
+        <div class="invoice-row">
+          <span class="invoice-label">Payment Status:</span>
+          <span class="invoice-value" style="color: #28a745; font-weight: 600;">${data.stat || 'SUCCESS'}</span>
+        </div>
+        <div class="invoice-row">
+          <span class="invoice-label">Purchase Date:</span>
+          <span class="invoice-value">${formattedTime}</span>
+        </div>
+        <div class="total-row">
+          <span class="total-label">Total Amount:</span>
+          <span class="total-amount">${formattedAmount}</span>
+        </div>
       </div>
-      <div class="bill-row">
-        <span class="bill-label">Order ID:</span>
-        <span class="bill-value">${data.orderId || data.txnid || 'N/A'}</span>
+      
+      ${pdfBuffer ? `
+      <div class="pdf-notice">
+        <strong>📄 Invoice Attached:</strong> A detailed PDF invoice has been attached to this email for your records.
       </div>
-      <div class="bill-row">
-        <span class="bill-label">Transaction ID:</span>
-        <span class="bill-value">${data.txnid || 'N/A'}</span>
-      </div>
-      <div class="bill-row">
-        <span class="bill-label">Payment Method:</span>
-        <span class="bill-value">${data.paymentMethod || 'PhonePe'}</span>
-      </div>
-      <div class="bill-row">
-        <span class="bill-label">Payment Status:</span>
-        <span class="bill-value" style="color: #28a745; font-weight: bold;">${data.stat || 'SUCCESS'}</span>
-      </div>
-      <div class="bill-row">
-        <span class="bill-label">Date & Time:</span>
-        <span class="bill-value">${formattedTime}</span>
-      </div>
-      <div class="bill-row" style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #5a2d82;">
-        <span class="bill-label" style="font-size: 18px;">Amount Paid:</span>
-        <span class="amount-highlight">${formattedAmount}</span>
+      ` : ''}
+      
+      <div class="cta-section">
+        <h3 style="color: #5a2d82; margin-bottom: 15px;">Ready to Start Learning?</h3>
+        <p style="color: #6c757d; margin-bottom: 20px;">Access your course materials and start your learning journey now!</p>
+        <a href="${courseUrl}" class="cta-button">🚀 Access Course</a>
       </div>
     </div>
+    
     <div class="footer">
-      <p>Thank you for your purchase!<br><strong>Vhass Academy</strong></p>
-      <p>✉️ info@vhassacademy.com</p>
-      <p>📞 +91 8985320226</p>
-      <p><a href="https://vhass.in">vhass.in</a></p>
+      <h4>VHASS Academy</h4>
+      <p>Empowering minds through quality education</p>
+      <div class="footer-contact">
+        <span>📧 info@vhassacademy.com</span>
+        <span>📞 +91 8985380266</span>
+        <span>🌐 <a href="https://www.vhassacademy.com">www.vhassacademy.com</a></span>
+      </div>
+      <p style="margin-top: 20px; font-size: 11px; color: #7f8c8d;">
+        This is an automated email. Please do not reply directly to this message.<br>
+        For support, contact us at info@vhassacademy.com
+      </p>
     </div>
   </div>
 </body>
@@ -1043,11 +1328,22 @@ export const sendTransactMailUser = async (subject, data) => {
       html,
     };
     
+    // Attach PDF invoice if generated
+    if (pdfBuffer) {
+      mailOptions.attachments = [{
+        filename: `Invoice-${data.orderId || data.txnid || Date.now()}.pdf`,
+        content: pdfBuffer,
+        contentType: 'application/pdf'
+      }];
+      console.log('📎 PDF invoice attached to email');
+    }
+    
     console.log('📧 Sending email with options:', {
       from: mailOptions.from,
       to: mailOptions.to,
       subject: mailOptions.subject,
-      htmlLength: mailOptions.html?.length || 0
+      htmlLength: mailOptions.html?.length || 0,
+      hasAttachment: !!pdfBuffer
     });
     
     const result = await transport.sendMail(mailOptions);
@@ -1077,6 +1373,17 @@ export const sendTransactMailUser = async (subject, data) => {
           subject,
           html,
         };
+        
+        // For Resend API, attach PDF as base64
+        if (pdfBuffer) {
+          mailOptions.attachments = [{
+            filename: `Invoice-${data.orderId || data.txnid || Date.now()}.pdf`,
+            content: pdfBuffer.toString('base64'),
+            type: 'application/pdf',
+            disposition: 'attachment'
+          }];
+        }
+        
         return await sendViaResendAPI(mailOptions, html);
       } catch (resendError) {
         console.error('❌ Resend API also failed for user email:', resendError.message);
