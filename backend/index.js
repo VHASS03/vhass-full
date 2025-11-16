@@ -124,21 +124,67 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Global OPTIONS handler for CORS preflight - let the CORS middleware handle it
-app.options('*', cors());
-
-// Additional CORS headers for all responses
-app.use((req, res, next) => {
-  const allowedOrigins = ['https://www.vhassacademy.com', 'https://vhassacademy.com'];
+// Explicit OPTIONS handler for all routes to ensure preflight requests work
+app.options('*', (req, res) => {
+  const allowedOrigins = [
+    'https://vhassacademy.com',
+    'https://www.vhassacademy.com',
+    'https://api.vhassacademy.com',
+    'https://www.vhass.in',
+    'https://api.vhass.in',
+    'https://vhass-frontend.onrender.com',
+    'https://vhass-backend.onrender.com',
+    'https://vhass-front.vercel.app',
+    'https://vhass-front-6682o09ot-vhass-projects-7b5ca00b.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:3000',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:5174'
+  ];
+  
   const origin = req.headers.origin;
   
-  if (allowedOrigins.includes(origin)) {
+  if (origin && allowedOrigins.includes(origin)) {
     res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, token, Token, Accept, Origin, X-Requested-With, X-VERIFY, X-MERCHANT-ID');
+    res.header('Access-Control-Max-Age', '86400');
+    res.header('Vary', 'Origin');
+    return res.sendStatus(204);
   }
   
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, token, Token, Accept, Origin, X-Requested-With, X-VERIFY, X-MERCHANT-ID');
+  res.sendStatus(403);
+});
+
+// Additional CORS headers for all responses (cors() middleware handles OPTIONS automatically)
+app.use((req, res, next) => {
+  const allowedOrigins = [
+    'https://vhassacademy.com',
+    'https://www.vhassacademy.com',
+    'https://api.vhassacademy.com',
+    'https://www.vhass.in',
+    'https://api.vhass.in',
+    'https://vhass-frontend.onrender.com',
+    'https://vhass-backend.onrender.com',
+    'https://vhass-front.vercel.app',
+    'https://vhass-front-6682o09ot-vhass-projects-7b5ca00b.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:3000',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:5174'
+  ];
+  
+  const origin = req.headers.origin;
+  
+  // For all requests, ensure CORS headers are set if origin is allowed
+  // (cors() middleware already handles this, but this ensures consistency)
+  if (origin && allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
   
   next();
 });
