@@ -4,22 +4,48 @@ services:
   - type: web
     name: vhass-backend
     env: node
+    rootDir: backend
     buildCommand: npm install
     startCommand: npm start
     envVars:
       - key: MONGODB_URI
-        fromService:
-          name: mongodb
-          type: pserv
-          property: connectionString
+        value: mongodb+srv://vhass0310:Uday_123@cluster0.zndptf0.mongodb.net/vhass?retryWrites=true&w=majority&appName=Cluster0
       - key: SESSION_SECRET
-        generateValue: true
+        value: vhass-super-secret-session-key-2024
+      - key: JWT_SECRET
+        value: vhass-super-secret-jwt-key-2024
+      - key: GOOGLE_CLIENT_ID
+        value: 8739533127-rvga58btf64j28njdjdq84r2kof2h4n4.apps.googleusercontent.com
+      - key: GOOGLE_CLIENT_SECRET
+        value: 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
       - key: FRONTEND_URL
-        value: https://vhass-frontend.onrender.com
+        value: https://vhass-front.vercel.app
+      - key: BACKEND_URL
+        value: https://api.vhassacademy.com
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
+      - key: PHONEPE_MERCHANT_ID
+        value: SU2505141931362838820920
+      - key: PHONEPE_SALT_KEY
+        value: 33418406-0957-4ae0-a07a-a6383760ba05
+      - key: PHONEPE_SALT_INDEX
+        value: 1
+      - key: PHONEPE_ENVIRONMENT
+        value: PRODUCTION
+      - key: PHONEPE_REDIRECT_URL
+        value: https://vhass-front.vercel.app
+      - key: SMTP_HOST
+        value: smtp.hostinger.com
+      - key: SMTP_PORT
+        value: 465
+      - key: SMTP_USER
+        value: info@vhassacademy.com
+      - key: SMTP_PASS
+        value: Hemanth@123
+      - key: RESEND_API_KEY
+        value: re_RFAcz2vm_LotgeJkznk34BuLN8qqUKS9P
     healthCheckPath: /health
     autoDeploy: true
 
