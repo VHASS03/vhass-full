@@ -1053,6 +1053,9 @@ export const sendTransactMailUser = async (subject, data) => {
     // Continue without PDF if generation fails
   }
 
+  // Get logo URL
+  const logoUrl = `${frontendUrl}/VHASS.png`;
+
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1067,216 +1070,254 @@ export const sendTransactMailUser = async (subject, data) => {
     }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background-color: #f5f7fa;
+      background-color: #f5f5f5;
       margin: 0;
       padding: 0;
       line-height: 1.6;
+      color: #333333;
     }
-    .email-wrapper {
+    .email-container {
       max-width: 600px;
       margin: 0 auto;
       background-color: #ffffff;
     }
-    .header {
-      background: linear-gradient(135deg, #5a2d82 0%, #7b3fa3 100%);
-      padding: 40px 30px;
+    .logo-section {
+      padding: 30px 40px;
       text-align: center;
-      color: #ffffff;
+      border-bottom: 1px solid #e5e5e5;
+      background-color: #ffffff;
     }
-    .header h1 {
-      font-size: 28px;
+    .logo {
+      max-width: 180px;
+      height: auto;
+      display: inline-block;
+    }
+    .main-content {
+      padding: 0;
+      background-color: #ffffff;
+    }
+    .header-section {
+      padding: 40px 40px 30px;
+      text-align: left;
+    }
+    .header-section h1 {
+      font-size: 32px;
       font-weight: 600;
-      margin-bottom: 10px;
-      color: #ffffff;
+      color: #1c1c1c;
+      margin-bottom: 12px;
+      line-height: 1.2;
     }
-    .header p {
+    .header-section p {
       font-size: 16px;
-      opacity: 0.95;
-      color: #ffffff;
-    }
-    .content {
-      padding: 40px 30px;
-    }
-    .success-badge {
-      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-      color: #ffffff;
-      padding: 20px;
-      border-radius: 12px;
-      text-align: center;
+      color: #666666;
       margin-bottom: 30px;
-      box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+      line-height: 1.5;
     }
-    .success-badge h2 {
-      font-size: 22px;
-      margin-bottom: 8px;
+    .cta-button-primary {
+      display: inline-block;
+      background-color: #1c1c1c;
       color: #ffffff;
+      padding: 14px 32px;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 16px;
+      margin-top: 10px;
+      transition: background-color 0.2s;
     }
-    .success-badge p {
-      font-size: 14px;
-      opacity: 0.95;
-      color: #ffffff;
+    .cta-button-primary:hover {
+      background-color: #333333;
     }
-    .invoice-section {
-      background-color: #f8f9fa;
-      border-radius: 12px;
-      padding: 25px;
-      margin-bottom: 30px;
-      border: 1px solid #e9ecef;
+    .invoice-box {
+      background-color: #f8f8f8;
+      margin: 0 40px 40px;
+      padding: 30px;
+      border-radius: 4px;
     }
-    .invoice-section h3 {
-      color: #5a2d82;
+    .invoice-title {
       font-size: 18px;
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 2px solid #5a2d82;
+      font-weight: 600;
+      color: #1c1c1c;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e5e5e5;
     }
-    .invoice-row {
+    .transaction-info {
+      margin-bottom: 24px;
+    }
+    .transaction-info-row {
       display: flex;
       justify-content: space-between;
+      padding: 8px 0;
+      font-size: 14px;
+    }
+    .transaction-info-label {
+      color: #666666;
+    }
+    .transaction-info-value {
+      color: #1c1c1c;
+      font-weight: 500;
+    }
+    .course-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 24px 0;
+    }
+    .course-table th {
+      text-align: left;
       padding: 12px 0;
-      border-bottom: 1px solid #e9ecef;
-    }
-    .invoice-row:last-child {
-      border-bottom: none;
-    }
-    .invoice-label {
+      font-size: 13px;
       font-weight: 600;
-      color: #495057;
-      font-size: 14px;
+      color: #666666;
+      border-bottom: 1px solid #e5e5e5;
     }
-    .invoice-value {
-      color: #6c757d;
+    .course-table td {
+      padding: 12px 0;
       font-size: 14px;
+      color: #1c1c1c;
+      border-bottom: 1px solid #e5e5e5;
+    }
+    .course-table th:last-child,
+    .course-table td:last-child {
       text-align: right;
     }
+    .course-name {
+      font-weight: 500;
+      color: #1c1c1c;
+    }
+    .price-cell {
+      font-weight: 500;
+    }
+    .summary-section {
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid #e5e5e5;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      font-size: 14px;
+    }
+    .summary-label {
+      color: #666666;
+    }
+    .summary-value {
+      color: #1c1c1c;
+      font-weight: 500;
+    }
     .total-row {
-      margin-top: 15px;
-      padding-top: 15px;
-      border-top: 3px solid #5a2d82;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 2px solid #1c1c1c;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
     .total-label {
-      font-size: 20px;
-      font-weight: 700;
-      color: #5a2d82;
+      font-size: 18px;
+      font-weight: 600;
+      color: #1c1c1c;
     }
     .total-amount {
-      font-size: 28px;
+      font-size: 24px;
       font-weight: 700;
-      color: #5a2d82;
+      color: #1c1c1c;
     }
-    .cta-section {
-      text-align: center;
-      margin: 35px 0;
-      padding: 30px;
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-      border-radius: 12px;
+    .purchased-by {
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid #e5e5e5;
     }
-    .cta-button {
-      display: inline-block;
-      background: linear-gradient(135deg, #5a2d82 0%, #7b3fa3 100%);
-      color: #ffffff;
-      padding: 16px 40px;
-      text-decoration: none;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 16px;
-      box-shadow: 0 4px 12px rgba(90, 45, 130, 0.3);
-      transition: transform 0.2s;
+    .purchased-by-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 13px;
+      color: #666666;
     }
-    .cta-button:hover {
-      transform: translateY(-2px);
+    .help-section {
+      padding: 0 40px 40px;
+      text-align: left;
+    }
+    .help-section p {
+      font-size: 14px;
+      color: #666666;
+      margin-bottom: 8px;
+    }
+    .help-section a {
+      color: #1c1c1c;
+      text-decoration: underline;
     }
     .pdf-notice {
-      background-color: #e7f3ff;
+      background-color: #e8f4f8;
       border-left: 4px solid #0066cc;
-      padding: 15px;
-      border-radius: 6px;
-      margin: 20px 0;
+      padding: 16px 20px;
+      margin: 0 40px 30px;
+      border-radius: 4px;
       font-size: 14px;
       color: #004085;
     }
+    .pdf-notice strong {
+      font-weight: 600;
+    }
     .footer {
-      background-color: #2c3e50;
-      color: #ecf0f1;
-      padding: 30px;
-      text-align: center;
-      font-size: 13px;
-    }
-    .footer h4 {
+      background-color: #1c1c1c;
       color: #ffffff;
-      font-size: 16px;
-      margin-bottom: 15px;
+      padding: 40px;
+      text-align: center;
+      font-size: 12px;
     }
-    .footer p {
-      color: #bdc3c7;
-      margin: 8px 0;
+    .footer-links {
+      margin-bottom: 20px;
     }
-    .footer a {
-      color: #5a9;
+    .footer-links a {
+      color: #ffffff;
       text-decoration: none;
+      margin: 0 10px;
     }
-    .footer-contact {
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
+    .footer-text {
+      color: #999999;
+      line-height: 1.6;
       margin-top: 20px;
-      padding-top: 20px;
-      border-top: 1px solid #34495e;
     }
-    .footer-contact span {
-      display: inline-block;
-      margin: 0 15px;
-      color: #95a5a6;
+    .footer-address {
+      color: #999999;
+      margin-top: 16px;
+      font-size: 11px;
+    }
+    @media only screen and (max-width: 600px) {
+      .email-container {
+        width: 100% !important;
+      }
+      .logo-section,
+      .header-section,
+      .invoice-box,
+      .help-section,
+      .footer {
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+      }
+      .header-section h1 {
+        font-size: 26px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="email-wrapper">
-    <div class="header">
-      <h1>🎉 Purchase Confirmed!</h1>
-      <p>Thank you for choosing VHASS Academy</p>
+  <div class="email-container">
+    <div class="logo-section">
+      <img src="${logoUrl}" alt="VHASS Academy" class="logo" />
     </div>
     
-    <div class="content">
-      <div class="success-badge">
-        <h2>✅ Payment Successful</h2>
-        <p>Your enrollment has been confirmed. Start learning right away!</p>
-      </div>
-      
-      <div class="invoice-section">
-        <h3>📋 Order Details</h3>
-        <div class="invoice-row">
-          <span class="invoice-label">Customer Name:</span>
-          <span class="invoice-value">${data.name || 'N/A'}</span>
-        </div>
-        <div class="invoice-row">
-          <span class="invoice-label">Course/Workshop:</span>
-          <span class="invoice-value">${data.course || 'N/A'}</span>
-        </div>
-        <div class="invoice-row">
-          <span class="invoice-label">Order ID:</span>
-          <span class="invoice-value">${data.orderId || data.txnid || 'N/A'}</span>
-        </div>
-        <div class="invoice-row">
-          <span class="invoice-label">Transaction ID:</span>
-          <span class="invoice-value">${data.txnid || 'N/A'}</span>
-        </div>
-        <div class="invoice-row">
-          <span class="invoice-label">Payment Method:</span>
-          <span class="invoice-value">${data.paymentMethod || 'PhonePe'}</span>
-        </div>
-        <div class="invoice-row">
-          <span class="invoice-label">Payment Status:</span>
-          <span class="invoice-value" style="color: #28a745; font-weight: 600;">${data.stat || 'SUCCESS'}</span>
-        </div>
-        <div class="invoice-row">
-          <span class="invoice-label">Purchase Date:</span>
-          <span class="invoice-value">${formattedTime}</span>
-        </div>
-        <div class="total-row">
-          <span class="total-label">Total Amount:</span>
-          <span class="total-amount">${formattedAmount}</span>
-        </div>
+    <div class="main-content">
+      <div class="header-section">
+        <h1>Your order's been processed</h1>
+        <p>You're all set to start learning. Ready to jump in?</p>
+        <a href="${courseUrl}" class="cta-button-primary">Start learning</a>
       </div>
       
       ${pdfBuffer ? `
@@ -1285,25 +1326,95 @@ export const sendTransactMailUser = async (subject, data) => {
       </div>
       ` : ''}
       
-      <div class="cta-section">
-        <h3 style="color: #5a2d82; margin-bottom: 15px;">Ready to Start Learning?</h3>
-        <p style="color: #6c757d; margin-bottom: 20px;">Access your course materials and start your learning journey now!</p>
-        <a href="${courseUrl}" class="cta-button">🚀 Access Course</a>
+      <div class="invoice-box">
+        <div class="invoice-title">Transaction Information</div>
+        
+        <div class="transaction-info">
+          <div class="transaction-info-row">
+            <span class="transaction-info-label">Transaction date:</span>
+            <span class="transaction-info-value">${formattedTime.split(',')[0]}</span>
+          </div>
+          <div class="transaction-info-row">
+            <span class="transaction-info-label">Transaction number:</span>
+            <span class="transaction-info-value">${data.txnid || data.orderId || 'N/A'}</span>
+          </div>
+        </div>
+        
+        <table class="course-table">
+          <thead>
+            <tr>
+              <th>Course name</th>
+              <th style="text-align: right;">Your price</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="course-name">${data.course || 'Course/Workshop'}</td>
+              <td class="price-cell" style="text-align: right;">${formattedAmount}</td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div class="summary-section">
+          <div class="summary-row">
+            <span class="summary-label">Subtotal:</span>
+            <span class="summary-value">${formattedAmount}</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Tax:</span>
+            <span class="summary-value">₹0.00</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Credits:</span>
+            <span class="summary-value">₹0.00</span>
+          </div>
+          <div class="total-row">
+            <span class="total-label">Total:</span>
+            <span class="total-amount">${formattedAmount}</span>
+          </div>
+        </div>
+        
+        <div class="purchased-by">
+          <div class="purchased-by-row">
+            <span>Purchased by:</span>
+            <span>${data.name || 'Customer'}</span>
+          </div>
+          <div class="purchased-by-row">
+            <span>Payment method:</span>
+            <span>${(data.paymentMethod || 'PhonePe').toLowerCase()}</span>
+          </div>
+          <div class="purchased-by-row">
+            <span>Sold by:</span>
+            <span>VHASS Academy</span>
+          </div>
+          <div class="purchased-by-row" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e5e5;">
+            <span style="font-size: 12px; color: #999999;">9-1-70, Brilliant's School Area,<br>Ibrahimpatnam Krishna-521456,<br>Andhra Pradesh, India</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="help-section">
+        <p><strong>Need help?</strong> Visit our <a href="${frontendUrl}/contact">Help Center</a> for support.</p>
       </div>
     </div>
     
     <div class="footer">
-      <h4>VHASS Academy</h4>
-      <p>Empowering minds through quality education</p>
-      <div class="footer-contact">
-        <span>📧 info@vhassacademy.com</span>
-        <span>📞 +91 89853 20226</span>
-        <span>🌐 <a href="https://www.vhassacademy.com">www.vhassacademy.com</a></span>
+      <div class="footer-links">
+        <a href="${frontendUrl}">About us</a>
+        <span style="color: #666;">|</span>
+        <a href="${frontendUrl}/contact">Support</a>
+        <span style="color: #666;">|</span>
+        <a href="${frontendUrl}/policies">Privacy terms</a>
       </div>
-      <p style="margin-top: 20px; font-size: 11px; color: #7f8c8d;">
-        This is an automated email. Please do not reply directly to this message.<br>
-        For support, contact us at info@vhassacademy.com
-      </p>
+      <div class="footer-text">
+        You are receiving this email because you signed up on VHASS Academy with this email address.
+      </div>
+      <div class="footer-address">
+        VHASS Academy<br>
+        9-1-70, Brilliant's School Area<br>
+        Ibrahimpatnam Krishna-521456<br>
+        Andhra Pradesh, India
+      </div>
     </div>
   </div>
 </body>

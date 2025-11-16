@@ -76,7 +76,7 @@ const Footer = () => {
                     <div className="footer-link-cell contact-info">
                       <div className="contact-item">
                         <FaPhone className="contact-icon" />
-                        +91 8985380266
+                        +91 89853 20226
                       </div>
                       <div className="contact-item">
                         <FaEnvelope className="contact-icon" />

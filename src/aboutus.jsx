@@ -343,7 +343,7 @@ const AboutUs = () => {
                     <div className="text-purple-400 mr-4">📞</div>
                     <div>
                       <h4 className="font-bold">Phone</h4>
-                      <p className="text-gray-400">+91 8985380266</p>
+                      <p className="text-gray-400">+91 89853 20226</p>
                     </div>
                   </div>
                   <div className="flex items-start">
