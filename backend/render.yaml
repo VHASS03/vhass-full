@@ -18,6 +18,8 @@ services:
         value: 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
       - key: FRONTEND_URL
         value: https://vhass-front.vercel.app
+      - key: BACKEND_URL
+        value: https://api.vhassacademy.com
       - key: NODE_ENV
         value: production
       - key: PORT
@@ -35,8 +37,10 @@ services:
       - key: SMTP_HOST
         value: smtp.hostinger.com
       - key: SMTP_PORT
-        value: 587
+        value: 465
       - key: SMTP_USER
         value: info@vhassacademy.com
       - key: SMTP_PASS
         value: Hemanth@123
+      - key: RESEND_API_KEY
+        value: re_RFAcz2vm_LotgeJkznk34BuLN8qqUKS9P

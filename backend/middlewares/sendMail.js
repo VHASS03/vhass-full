@@ -1,7 +1,5 @@
 import { createTransport } from "nodemailer";
-
-
-
+import { Resend } from '@resend/node';
 import net from 'net';
 
 // Test network connectivity to SMTP host
@@ -489,9 +487,66 @@ export const sendContactMail = async (data) => {
     }
   }
   
+  // If SMTP failed due to network/firewall, try Resend API as fallback
+  if (lastError && (lastError.code === 'ETIMEDOUT' || lastError.message.includes('timeout'))) {
+    console.log('🔄 SMTP blocked by firewall, trying Resend API fallback...');
+    try {
+      return await sendViaResendAPI(mailOptions, html);
+    } catch (resendError) {
+      console.error('❌ Resend API also failed:', resendError.message);
+      throw lastError; // Throw original SMTP error
+    }
+  }
+  
   // If we get here, all attempts failed
   console.error('❌ CRITICAL: All attempts to send contact email failed');
   throw lastError || new Error('Failed to send email after all retry attempts');
+};
+
+// Fallback email sending via Resend API (works when SMTP is blocked)
+const sendViaResendAPI = async (mailOptions, html) => {
+  const resendApiKey = process.env.RESEND_API_KEY;
+  
+  if (!resendApiKey) {
+    throw new Error('RESEND_API_KEY not configured. SMTP is blocked and no API fallback available.');
+  }
+  
+  const resend = new Resend(resendApiKey);
+  
+  // Send to each recipient separately (Resend API format)
+  const recipients = mailOptions.to.split(',').map(email => email.trim());
+  const results = [];
+  
+  for (const recipient of recipients) {
+    try {
+      const result = await resend.emails.send({
+        from: mailOptions.from || 'info@vhassacademy.com',
+        to: recipient,
+        subject: mailOptions.subject,
+        html: html,
+        replyTo: mailOptions.replyTo,
+      });
+      
+      console.log(`✅ Email sent via Resend API to ${recipient}:`, result);
+      results.push({ recipient, success: true, result });
+    } catch (error) {
+      console.error(`❌ Failed to send via Resend API to ${recipient}:`, error.message);
+      results.push({ recipient, success: false, error: error.message });
+    }
+  }
+  
+  // Return success if at least one email was sent
+  const successCount = results.filter(r => r.success).length;
+  if (successCount > 0) {
+    return { 
+      messageId: `resend-${Date.now()}`,
+      accepted: results.filter(r => r.success).map(r => r.recipient),
+      rejected: results.filter(r => !r.success).map(r => r.recipient),
+      response: 'Sent via Resend API (SMTP blocked)'
+    };
+  }
+  
+  throw new Error('All Resend API sends failed');
 };
 
 // Send acknowledgement email back to the sender of the contact form
