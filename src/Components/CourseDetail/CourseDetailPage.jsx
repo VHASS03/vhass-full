@@ -316,15 +316,24 @@ export default function CourseDetailsPage() {
           onClick={() => navigate("/course")}
           variant="ghost"
           className="mb-6 hover:opacity-80"
+<<<<<<< HEAD
           style={{ color: "var(--text-primary)", backgroundColor: "var(--bg-card)", border: "1px solid var(--accent-primary)" }}
+=======
+          style={{ color: "#FFFFF0", backgroundColor: "rgba(255, 255, 255, 0.1)", border: "1px solid #B88AFF" }}
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Courses
         </Button>
 
         {/* Course Hero Section */}
+<<<<<<< HEAD
         <div className="text-center mb-12 py-16 rounded-3xl shadow-2xl" style={{ backgroundColor: "var(--bg-secondary)" }}>
           <h1 className="text-4xl md:text-5xl font-bold mb-8" style={{ color: "var(--text-primary)" }}>
+=======
+        <div className="text-center mb-12 py-16 rounded-3xl shadow-2xl" style={{ backgroundColor: "#000000" }}>
+          <h1 className="text-4xl md:text-5xl font-bold mb-8" style={{ color: "#FFFFF0" }}>
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
             {course.title}
           </h1>
           <div className="max-w-4xl mx-auto mb-8">
@@ -335,33 +344,57 @@ export default function CourseDetailsPage() {
             />
           </div>
           <div className="flex flex-wrap justify-center items-center gap-8 text-lg">
+<<<<<<< HEAD
             <span style={{ color: "var(--accent-primary)" }}>{course.instructor}</span>
             <span style={{ color: "var(--accent-primary)" }}>{course.duration}</span>
             <span className="text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
+=======
+            <span style={{ color: "#B88AFF" }}>{course.instructor}</span>
+            <span style={{ color: "#B88AFF" }}>{course.duration}</span>
+            <span className="text-3xl font-bold" style={{ color: "#FFFFF0" }}>
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
               {course.price}
             </span>
           </div>
         </div>
 
         {/* About This Course */}
+<<<<<<< HEAD
         <section className="mb-12 p-8 rounded-2xl shadow-xl" style={{ backgroundColor: "var(--bg-card)", border: "2px solid var(--accent-primary)", backdropFilter: "blur(10px)" }}>
           <h2 className="text-3xl font-bold mb-6 pb-4 border-b-4" style={{ color: "var(--text-primary)", borderColor: "var(--accent-primary)" }}>
             About This Course
           </h2>
           <p className="text-lg leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+=======
+        <section className="mb-12 p-8 rounded-2xl shadow-xl" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)", border: "2px solid #B88AFF" }}>
+          <h2 className="text-3xl font-bold mb-6 pb-4 border-b-4" style={{ color: "#FFFFF0", borderColor: "#B88AFF" }}>
+            About This Course
+          </h2>
+          <p className="text-lg leading-relaxed" style={{ color: "#B88AFF" }}>
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
             {course.about}
           </p>
         </section>
 
         {/* Syllabus */}
+<<<<<<< HEAD
         <section className="mb-12 p-8 rounded-2xl shadow-xl" style={{ backgroundColor: "var(--bg-card)", border: "2px solid var(--accent-primary)", backdropFilter: "blur(10px)" }}>
           <h2 className="text-3xl font-bold mb-6 pb-4 border-b-4" style={{ color: "var(--text-primary)", borderColor: "var(--accent-primary)" }}>
+=======
+        <section className="mb-12 p-8 rounded-2xl shadow-xl" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)", border: "2px solid #B88AFF" }}>
+          <h2 className="text-3xl font-bold mb-6 pb-4 border-b-4" style={{ color: "#FFFFF0", borderColor: "#B88AFF" }}>
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
             Course Syllabus
           </h2>
           <div className="space-y-4">
             {course.syllabus.map((item, index) => (
+<<<<<<< HEAD
               <div key={index} className="p-4 rounded-lg" style={{ backgroundColor: "var(--border-color)" }}>
                 <p className="text-lg" style={{ color: "var(--text-secondary)" }}>
+=======
+              <div key={index} className="p-4 rounded-lg" style={{ backgroundColor: "rgba(255, 255, 255, 0.05)" }}>
+                <p className="text-lg" style={{ color: "#B88AFF" }}>
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
                   {item}
                 </p>
               </div>
@@ -370,14 +403,24 @@ export default function CourseDetailsPage() {
         </section>
 
         {/* Who Should Attend */}
+<<<<<<< HEAD
         <section className="mb-12 p-8 rounded-2xl shadow-xl" style={{ backgroundColor: "var(--bg-card)", border: "2px solid var(--accent-primary)", backdropFilter: "blur(10px)" }}>
           <h2 className="text-3xl font-bold mb-6 pb-4 border-b-4" style={{ color: "var(--text-primary)", borderColor: "var(--accent-primary)" }}>
+=======
+        <section className="mb-12 p-8 rounded-2xl shadow-xl" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)", border: "2px solid #B88AFF" }}>
+          <h2 className="text-3xl font-bold mb-6 pb-4 border-b-4" style={{ color: "#FFFFF0", borderColor: "#B88AFF" }}>
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
             Who Should Attend
           </h2>
           <div className="space-y-4">
             {course.whoShouldAttend.map((item, index) => (
+<<<<<<< HEAD
               <div key={index} className="p-4 rounded-lg" style={{ backgroundColor: "var(--border-color)" }}>
                 <p className="text-lg" style={{ color: "var(--text-secondary)" }}>
+=======
+              <div key={index} className="p-4 rounded-lg" style={{ backgroundColor: "rgba(255, 255, 255, 0.05)" }}>
+                <p className="text-lg" style={{ color: "#B88AFF" }}>
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
                   {item}
                 </p>
               </div>
@@ -386,14 +429,24 @@ export default function CourseDetailsPage() {
         </section>
 
         {/* Prerequisites */}
+<<<<<<< HEAD
         <section className="mb-12 p-8 rounded-2xl shadow-xl" style={{ backgroundColor: "var(--bg-card)", border: "2px solid var(--accent-primary)", backdropFilter: "blur(10px)" }}>
           <h2 className="text-3xl font-bold mb-6 pb-4 border-b-4" style={{ color: "var(--text-primary)", borderColor: "var(--accent-primary)" }}>
+=======
+        <section className="mb-12 p-8 rounded-2xl shadow-xl" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)", border: "2px solid #B88AFF" }}>
+          <h2 className="text-3xl font-bold mb-6 pb-4 border-b-4" style={{ color: "#FFFFF0", borderColor: "#B88AFF" }}>
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
             Prerequisites
           </h2>
           <div className="space-y-4">
             {course.prerequisites.map((item, index) => (
+<<<<<<< HEAD
               <div key={index} className="p-4 rounded-lg" style={{ backgroundColor: "var(--border-color)" }}>
                 <p className="text-lg" style={{ color: "var(--text-secondary)" }}>
+=======
+              <div key={index} className="p-4 rounded-lg" style={{ backgroundColor: "rgba(255, 255, 255, 0.05)" }}>
+                <p className="text-lg" style={{ color: "#B88AFF" }}>
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
                   {item}
                 </p>
               </div>
@@ -407,7 +460,11 @@ export default function CourseDetailsPage() {
             <Button
               onClick={() => navigate('/dashboard')}
               className="px-8 py-4 text-xl"
+<<<<<<< HEAD
               style={{ backgroundColor: "#10b981", color: "#ffffff" }}
+=======
+              style={{ backgroundColor: "#10b981", color: "#FFFFF0" }}
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
             >
               Enrolled already — Go to Dashboard
             </Button>
@@ -415,7 +472,11 @@ export default function CourseDetailsPage() {
             <Button
               onClick={handleEnrollClick}
               className="px-8 py-4 text-xl"
+<<<<<<< HEAD
               style={{ background: "var(--accent-gradient)", color: "white" }}
+=======
+              style={{ backgroundColor: "#B88AFF", color: "#FFFFF0" }}
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
               disabled={!user}
             >
               {user ? `Enroll in Course - ${course.price}` : "Login to Enroll"}
@@ -427,9 +488,15 @@ export default function CourseDetailsPage() {
       {/* Enrollment Modal */}
       {showEnrollmentModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+<<<<<<< HEAD
           <div className="bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-2xl p-8 max-w-md w-full border-2 border-[var(--accent-primary)]">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
+=======
+          <div className="bg-gray-900 rounded-2xl p-8 max-w-md w-full border-2 border-purple-500">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold" style={{ color: "#FFFFF0" }}>
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
                 Enroll in Course
               </h2>
               <button
@@ -442,7 +509,11 @@ export default function CourseDetailsPage() {
             
             <form onSubmit={handleFormSubmit} className="space-y-6">
               <div>
+<<<<<<< HEAD
                 <Label htmlFor="name" className="text-lg" style={{ color: "var(--text-secondary)" }}>
+=======
+                <Label htmlFor="name" className="text-lg" style={{ color: "#B88AFF" }}>
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
                   Full Name
                 </Label>
                 <Input
@@ -453,11 +524,19 @@ export default function CourseDetailsPage() {
                   onChange={handleInputChange}
                   required
                   className="mt-2"
+<<<<<<< HEAD
                   style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--accent-primary)", color: "var(--text-primary)" }}
                 />
               </div>
               <div>
                 <Label htmlFor="email" className="text-lg" style={{ color: "var(--text-secondary)" }}>
+=======
+                  style={{ backgroundColor: "rgba(255, 255, 255, 0.1)", border: "1px solid #B88AFF", color: "#FFFFF0" }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="email" className="text-lg" style={{ color: "#B88AFF" }}>
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
                   Email
                 </Label>
                 <Input
@@ -468,11 +547,19 @@ export default function CourseDetailsPage() {
                   onChange={handleInputChange}
                   required
                   className="mt-2"
+<<<<<<< HEAD
                   style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--accent-primary)", color: "var(--text-primary)" }}
                 />
               </div>
               <div>
                 <Label htmlFor="mobile" className="text-lg" style={{ color: "var(--text-secondary)" }}>
+=======
+                  style={{ backgroundColor: "rgba(255, 255, 255, 0.1)", border: "1px solid #B88AFF", color: "#FFFFF0" }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="mobile" className="text-lg" style={{ color: "#B88AFF" }}>
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
                   Mobile Number
                 </Label>
                 <Input
@@ -483,6 +570,7 @@ export default function CourseDetailsPage() {
                   onChange={handleInputChange}
                   required
                   className="mt-2"
+<<<<<<< HEAD
                   style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--accent-primary)", color: "var(--text-primary)" }}
                 />
               </div>
@@ -494,6 +582,22 @@ export default function CourseDetailsPage() {
                 <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
                   <strong>Price:</strong> {course.price}
                 </p>
+=======
+                  style={{ backgroundColor: "rgba(255, 255, 255, 0.1)", border: "1px solid #B88AFF", color: "#FFFFF0" }}
+                />
+              </div>
+              
+              {/* Coupon removed */}
+              
+              <div className="bg-gray-800 p-4 rounded-lg">
+                <p className="text-sm" style={{ color: "#B88AFF" }}>
+                  <strong>Course:</strong> {course.title}
+                </p>
+                <p className="text-sm" style={{ color: "#B88AFF" }}>
+                  <strong>Price:</strong> {course.price}
+                </p>
+                {/* Final price display removed (no coupons) */}
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
               </div>
               
               <div className="flex gap-4">
@@ -501,7 +605,11 @@ export default function CourseDetailsPage() {
                   type="submit"
                   className="flex-1"
                   disabled={isProcessingPayment}
+<<<<<<< HEAD
                   style={{ background: "var(--accent-gradient)", color: "white" }}
+=======
+                  style={{ backgroundColor: "#B88AFF", color: "#FFFFF0" }}
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
                 >
                   {isProcessingPayment ? "Processing Payment..." : `Pay ${finalAmount ? `₹${finalAmount}` : course.price}`}
                 </Button>
@@ -510,7 +618,11 @@ export default function CourseDetailsPage() {
                   variant="outline"
                   onClick={() => setShowEnrollmentModal(false)}
                   disabled={isProcessingPayment}
+<<<<<<< HEAD
                   style={{ borderColor: "var(--accent-primary)", color: "var(--accent-primary)" }}
+=======
+                  style={{ borderColor: "#B88AFF", color: "#B88AFF" }}
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
                 >
                   Cancel
                 </Button>
@@ -522,4 +634,7 @@ export default function CourseDetailsPage() {
     </div>
   )
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e

@@ -15,7 +15,11 @@
 
 body {
   position: relative;
+<<<<<<< HEAD
   background-color: var(--bg-primary);
+=======
+  background-color: #010101;
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
   z-index: 0;
 }
 

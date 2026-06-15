@@ -3,12 +3,18 @@ import React from "react"
 import api from "../services/api"
 import { useNavigate } from "react-router-dom"
 import { useState } from "react"
+<<<<<<< HEAD
 import { Mail, Phone } from "lucide-react"
+=======
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
 import Navbar from "../Components/navbar";
 import Footer from "../Components/footer";
 import "../App.css"
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
 export default function HelpDeskPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [activeFilter, setActiveFilter] = useState("All")
@@ -43,7 +49,11 @@ export default function HelpDeskPage() {
     {
       id: 4,
       question: "What are the payment options?",
+<<<<<<< HEAD
       answer: "We accept various payment methods including UPI, credit/debit cards, net banking, and wallets via PhonePe.",
+=======
+      answer: "We accept various payment methods including credit cards, debit cards, UPI, and bank transfers.",
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
       category: "Payment",
     },
   ]
@@ -77,6 +87,7 @@ export default function HelpDeskPage() {
     }
   }
 
+<<<<<<< HEAD
   // Filter FAQs based on search and category
   const filteredFaqs = faqs.filter((faq) => {
     const matchesSearch = faq.question.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -117,11 +128,32 @@ export default function HelpDeskPage() {
 
         {/* Search Bar */}
         <div className="max-w-2xl mx-auto mb-10 px-4">
+=======
+  return (
+   <div className="min-h-screen text-white relative z-10">
+
+      <Navbar />
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-12">
+        {/* Header Section */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-white mb-4">
+Frequently Asked Questions</h1>
+         <p className="text-gray-300">
+            Find answers to common questions about our courses, workshops, and cybersecurity training programs.
+          </p>
+        </div>
+
+        {/* Search Bar */}
+        <div className="max-w-2xl mx-auto mb-8">
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
           <input
             type="text"
             placeholder="Search questions..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+<<<<<<< HEAD
             className="w-full px-5 py-4 rounded-full text-base shadow-lg focus:outline-none"
             style={{
               background: 'var(--bg-card)',
@@ -129,21 +161,36 @@ export default function HelpDeskPage() {
               color: 'var(--text-primary)',
               fontFamily: "'Plus Jakarta Sans', sans-serif"
             }}
+=======
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
           />
         </div>
 
         {/* Filter Buttons */}
+<<<<<<< HEAD
         <div className="flex flex-wrap justify-center gap-3 mb-12 px-4" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+=======
+        <div className="flex justify-center gap-4 mb-12">
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
           {["All", "Courses", "Certification", "Payment"].map((filter) => (
             <button
               key={filter}
               onClick={() => setActiveFilter(filter)}
+<<<<<<< HEAD
               className="px-6 py-2.5 rounded-full font-medium transition-all duration-300 text-sm"
               style={
                 activeFilter === filter
                   ? { background: 'var(--accent-gradient)', color: '#fff', boxShadow: '0 4px 15px var(--glow-color-hover)' }
                   : { background: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }
               }
+=======
+              className={`px-6 py-2 rounded-full font-medium transition-colors ${
+                activeFilter === filter
+                  ? "bg-blue-600 text-white"
+                  : "bg-white text-gray-600 border border-gray-300 hover:bg-gray-50"
+              }`}
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
             >
               {filter}
             </button>
@@ -151,6 +198,7 @@ export default function HelpDeskPage() {
         </div>
 
         {/* FAQ Items */}
+<<<<<<< HEAD
         <div className="max-w-3xl mx-auto mb-20 px-4">
           {filteredFaqs.length > 0 ? (
             filteredFaqs.map((faq) => (
@@ -305,6 +353,111 @@ export default function HelpDeskPage() {
 
             </div>
           </div>
+=======
+        <div className="max-w-4xl mx-auto mb-16">
+          {faqs.map((faq) => (
+            <div key={faq.id} className="bg-white border border-gray-200 rounded-lg mb-4 overflow-hidden">
+              <button
+                onClick={() => toggleFAQ(faq.id)}
+                className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-50 transition-colors"
+              >
+                <span className="font-medium text-gray-800">{faq.question}</span>
+                <svg
+                  className={`w-5 h-5 text-gray-500 transition-transform ${expandedFAQ === faq.id ? "rotate-180" : ""}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {expandedFAQ === faq.id && (
+                <div className="px-6 pb-4">
+                  <p className="text-gray-600">{faq.answer}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Contact Section */}
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-8">
+          {/* Still have questions */}
+          <div className="bg-blue-600 text-white p-8 rounded-lg">
+            <h3 className="text-2xl font-bold mb-4">Still have questions?</h3>
+            <p className="mb-6">
+              If you couldn't find the answer to your question, please don't hesitate to contact our support team.
+            </p>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                </svg>
+                <span>info@vhassacademy.com</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                </svg>
+                <span>+91 8985820226</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Send us a message */}
+          <div className="bg-white p-8 rounded-lg border border-gray-200">
+            <h3 className="text-2xl font-bold text-gray-800 mb-6">Send us a message</h3>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  placeholder="Your name"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 placeholder-gray-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="Your email"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 placeholder-gray-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
+                <textarea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleInputChange}
+                  placeholder="Your question"
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 placeholder-gray-500"
+                  required
+                />
+              </div>
+              {status && (
+                <div className="text-sm text-gray-600">{status}</div>
+              )}
+              <button
+                type="submit"
+                disabled={sending}
+                className="w-full bg-blue-600 disabled:opacity-60 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors font-medium"
+              >
+                {sending ? "Sending..." : "Send Message"}
+              </button>
+            </form>
+          </div>
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
         </div>
       </main>
       <Footer />

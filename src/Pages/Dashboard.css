@@ -1,8 +1,13 @@
 /* Dashboard Container */
 .dashboard-container {
   min-height: 100vh;
+<<<<<<< HEAD
   background-color: var(--bg-primary);
   color: var(--text-primary);
+=======
+  background-color: #010101;
+  color: white;
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
   position: relative;
   z-index: 0;
 }
@@ -18,7 +23,11 @@
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
+<<<<<<< HEAD
   opacity: 0.05;
+=======
+  opacity: 0.1;
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
   z-index: -1;
 }
 
@@ -47,7 +56,11 @@
   font-size: 3rem;
   font-weight: bold;
   margin-bottom: 0.5rem;
+<<<<<<< HEAD
   background: var(--accent-gradient);
+=======
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -55,15 +68,25 @@
 
 .welcome-subtitle {
   font-size: 1.2rem;
+<<<<<<< HEAD
   color: var(--text-secondary);
+=======
+  color: #a0a0a0;
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
   margin: 0;
 }
 
 /* Profile Card */
 .profile-card {
+<<<<<<< HEAD
   background: var(--bg-card);
   backdrop-filter: blur(10px);
   border: 1px solid var(--border-color);
+=======
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
   border-radius: 20px;
   padding: 2rem;
   display: flex;
@@ -75,7 +98,11 @@
 .profile-avatar {
   width: 60px;
   height: 60px;
+<<<<<<< HEAD
   background: var(--accent-gradient);
+=======
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -89,16 +116,26 @@
   margin: 0 0 0.5rem 0;
   font-size: 1.2rem;
   font-weight: 600;
+<<<<<<< HEAD
   color: var(--text-primary);
+=======
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
 }
 
 .profile-info p {
   margin: 0.25rem 0;
+<<<<<<< HEAD
   color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
 
+=======
+  color: #a0a0a0;
+  font-size: 0.9rem;
+}
+
+>>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
 .profile-actions {
   display: flex;
   flex-direction: column;
