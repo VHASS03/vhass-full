@@ -1,0 +1,171 @@
+/* Redesigned Premium Footer CSS */
+.footer-section {
+  position: relative;
+  background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+  border-top: 1px solid var(--border-color);
+  width: 100%;
+  z-index: 5;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.footer-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--accent-primary) 30%, var(--accent-secondary) 70%, transparent 100%);
+  z-index: 6;
+  pointer-events: none;
+}
+
+/* Background Large Branding Watermark */
+.footer-bg-text-wrapper {
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  right: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.footer-bg-text {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  line-height: 0.75;
+  user-select: none;
+  text-transform: uppercase;
+}
+
+/* Watermark visibility: very faint in dark, slightly visible in light */
+.footer-watermark-text {
+  color: rgba(255, 177, 98, 0.04);
+}
+
+.light .footer-watermark-text {
+  color: rgba(163, 81, 57, 0.07);
+}
+
+/* Footer link styling */
+.footer-link {
+  color: inherit;
+  transition: color 0.25s ease;
+}
+
+.footer-link:hover {
+  color: var(--accent-primary);
+}
+
+/* Social buttons styling */
+.social-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.social-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-card-hover);
+  border-color: var(--accent-primary);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px var(--glow-color-hover);
+}
+
+/* Form Inputs styling */
+.footer-input {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(5px);
+}
+
+.footer-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.footer-input:hover {
+  border-color: var(--border-color-hover);
+  background: var(--bg-card-hover);
+}
+
+.footer-input:focus {
+  outline: none;
+  background: var(--bg-card-hover);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 15px var(--glow-color-hover);
+}
+
+.footer-textarea {
+  resize: none;
+}
+
+/* Submit Button styling */
+.footer-submit-btn {
+  width: 100%;
+  padding: 13px 24px;
+  border-radius: 9999px;
+  background: var(--accent-gradient);
+  border: none;
+  color: #ffffff;
+  font-weight: 600;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 0.95rem;
+}
+
+.footer-submit-btn:hover {
+  transform: translateY(-2px);
+  background: var(--accent-gradient-hover);
+  box-shadow: 0 6px 20px var(--glow-color-hover);
+}
+
+.footer-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Responsiveness adjustments for smaller devices */
+@media (max-width: 768px) {
+  .footer-section {
+    text-align: left;
+  }
+  
+  .footer-bg-text-wrapper {
+    bottom: -5px;
+  }
+  
+  .footer-bg-text {
+    font-size: 16vw;
+  }
+
+  .footer-submit-btn {
+    width: 100%;
+  }
+}

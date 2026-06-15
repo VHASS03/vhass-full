@@ -1,0 +1,20 @@
+[33m61f7ce0[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m CRITICAL: Fix PhonePe checkout empty response - add comprehensive logging and error handling
+[33m1d8afc8[m CRITICAL FIX: Reorder routes to prevent /course/:id from catching phonepe-checkout requests
+[33mdae7e5a[m Fix PhonePe route mismatch: update backend to match frontend endpoint /course/:id/phonepe-checkout
+[33mb73c31d[m Fix coupon system: remove client-side logic, seed database with test coupons, test API endpoint
+[33m27b74d1[m Add coupon validation to course routes as immediate workaround for production
+[33me76bcc3[m Fix deployment issues: correct TryCatch import and simplify coupon routes
+[33m91a9383[m Add coupon validation endpoint to course routes as workaround for production deployment
+[33me0a2114[m Add debugging endpoints and better error handling for coupon system
+[33m428ae6d[m Add comprehensive coupon code discount system with backend models, controllers, routes, and frontend components
+[33mfc1cbd6[m Update company name to Vhass Software Solutions Pvt. Ltd. in cybersecurity banner
+[33m0b982b9[m Make home page mobile responsive - responsive layout, typography, and 3D scene
+[33mfa2c5a1[m Make website mobile responsive - add hamburger menu, responsive layouts, mobile-friendly components
+[33mbbb2c2e[m Add leadership photos to public/images for production
+[33mee4aec3[m About Us: add leadership photos (hemanth.webp, uday.jpg)
+[33ma7ec97b[m Footer: change Courses label to Course and link to /course
+[33mb5bba90[m Fix footer course links and entrepreneurship Apply Now redirect
+[33m065cb12[m Fix ApiService method name clash; use public getAllCourses/getAllWorkshops
+[33m2b5b013[m Fix ApiService constructor error - update all imports and usage patterns
+[33m9a9d2c3[m Fix ApiService constructor error - courses now loading correctly
+[33mb597446[m Fix courses page API configuration and CORS issues

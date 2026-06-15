@@ -1,0 +1,169 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+  user-select: none;
+  /* overflow-y: hidden; */
+}
+
+body {
+  position: relative;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  z-index: 0;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/image.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.1; /* ✅ Adjust opacity here */
+  z-index: -1;
+}
+
+/* Gradient Animated Tag Box */
+.tag-box {
+  position: relative;
+  width: 12rem;
+  height: 2rem;
+  border-radius: 50px;
+  background: linear-gradient(to right, #8e6a4a, #FFB162, #A35139, #FFB162, #8e6a4a, #A35139, #8e6a4a);
+  background-size: 300%;
+  animation: landing-page-animationGradient 3s linear infinite;
+  box-shadow: 0 0 18px rgba(255, 177, 98, 0.35);
+}
+
+@media (min-width: 640px) {
+  .tag-box {
+    width: 15rem;
+    height: 2.25rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .tag-box {
+    width: 18rem;
+    height: 2.5rem;
+  }
+}
+
+.landing-page .tag-box .tag {
+  position: absolute;
+  inset: 3px;
+  background-color: var(--bg-primary);
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.5s ease;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .landing-page .tag-box .tag {
+    font-size: 0.875rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .landing-page .tag-box .tag {
+    font-size: 1rem;
+  }
+}
+
+.landing-page .tag-box .tag:hover {
+  color: var(--accent-primary);
+}
+
+/* Tag Box Gradient Animation */
+@keyframes landing-page-animationGradient {
+  to {
+    background-position: 200%;
+  }
+}
+
+/* Down Arrow Animation */
+.arrDown {
+  animation: anime 1.5s linear infinite;
+}
+
+@keyframes anime {
+  0% {
+    transform: translateY(-10px);
+  }
+  50% {
+    transform: translateY(5px);
+  }
+  100% {
+    transform: translateY(-10px);
+  }
+}
+
+/* ─────────────────────────────── */
+/* FAQ Page Styles (Added Here)   */
+/* ─────────────────────────────── */
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--border-color);
+  border-left: 4px solid var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@layer base {
+  html,
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    margin: 0;
+    padding: 0;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  *,
+  *::before,
+  *::after {
+    border-color: var(--border-color);
+  }
+}

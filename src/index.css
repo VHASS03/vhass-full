@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* === DARK MODE (default) === */
+  --bg-primary: #0D1117;           /* Very deep dark - much darker than before */
+  --bg-secondary: #161B22;         /* Secondary dark layer */
+  --bg-card: rgba(22, 30, 42, 0.5);
+  --bg-card-hover: rgba(28, 40, 58, 0.7);
+  --text-primary: #EEE9DF;         /* Palladian */
+  --text-secondary: #C9C1B1;       /* Oatmeal */
+  --text-muted: #8e9fae;
+  --accent-primary: #FFB162;       /* Burning Flame */
+  --accent-secondary: #A35139;     /* Truffle Trouble */
+  --accent-gradient: linear-gradient(90deg, #FFB162 0%, #A35139 100%);
+  --accent-gradient-hover: linear-gradient(90deg, #ffa142 0%, #934129 100%);
+  --border-color: rgba(255, 255, 255, 0.07);
+  --border-color-hover: rgba(255, 255, 255, 0.15);
+  --glow-color: rgba(255, 177, 98, 0.12);
+  --glow-color-hover: rgba(255, 177, 98, 0.25);
+  --hero-glow: rgba(255, 177, 98, 0.08);
+  --card-bg-raw: 22, 30, 42;
+}
+
+.light {
+  /* === LIGHT MODE === */
+  --bg-primary: #EEE9DF;           /* Palladian */
+  --bg-secondary: #D8D0C4;         /* Slightly darker than Palladian */
+  --bg-card: rgba(255, 255, 255, 0.6);
+  --bg-card-hover: rgba(255, 255, 255, 0.85);
+  --text-primary: #1B2632;         /* Abyssal Anchorfish Blue */
+  --text-secondary: #2C3B4D;       /* Blue Fantastic */
+  --text-muted: #4a5568;
+  --accent-primary: #A35139;       /* Truffle Trouble */
+  --accent-secondary: #FFB162;     /* Burning Flame */
+  --accent-gradient: linear-gradient(90deg, #A35139 0%, #FFB162 100%);
+  --accent-gradient-hover: linear-gradient(90deg, #934129 0%, #ffa142 100%);
+  --border-color: rgba(27, 38, 50, 0.12);
+  --border-color-hover: rgba(27, 38, 50, 0.25);
+  --glow-color: rgba(163, 81, 57, 0.1);
+  --glow-color-hover: rgba(163, 81, 57, 0.2);
+  --hero-glow: rgba(163, 81, 57, 0.06);
+  --card-bg-raw: 255, 255, 255;
+}
+
+/* Force global bg and text colors */
+html, body {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ===== GLOBAL THEME OVERRIDES ===== */
+/* Replace ALL hardcoded purple/indigo/gray text with theme-aware colors */
+
+/* White text → theme text-primary in light mode */
+.light .text-white,
+.light h1.text-white,
+.light h2.text-white,
+.light h3.text-white,
+.light h4.text-white,
+.light h5.text-white,
+.light p.text-white,
+.light label.text-white,
+.light li.text-white,
+.light span.text-white,
+.light div.text-white {
+  color: var(--text-primary) !important;
+}
+
+/* Gray overrides for light mode */
+.light .text-gray-100 { color: var(--text-primary) !important; }
+.light .text-gray-200 { color: var(--text-primary) !important; }
+.light .text-gray-300 { color: var(--text-secondary) !important; }
+.light .text-gray-400 { color: var(--text-muted) !important; }
+.light .text-gray-500 { color: var(--text-muted) !important; }
+
+/* Purple/Indigo accent → brand accent in light mode */
+.light .text-purple-300,
+.light .text-purple-400 { color: var(--accent-primary) !important; }
+.light .text-indigo-300,
+.light .text-indigo-400 { color: var(--accent-secondary) !important; }
+
+/* Card backgrounds: replace hardcoded black/white cards with theme-aware */
+.light .bg-white\/\[0\.02\],
+.light .bg-white\/\[0\.03\] {
+  background: var(--bg-card) !important;
+}
+
+/* Border overrides in light mode */
+.light .border-white\/\[0\.06\],
+.light .border-white\/\[0\.08\],
+.light .border-white\/\[0\.10\],
+.light .border-white\/10 {
+  border-color: var(--border-color) !important;
+}
+
+/* Input fields in light mode */
+.light input,
+.light textarea {
+  color: var(--text-primary);
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+.light input::placeholder,
+.light textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* Gradient brand text (Burning Flame → Truffle Trouble) for dark mode spans */
+.brand-gradient-text {
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

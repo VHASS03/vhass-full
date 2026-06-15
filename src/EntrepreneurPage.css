@@ -1,0 +1,281 @@
+/* General Styles */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+  user-select: none;
+  /* overflow-y: hidden; */
+}
+
+body {
+  position: relative;
+  background-color: var(--bg-primary);
+  z-index: 0;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/image.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.1; /* ✅ Adjust opacity here */
+  z-index: -1;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Hero Section */
+.hero-section {
+  background:transparent; 
+  color: white;
+  padding: 80px 0;
+  text-align: center;
+}
+
+.hero-section h1 {
+  font-size: 2.8rem;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.hero-section p {
+  font-size: 1.2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  opacity: 0.9;
+  line-height: 1.8;
+}
+
+.company-name {
+  font-weight: 700;
+  color: #ffd166;
+}
+
+/* Security Auditing Section */
+.auditing-section {
+  padding: 80px 0;
+  background-color: transparent;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.section-header h2 {
+  font-size: 2.2rem;
+  color: #ffffff;
+  margin-bottom: 15px;
+}
+
+.tagline {
+  display: inline-block;
+  background-color: #e53e3e;
+  color: white;
+  font-size: 1.3rem;
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 30px;
+}
+
+.content {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.content p {
+  font-size: 1.1rem;
+  margin-bottom: 40px;
+  line-height: 1.8;
+}
+
+.services-offered h3 {
+  font-size: 1.5rem;
+  color: #ffffff;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.service-card {
+  background: white;
+  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.service-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+.card-icon {
+  width: 70px;
+  height: 70px;
+  background: #1a3a6c;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  color: white;
+  font-size: 1.8rem;
+}
+
+.card-content h3,
+.card-content h4 {
+  font-size: 1.4rem;
+  color: #1a3a6c;
+  margin-bottom: 15px;
+}
+
+.card-content p {
+  font-size: 1rem;
+  color: #4a5568;
+  margin-bottom: 0;
+}
+
+/* Additional Services */
+.additional-services {
+  padding: 80px 0;
+  background-color:transparent;
+}
+
+.additional-services h2 {
+  text-align: center;
+  font-size: 2.2rem;
+  color: #1a3a6c;
+  margin-bottom: 50px;
+}
+
+.additional-services .services-grid {
+  gap: 40px;
+}
+
+.additional-services .service-card {
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+}
+
+.additional-services .service-card:hover {
+  background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
+}
+
+/* CTA Section */
+.cta-section {
+  background: linear-gradient(135deg, #2c5282 0%, #1a3a6c 100%);
+  color: rgb(255, 255, 255);
+  padding: 80px 0;
+  text-align: center;
+}
+
+.cta-section h2 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.cta-section p {
+  font-size: 1.2rem;
+  max-width: 700px;
+  margin: 0 auto 30px;
+  opacity: 0.9;
+}
+
+.cta-button {
+  background: #ffd166;
+  color: #1a3a6c;
+  border: none;
+  padding: 15px 40px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cta-button:hover {
+  background: #ffc44d;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 60px 0;
+  }
+  
+  .hero-section h1 {
+    font-size: 2.2rem;
+  }
+  
+  .hero-section p {
+    font-size: 1rem;
+  }
+  
+  .auditing-section,
+  .additional-services {
+    padding: 60px 0;
+  }
+  
+  .section-header h2,
+  .additional-services h2 {
+    font-size: 1.8rem;
+  }
+  
+  .tagline {
+    font-size: 1.1rem;
+  }
+  
+  .cta-section h2 {
+    font-size: 2rem;
+  }
+  
+  .cta-section p {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section h1 {
+    font-size: 1.8rem;
+  }
+  
+  .section-header h2,
+  .additional-services h2 {
+    font-size: 1.6rem;
+  }
+  
+  .cta-section {
+    padding: 60px 0;
+  }
+  
+  .services-grid {
+    grid-template-columns: 1fr;
+  }
+}

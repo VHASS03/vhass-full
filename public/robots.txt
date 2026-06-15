@@ -1,0 +1,26 @@
+# robots.txt for VHASS Academy
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /auth
+Disallow: /login
+Disallow: /payment/callback
+Disallow: /phonepe-test
+Disallow: /phonepe-debug
+
+# Allow important pages
+Allow: /course
+Allow: /workshop
+Allow: /aboutus
+Allow: /services
+Allow: /Entrepreneur
+Allow: /helpdesk
+Allow: /policies
+
+# Sitemap location
+Sitemap: https://www.vhassacademy.com/sitemap.xml
+
+# Crawl delay (optional, helps prevent server overload)
+Crawl-delay: 1
+

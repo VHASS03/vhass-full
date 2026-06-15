@@ -1,0 +1,402 @@
+/* VHASS Platform Modern Navigation System */
+
+header {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1100;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.navbar {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 24px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--text-primary);
+  z-index: 100;
+}
+
+/* Brand & Logo styling */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.brand:hover {
+  transform: scale(1.02);
+}
+
+.logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px var(--glow-color));
+}
+
+.brand-text {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--text-primary) 40%, var(--accent-primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0;
+}
+
+/* Nav Menu links */
+.nav-menu {
+  display: flex;
+  align-items: center;
+}
+
+.nav-menu ul {
+  list-style: none;
+  display: flex;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-menu ul li {
+  display: inline-block;
+}
+
+.nav-libtn {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: transparent;
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-size: 14.5px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: -0.01em;
+}
+
+.nav-libtn::before {
+  content: '';
+  position: absolute;
+  top: var(--y, 50%);
+  left: var(--x, 50%);
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, var(--glow-color-hover) 0%, transparent 60%);
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  transition: transform 0.5s ease, opacity 0.3s ease;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.nav-libtn:hover::before {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+
+.nav-libtn:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
+}
+
+/* User Menu & Authentication buttons */
+.user-menu {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.user-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navbar .login {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 8px 20px;
+  border-radius: 9999px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  letter-spacing: 0.02em;
+}
+
+.navbar .login::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--accent-gradient);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.navbar .login:hover::after {
+  opacity: 1;
+}
+
+.navbar .login:hover {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 15px var(--glow-color-hover);
+  transform: translateY(-1px);
+}
+
+/* Theme Toggle Button Style */
+.theme-toggle-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  padding: 0;
+}
+
+.theme-toggle-btn:hover {
+  transform: scale(1.08);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 12px var(--glow-color-hover);
+  background: var(--bg-card-hover);
+}
+
+.theme-toggle-btn svg {
+  display: block;
+}
+
+.navbar .register {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  background: var(--accent-gradient);
+  border: none;
+  color: #ffffff;
+  padding: 8px 22px;
+  border-radius: 9999px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px var(--glow-color);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.02em;
+}
+
+.navbar .register:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px var(--glow-color-hover);
+}
+
+.navbar .admin-logout {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  padding: 8px 20px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.navbar .admin-logout:hover {
+  background: #ef4444;
+  color: #ffffff;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Mobile Menu Toggle button */
+.mobile-menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 12px;
+  z-index: 2500;
+  width: 42px;
+  height: 42px;
+  transition: all 0.2s ease;
+}
+
+.mobile-menu-toggle:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--accent-primary);
+}
+
+.hamburger {
+  width: 20px;
+  height: 2px;
+  background-color: var(--text-primary);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 2px;
+}
+
+.hamburger.open:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.hamburger.open:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.hamburger.open:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 992px) {
+  .nav-menu {
+    display: none;
+  }
+  
+  .navbar {
+    padding: 12px 16px;
+  }
+
+  .mobile-menu-toggle {
+    display: flex;
+  }
+
+  .nav-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 80%;
+    max-width: 320px;
+    height: 100vh;
+    background: var(--bg-primary);
+    border-left: 1px solid var(--border-color);
+    transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    padding: 88px 24px 40px;
+    box-sizing: border-box;
+    justify-content: flex-start;
+  }
+
+  .nav-menu.mobile-open {
+    right: 0;
+  }
+
+  .nav-menu ul {
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    gap: 8px;
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .nav-menu ul li {
+    display: block;
+    width: 100%;
+  }
+
+  .nav-menu .nav-libtn {
+    width: 100%;
+    text-align: left;
+    padding: 14px 20px;
+    font-size: 16px;
+    border-radius: 12px;
+    margin: 0;
+    color: var(--text-primary);
+  }
+
+  .nav-menu .nav-libtn:hover {
+    background: var(--bg-card);
+    color: var(--accent-primary);
+  }
+
+  .user-menu {
+    position: absolute;
+    bottom: 40px;
+    left: 24px;
+    right: 24px;
+    justify-content: center;
+  }
+
+  .user-buttons {
+    width: 100%;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .user-buttons .login, .user-buttons .register {
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+  }
+}
+
+/* Prevent body scroll when mobile menu open */
+body.mobile-menu-open {
+  overflow: hidden;
+}
+
+/* Backdrop behind mobile sidebar */
+.nav-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1500;
+}
+
+@media (max-width: 480px) {
+  .logo {
+    width: 40px;
+    height: 40px;
+  }
+
+  .brand-text {
+    font-size: 20px;
+  }
+}

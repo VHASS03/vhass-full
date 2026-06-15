@@ -1,0 +1,5 @@
+[33mf7a2cdd[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Implement token-based authentication - add JWT tokens and update AuthContext
+[33m5173b3a[m Add comprehensive debugging to login process to track session issues
+[33mb28bcb0[m Fix authentication state management - remove conflicting checkAuthStatus calls and add debugging
+[33m3746348[m Enhance cache buster with random value to force fresh requests
+[33m14f0ead[m Fix API service imports - use static imports instead of dynamic imports
