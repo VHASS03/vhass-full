@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+﻿const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 const CACHE_BUSTER = Date.now() + Math.random(); // Force cache invalidation
 
 // Debug logging
@@ -30,7 +30,6 @@ class ApiService {
     // Ensure baseURL doesn't end with slash to avoid double slashes
     const baseURL = this.baseURL.endsWith('/') ? this.baseURL.slice(0, -1) : this.baseURL;
     
-<<<<<<< HEAD
     // Deduplicate /api prefix if both baseURL and endpoint contain it
     let finalEndpoint = cleanEndpoint;
     if (baseURL.endsWith('/api') && cleanEndpoint.startsWith('api/')) {
@@ -42,13 +41,6 @@ class ApiService {
     const hasQuery = finalEndpoint.includes('?');
     const cacheBusted = method === 'GET' ? `${hasQuery ? '&' : '?'}_cb=${CACHE_BUSTER}` : '';
     const url = `${baseURL}/${finalEndpoint}${cacheBusted}`;
-=======
-    // Build URL and only append cache-buster for GET requests
-    const method = (options.method || 'GET').toUpperCase();
-    const hasQuery = cleanEndpoint.includes('?');
-    const cacheBusted = method === 'GET' ? `${hasQuery ? '&' : '?'}_cb=${CACHE_BUSTER}` : '';
-    const url = `${baseURL}/${cleanEndpoint}${cacheBusted}`;
->>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
     console.log('🌐 Making API request to:', url);
     
     // Lightweight retry for transient network errors (e.g., ERR_NETWORK_CHANGED)

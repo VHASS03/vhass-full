@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef, Suspense, useState } from "react";
+﻿import React, { useLayoutEffect, useRef, Suspense, useState } from "react";
 
 import Navbar from "./Components/navbar";
 import Footer from "./Components/footer";
@@ -79,11 +79,8 @@ function Home() {
 
         {/* Intro Section */}
         <section className="relative flex flex-col md:flex-row items-center justify-between min-h-screen h-auto md:h-[100vh] px-4 md:px-8 py-20 md:py-0">
-<<<<<<< HEAD
           {/* Gradient glow behind intro text */}
           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[150px] pointer-events-none" style={{ background: 'var(--glow-color)', opacity: 0.6 }} />
-=======
->>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
           <div className="flex flex-col justify-center w-full md:w-1/2 mb-8 md:mb-20 md:ml-20 z-10">
             <div className="relative md:absolute md:top-28 md:left-10 px-4 pt-14">
               <div className="landing-page">
@@ -91,15 +88,9 @@ function Home() {
                   <div className="tag">INTRODUCING</div>
                 </div>
               </div>
-<<<<<<< HEAD
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[5.5rem] font-extrabold mb-2 leading-none tracking-tight" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>LEARN FROM</h1>
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[5.5rem] font-extrabold mb-4 md:mb-6 leading-none tracking-tight" style={{ fontFamily: "'Outfit', sans-serif", background: 'var(--accent-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>VHASS</h1>
               <p className="text-base sm:text-lg md:text-xl font-normal max-w-lg leading-relaxed opacity-90" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-secondary)' }}>
-=======
-              <h1 className="text-white text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold mb-2" style={{ fontFamily: 'Times New Roman, serif' }}>LEARN FROM</h1>
-              <h1 className="text-white text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold mb-4 md:mb-2" style={{ fontFamily: 'Times New Roman, serif' }}>VHASS</h1>
-              <p className="text-white text-base sm:text-lg md:text-xl font-normal max-w-lg" style={{ fontFamily: 'Times New Roman, serif' }}>
->>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
                 VHASS Softwares is a leading ed-tech company focused on cybersecurity training, dedicated to addressing real-time problems, especially in the areas of privacy and security.
               </p>
             </div>
@@ -116,7 +107,6 @@ function Home() {
         {/* Section 1 */}
         <section className="relative flex flex-col md:flex-row items-center justify-evenly min-h-screen h-auto md:h-[100vh] py-8 md:py-16 px-4 md:px-0">
           <div className="hidden md:block w-[50%]"></div>
-<<<<<<< HEAD
           <div ref={sectionRefs[0]} className="w-full md:w-[50%] px-4 sm:px-8 md:px-12" style={{ color: 'var(--text-primary)' }}>
             <div className="relative backdrop-blur-md rounded-2xl p-6 sm:p-8 md:p-10 shadow-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
               <div className="absolute top-6 -left-2 w-4 h-4 rounded-full animate-ping" style={{ background: 'var(--accent-primary)' }}></div>
@@ -126,17 +116,6 @@ function Home() {
               </div>
               <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 md:mb-6 tracking-tight" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>INTRODUCTION</h3>
               <p className="text-base sm:text-lg md:text-xl font-light leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-=======
-          <div ref={sectionRefs[0]} className="text-white w-full md:w-[50%] px-4 sm:px-8 md:px-12">
-            <div className="relative bg-black bg-opacity-30 backdrop-blur-md rounded-2xl p-6 sm:p-8 md:p-10 border border-white border-opacity-20 shadow-2xl">
-              <div className="absolute top-6 -left-2 w-4 h-4 bg-blue-500 rounded-full animate-ping"></div>
-              <div className="flex items-center mb-6 md:mb-8">
-                <div className="w-8 md:w-12 h-0.5 bg-blue-500 mr-4"></div>
-                <h2 className="text-blue-400 text-lg sm:text-xl font-semibold tracking-wider">ABOUT US</h2>
-              </div>
-              <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 md:mb-6" style={{ fontFamily: 'Times New Roman, serif' }}>INTRODUCTION</h3>
-              <p className="text-base sm:text-lg md:text-xl font-light leading-relaxed">
->>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
                 Cybersecurity is the practice of protecting digital systems, networks, and sensitive data from unauthorized access, breaches, and cyberattacks.
                 It plays a vital role in ensuring the safety of individuals and organizations in an increasingly digital world.
                 <br /><br />
@@ -149,7 +128,6 @@ function Home() {
 
         {/* Section 2 */}
         <section className="relative flex flex-col md:flex-row items-center justify-evenly min-h-screen h-auto md:h-[100vh] py-8 md:py-16 px-4 md:px-0">
-<<<<<<< HEAD
           <div ref={sectionRefs[1]} className="w-full md:w-[50%] px-4 sm:px-8 md:px-12 order-2 md:order-1" style={{ color: 'var(--text-primary)' }}>
             <div className="relative backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-2xl max-h-full overflow-auto" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
               <div className="absolute top-6 -left-2 w-4 h-4 rounded-full animate-ping" style={{ background: 'var(--accent-secondary)' }}></div>
@@ -158,16 +136,6 @@ function Home() {
                 <h2 className="text-base sm:text-lg font-semibold tracking-wider" style={{ color: 'var(--accent-secondary)' }}>INDUSTRY-READY SKILLS</h2>
               </div>
               <h3 className="text-2xl sm:text-3xl font-bold mb-4 md:mb-6 tracking-tight" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>WHY US?</h3>
-=======
-          <div ref={sectionRefs[1]} className="text-white w-full md:w-[50%] px-4 sm:px-8 md:px-12 order-2 md:order-1">
-            <div className="relative bg-black bg-opacity-30 backdrop-blur-md rounded-2xl p-6 sm:p-8 border border-white border-opacity-20 shadow-2xl max-h-full overflow-auto">
-              <div className="absolute top-6 -left-2 w-4 h-4 bg-purple-500 rounded-full animate-ping"></div>
-              <div className="flex items-center mb-6">
-                <div className="w-8 md:w-10 h-0.5 bg-purple-500 mr-4"></div>
-                <h2 className="text-purple-400 text-base sm:text-lg font-semibold tracking-wider">INDUSTRY-READY SKILLS</h2>
-              </div>
-              <h3 className="text-2xl sm:text-3xl font-bold mb-4 md:mb-6" style={{ fontFamily: 'Times New Roman, serif' }}>WHY US?</h3>
->>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
@@ -180,15 +148,9 @@ function Home() {
                   { title: "Industry Oriented", desc: "Get Industry Skills" },
                   { title: "Jobs/Career", desc: "Jobs/Placement/Career assistance" }
                 ].map((card, i) => (
-<<<<<<< HEAD
                   <div key={i} className="p-3 sm:p-4 rounded-lg shadow-sm" style={{ background: 'var(--bg-card-hover)', border: '1px solid var(--border-color)' }}>
                     <h4 className="font-semibold text-sm sm:text-base mb-1" style={{ color: 'var(--text-primary)' }}>{card.title}</h4>
                     <p className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>{card.desc}</p>
-=======
-                  <div key={i} className="bg-white bg-opacity-90 text-gray-800 p-3 sm:p-4 rounded-lg shadow-sm">
-                    <h4 className="font-semibold text-sm sm:text-base mb-1">{card.title}</h4>
-                    <p className="text-xs sm:text-sm">{card.desc}</p>
->>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
                   </div>
                 ))}
               </div>
@@ -200,7 +162,6 @@ function Home() {
         {/* Section 3 */}
         <section className="relative flex flex-col md:flex-row items-center justify-evenly min-h-screen h-auto md:h-[100vh] py-8 md:py-16 px-4 md:px-0">
           <div className="hidden md:block w-[50%]"></div>
-<<<<<<< HEAD
           <div ref={sectionRefs[2]} className="w-full md:w-[50%] px-4 sm:px-8 md:px-12" style={{ color: 'var(--text-primary)' }}>
             <div className="relative backdrop-blur-md rounded-2xl p-6 sm:p-8 md:p-10 shadow-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
               <div className="absolute top-6 -left-2 w-4 h-4 rounded-full animate-ping" style={{ background: 'var(--accent-primary)' }}></div>
@@ -210,17 +171,6 @@ function Home() {
               </div>
               <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 md:mb-6 tracking-tight" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>Your Cybersecurity Journey</h3>
               <p className="text-base sm:text-lg md:text-xl font-light leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-=======
-          <div ref={sectionRefs[2]} className="text-white w-full md:w-[50%] px-4 sm:px-8 md:px-12">
-            <div className="relative bg-black bg-opacity-30 backdrop-blur-md rounded-2xl p-6 sm:p-8 md:p-10 border border-white border-opacity-20 shadow-2xl">
-              <div className="absolute top-6 -left-2 w-4 h-4 bg-emerald-500 rounded-full animate-ping"></div>
-              <div className="flex items-center mb-6 md:mb-8">
-                <div className="w-8 md:w-12 h-0.5 bg-emerald-500 mr-4"></div>
-                <h2 className="text-emerald-400 text-lg sm:text-xl font-semibold tracking-wider">CAREER ACCELERATION</h2>
-              </div>
-              <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 md:mb-6" style={{ fontFamily: 'Times New Roman, serif' }}>Your Cybersecurity Journey</h3>
-              <p className="text-base sm:text-lg md:text-xl font-light leading-relaxed">
->>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
                 Join our global community of cybersecurity professionals and take the next step toward a rewarding, future-proof career. 
                 Gain access to industry-recognized certifications, personalized career mentorship, hands-on labs, and job placement assistance 
                 that connects you with leading employers. We don't just teach — we guide, support, and empower you to succeed.

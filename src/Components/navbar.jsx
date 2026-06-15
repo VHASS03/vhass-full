@@ -1,13 +1,10 @@
-import { useNavigate } from "react-router-dom";
+﻿import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "./navbar.css";
 import React from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useAuthCheck } from "../hooks/useAuthCheck.js";
-<<<<<<< HEAD
 import { Sun, Moon } from "lucide-react";
-=======
->>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
 
 function Navbar() {
   const navigate = useNavigate();
@@ -15,7 +12,6 @@ function Navbar() {
   const { user } = useAuthCheck();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-<<<<<<< HEAD
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem("theme") || "dark";
   });
@@ -36,8 +32,6 @@ function Navbar() {
     setTheme(prev => (prev === "dark" ? "light" : "dark"));
   };
 
-=======
->>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
   const handleMouseMove = (e) => {
     const button = e.currentTarget;
     const rect = button.getBoundingClientRect();
@@ -93,7 +87,6 @@ function Navbar() {
           </ul>
         </nav>
 
-<<<<<<< HEAD
         <div className="user-menu flex items-center gap-4">
           <button 
             onClick={toggleTheme} 
@@ -110,23 +103,12 @@ function Navbar() {
 
           {loading ? (
             <div className="text-sm">Loading...</div>
-=======
-        <div className="user-menu">
-          {loading ? (
-            <div style={{ color: 'white', fontSize: '14px' }}>Loading...</div>
->>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
           ) : user ? (
             <div className="user-buttons">
               <button className="login" onClick={() => { navigate("/dashboard"); closeMobileMenu(); }} onMouseMove={handleMouseMove}>Dashboard</button>
               {user.role === 'admin' && (
-<<<<<<< HEAD
                 <button className="login" onClick={() => { navigate("/admin"); closeMobileMenu(); }} onMouseMove={handleMouseMove} style={{ backgroundColor: 'var(--accent-primary)', color: '#000000' }}>Admin</button>
               )}
-=======
-                <button className="login" onClick={() => { navigate("/admin"); closeMobileMenu(); }} onMouseMove={handleMouseMove} style={{ backgroundColor: '#B88AFF', color: '#000000' }}>Admin</button>
-              )}
-            
->>>>>>> 66bc4f02194a681fb8f3e0e66a5e9a641725ec5e
             </div>
           ) : (
             <button className="login" onClick={() => { navigate("/auth"); closeMobileMenu(); }} onMouseMove={handleMouseMove}>LOGIN</button>
