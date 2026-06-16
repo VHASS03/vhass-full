@@ -7,3 +7,4 @@
 7. after login pages 
 8. Rendering issues 
 9. authentication issues 
+10. Message sending is taking time
