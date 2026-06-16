@@ -11,23 +11,21 @@ const AboutUs = () => {
 
   return (
     <div className="min-h-screen font-sans" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
-      <Navbar/>
-      
+      <Navbar />
+
       <div className="min-h-screen relative">
         {/* Hero Section */}
         <header
           className="relative py-20 md:py-32 px-4 md:px-6 overflow-hidden"
-          style={{ background: 'linear-gradient(to bottom, var(--bg-secondary), transparent)' }}
         >
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80')] bg-cover bg-center opacity-5"></div>
           <div className="relative max-w-6xl mx-auto text-center z-10">
-            <h1 
+            <h1
               className="text-4xl sm:text-5xl md:text-7xl font-extrabold mb-6 tracking-tight leading-none"
               style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}
             >
               About <span style={{ background: 'var(--accent-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>VHASS</span>
             </h1>
-            <p 
+            <p
               className="text-lg md:text-xl max-w-2xl mx-auto mb-10 px-4 leading-relaxed"
               style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-secondary)' }}
             >
@@ -35,7 +33,7 @@ const AboutUs = () => {
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4 px-4">
               <Link to="/course">
-                <button 
+                <button
                   className="px-8 py-3.5 rounded-full font-semibold text-white transition-all duration-300 text-sm md:text-base"
                   style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: 'var(--accent-gradient)', boxShadow: '0 4px 20px var(--glow-color-hover)' }}
                 >
@@ -43,7 +41,7 @@ const AboutUs = () => {
                 </button>
               </Link>
               <a href="#contact">
-                <button 
+                <button
                   className="px-8 py-3.5 rounded-full font-semibold transition-all text-sm md:text-base"
                   style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: 'var(--bg-card)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                 >
@@ -55,25 +53,25 @@ const AboutUs = () => {
         </header>
 
         {/* Mission Section */}
-        <section className="py-16 md:py-24 px-4 md:px-6 relative z-10">
+        <section className="py-16  px-4 md:px-6 relative z-10">
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
                 <div className="backdrop-blur-md p-8 rounded-2xl mb-8 transition-all duration-300" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-                  <h2 
+                  <h2
                     className="text-3xl md:text-4xl font-bold mb-4"
                     style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}
                   >
                     Our Mission
                   </h2>
-                  <p 
+                  <p
                     className="text-lg leading-relaxed"
                     style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-secondary)' }}
                   >
                     To empower and protect through education — because learning is the strongest defense in an interconnected world.
                   </p>
                 </div>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {[
                     { emoji: '🛡️', title: 'Security First', desc: 'Prioritizing protection in everything we do' },
@@ -89,11 +87,11 @@ const AboutUs = () => {
                   ))}
                 </div>
               </div>
-              
+
               <div className="relative">
                 <div className="absolute -inset-4 rounded-2xl rotate-3 blur-sm" style={{ background: 'linear-gradient(to right, var(--glow-color), var(--hero-glow))' }}></div>
                 <div className="relative backdrop-blur-md rounded-2xl p-8" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-                  <h2 
+                  <h2
                     className="text-3xl font-bold mb-6"
                     style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}
                   >
@@ -128,7 +126,7 @@ const AboutUs = () => {
         <section className="py-16 md:py-24 px-6 relative z-10">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
-              <h2 
+              <h2
                 className="text-3xl md:text-5xl font-bold mb-4"
                 style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}
               >
@@ -136,7 +134,7 @@ const AboutUs = () => {
               </h2>
               <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-muted)' }}>Our ambitious targets for the coming year</p>
             </div>
-            
+
             <div className="grid md:grid-cols-3 gap-8">
               {[
                 { num: '1000+', label: 'Ethical Hackers', desc: 'Train the next generation of cybersecurity professionals to protect digital assets worldwide.', progress: '80%', from: 'var(--accent-primary)', to: 'var(--accent-secondary)' },
@@ -167,7 +165,7 @@ const AboutUs = () => {
         <section className="py-16 md:py-24 px-4 md:px-6 relative z-10">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
-              <h2 
+              <h2
                 className="text-3xl md:text-5xl font-bold mb-4"
                 style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}
               >
@@ -175,7 +173,7 @@ const AboutUs = () => {
               </h2>
               <p className="max-w-2xl mx-auto px-4" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-muted)' }}>The visionaries driving our cybersecurity mission</p>
             </div>
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {[
                 {
@@ -222,10 +220,10 @@ const AboutUs = () => {
         </section>
 
         {/* FAQ Section */}
-        <section className="py-16 px-6 relative z-10" style={{ background: 'var(--bg-secondary)' }}>
+        <section className="py-16 px-6 relative z-10" style={{ background: 'var(--bg-primary)' }}>
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
-              <h2 
+              <h2
                 className="text-3xl md:text-5xl font-bold mb-4"
                 style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}
               >
@@ -233,7 +231,7 @@ const AboutUs = () => {
               </h2>
               <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-muted)' }}>Find answers to common questions about our programs</p>
             </div>
-            
+
             <div className="grid md:grid-cols-3 gap-8">
               {[
                 {
@@ -279,7 +277,7 @@ const AboutUs = () => {
           </div>
         </section>
 
-        <Footer/>
+        <Footer />
       </div>
     </div>
   );

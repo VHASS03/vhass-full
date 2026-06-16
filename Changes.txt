@@ -1,10 +1,8 @@
-1. admin Dashboard (courses and coupons and about page and easy to create workshops)
-2. footer lo line 
-3. About us background image 
+1. admin Dashboard (courses and coupons and about page and easy to create workshops) 
 4. 2026 goals
 5. Adding recorded modules (in website courses)
-6. Helpdesk page line 
 7. after login pages 
 8. Rendering issues 
 9. authentication issues 
 10. Message sending is taking time
+

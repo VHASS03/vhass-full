@@ -181,8 +181,7 @@ const Footer = () => {
 
         </div>
 
-        {/* Separator line */}
-        <div className="border-t pt-8 flex flex-col md:flex-row justify-between items-center gap-4" style={{ borderColor: 'var(--border-color)' }}>
+        <div className="flex flex-col md:flex-row justify-between items-center gap-8 px-1 py-6" >
           <p className="text-xs" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-muted)' }}>
             © 2026 VHASS Software® Pvt. Ltd. All rights reserved.
           </p>

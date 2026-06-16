@@ -237,6 +237,7 @@ function Dashboard() {
 
   return (
     <div className="dashboard-container">
+      <div className="dashboard-glow-bg" />
       <Navbar />
       
       <main className="dashboard-main">
@@ -468,15 +469,17 @@ function Dashboard() {
                       onClick={handleFixEnrollment}
                       disabled={fixingEnrollment}
                       style={{ 
-                        backgroundColor: '#10b981', 
-                        color: 'white',
+                        background: 'rgba(52, 211, 153, 0.12)', 
+                        border: '1px solid rgba(52, 211, 153, 0.3)', 
+                        color: '#34d399',
+                        boxShadow: 'none',
                         opacity: fixingEnrollment ? 0.6 : 1
                       }}
                     >
                       {fixingEnrollment ? 'Fixing...' : 'Fix My Enrollments'}
                     </button>
                   </div>
-                  <p style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}>
+                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '10px' }}>
                     Click "Fix My Enrollments" if you've paid for a course but it's not showing up
                   </p>
                 </div>

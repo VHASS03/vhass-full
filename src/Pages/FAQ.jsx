@@ -79,8 +79,8 @@ export default function HelpDeskPage() {
 
   // Filter FAQs based on search and category
   const filteredFaqs = faqs.filter((faq) => {
-    const matchesSearch = faq.question.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          faq.answer.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      faq.answer.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = activeFilter === "All" || faq.category === activeFilter;
     return matchesSearch && matchesCategory;
   });
@@ -103,8 +103,8 @@ export default function HelpDeskPage() {
             <div className="absolute top-1/4 left-1/3 w-[350px] h-[350px] rounded-full blur-[120px]" style={{ background: 'var(--hero-glow)' }} />
           </div>
           <div className="relative z-10 px-4">
-            <h1 
-              className="text-4xl sm:text-5xl md:text-7xl font-extrabold mb-6 tracking-tight leading-none" 
+            <h1
+              className="text-4xl sm:text-5xl md:text-7xl font-extrabold mb-6 tracking-tight leading-none"
               style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}
             >
               Frequently Asked <span style={{ background: 'var(--accent-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Questions</span>
@@ -154,8 +154,8 @@ export default function HelpDeskPage() {
         <div className="max-w-3xl mx-auto mb-20 px-4">
           {filteredFaqs.length > 0 ? (
             filteredFaqs.map((faq) => (
-              <div 
-                key={faq.id} 
+              <div
+                key={faq.id}
                 className="backdrop-blur-md rounded-2xl mb-4 overflow-hidden transition-all duration-300"
                 style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
               >
@@ -196,10 +196,10 @@ export default function HelpDeskPage() {
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
           >
             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-stretch">
-              
+
               {/* Left Side: Contact Info */}
               <div className="md:col-span-5 flex flex-col justify-between pr-0 md:pr-8" style={{ borderRight: '0' }}>
-                <div className="hidden md:block" style={{ borderRight: '1px solid var(--border-color)', position: 'absolute', height: '100%' }}></div>
+                <div className="hidden md:block" style={{ borderRight: '1px solid var(--border-color)', position: 'absolute', height: '0%' }}></div>
                 <div>
                   <h3 className="text-3xl font-extrabold mb-4 tracking-tight" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>Still have questions?</h3>
                   <p className="mb-8 leading-relaxed text-sm" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-secondary)' }}>

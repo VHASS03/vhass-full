@@ -1,47 +1,14 @@
-﻿"use client"
+"use client"
 import React from "react"
-import { useState, useEffect } from "react"
+import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Button } from "./Components/ui2/button"
-import { Card, CardContent, CardHeader, CardTitle } from "./Components/ui2/card"
-import { Input } from "./Components/ui2/input"
-import { Label } from "./Components/ui2/label"
 import Navbar from "./Components/navbar"
 import Footer from "./Components/footer"
-import ApiService from "./services/api.js"
 import { useAuth } from "./context/AuthContext.jsx"
-
-// Helper function to construct proper image URL
-const getImageUrl = (imagePath) => {
-  if (!imagePath || imagePath === 'null' || imagePath === 'undefined') {
-    return "/images/circuit-board.png";
-  }
-  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-    return imagePath;
-  }
-  if (!imagePath.includes('/')) {
-    return `/uploads/${imagePath}`;
-  }
-  if (imagePath.startsWith('uploads/')) {
-    return `/${imagePath}`;
-  }
-  if (imagePath.startsWith('/uploads/')) {
-    return imagePath;
-  }
-  return imagePath;
-};
 
 export default function VHASSWorkshopsPage() {
   const navigate = useNavigate()
   const { user, loading } = useAuth()
-  const [showViewDetails, setShowViewDetails] = useState({})
-  const [workshops, setWorkshops] = useState([])
-  const [showEnrollmentForm, setShowEnrollmentForm] = useState(null)
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    mobile: "",
-  })
 
   useEffect(() => {
     if (!loading && !user) {
@@ -49,46 +16,12 @@ export default function VHASSWorkshopsPage() {
     }
   }, [user, loading, navigate])
 
-  useEffect(() => {
-    if (!user) return
-
-    const loadWorkshops = async () => {
-      try {
-        const data = await ApiService.getAllWorkshops();
-        const list = Array.isArray(data.workshops) ? data.workshops : []
-        setWorkshops(list)
-
-        setTimeout(() => {
-          const state = {}
-          list.forEach((w) => { state[w._id] = true })
-          setShowViewDetails(state)
-        }, 1000)
-      } catch (e) {
-        console.error('Failed to fetch workshops:', e)
-        setWorkshops([])
-      }
-    }
-    loadWorkshops()
-  }, [user])
-
-  const handleFormSubmit = (e) => {
-    e.preventDefault()
-    alert("Enrollment form submitted! Proceeding to payment...")
-  }
-
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    })
-  }
-
   if (loading) {
     return (
       <div className="fixed inset-0 grid place-items-center bg-[var(--bg-primary)] text-[var(--text-primary)]">
         <div className="text-center">
-          <div className="w-10 h-10 border-4 border-white/10 border-l-[#c084fc] rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-400">Verifying session...</p>
+          <div className="w-10 h-10 border-4 border-[var(--border-color)] border-l-[var(--accent-primary)] rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-[var(--text-secondary)] font-semibold">Verifying session...</p>
         </div>
       </div>
     );
@@ -99,195 +32,54 @@ export default function VHASSWorkshopsPage() {
   }
 
   return (
-    <div className="min-h-screen font-sans">
+    <div className="min-h-screen font-sans bg-[var(--bg-primary)] text-[var(--text-primary)]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <Navbar />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-12 md:py-16">
+      <main className="container mx-auto px-4 py-12 md:py-16 relative">
+        {/* Background glow decoration */}
+        <div className="absolute top-10 left-1/3 w-[500px] h-[400px] bg-[var(--glow-color)] rounded-full blur-[150px] pointer-events-none" />
+
         {/* Hero Section */}
-        <div className="text-center mb-12 md:mb-20 py-20 md:py-28 rounded-3xl shadow-2xl relative overflow-hidden mx-4 md:mx-0 border border-white/5 bg-gradient-to-b from-[var(--bg-primary)] via-purple-950/15 to-transparent">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none">
-            <div className="absolute top-1/4 left-1/3 w-[350px] h-[350px] bg-purple-500/10 rounded-full blur-[120px]" />
-          </div>
+        <div className="text-center mb-16 md:mb-24 py-20 md:py-28 rounded-3xl shadow-2xl relative overflow-hidden mx-4 md:mx-0 border border-[var(--border-color)] bg-[var(--bg-card)] backdrop-blur-md">
           <div className="relative z-10 px-4">
             <h1 
-              className="text-4xl sm:text-5xl md:text-7xl font-extrabold mb-6 tracking-tight leading-none" 
+              className="text-4xl sm:text-5xl md:text-7xl font-extrabold mb-6 tracking-tight leading-none text-[var(--text-primary)]" 
               style={{ fontFamily: "'Outfit', sans-serif" }}
             >
-              Explore Our <span className="bg-gradient-to-r from-purple-400 to-indigo-300 bg-clip-text text-transparent">Workshops</span>
+              Explore Our <span style={{ background: 'var(--accent-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Workshops</span>
             </h1>
             <p 
-              className="text-lg sm:text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed text-gray-300" 
+              className="text-lg sm:text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed text-[var(--text-secondary)]" 
               style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
             >
-              Learn from industry experts and gain hands-on experience with our comprehensive cybersecurity workshops
+              Hands-on practical sessions guided by cybersecurity professionals to build your skills
             </p>
-            <div className="mt-8">
-              <div
-                className="inline-block px-8 py-3 rounded-full text-base md:text-lg font-semibold bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border border-purple-500/30 text-purple-300"
-                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-              >
-                🚀 Transform Your Career Today
-              </div>
-            </div>
           </div>
         </div>
 
-        {/* Workshop Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 max-w-7xl mx-auto px-4">
-          {workshops.map((workshop, index) => (
-            <Card
-              key={workshop._id || index}
-              className="group hover:scale-[1.03] transition-all duration-300 shadow-xl hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] border border-white/10 overflow-hidden rounded-2xl bg-white/[0.02] backdrop-blur-md flex flex-col justify-between"
-            >
-              <div className="relative overflow-hidden">
-                <img
-                  src={getImageUrl(workshop.image)}
-                  alt={workshop.title}
-                  className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div
-                  className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold bg-purple-600/20 border border-purple-500/30 text-purple-300"
-                  style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                >
-                  Popular
-                </div>
-              </div>
-
-              <CardHeader className="pb-2 pt-6">
-                <CardTitle 
-                  className="text-xl font-bold leading-tight text-white group-hover:text-purple-300 transition-colors" 
-                  style={{ fontFamily: "'Outfit', sans-serif" }}
-                >
-                  {workshop.title}
-                </CardTitle>
-              </CardHeader>
-
-              <CardContent className="pt-2 flex-grow flex flex-col justify-end">
-                <div className="space-y-2 mb-6" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                  <p className="text-sm text-gray-400">
-                    {workshop.createdBy || workshop.instructor || "VHASS SOFTWARES PRIVATE LIMITED"}
-                  </p>
-                  <p className="text-sm text-gray-400">
-                    {`Duration- ${workshop.duration || 0} Hours`}
-                  </p>
-                  <p 
-                    className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-300 mt-3" 
-                    style={{ fontFamily: "'Outfit', sans-serif" }}
-                  >
-                    {`₹${workshop.price || 0}`}
-                  </p>
-                </div>
-
-                {showViewDetails[workshop._id || index] && (
-                  <Button
-                    onClick={() => {
-                      navigate(`/workshop/${workshop._id}`)
-                    }}
-                    className="w-full text-white font-semibold py-3.5 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 transition-all duration-300 shadow-md"
-                    style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", border: 'none' }}
-                  >
-                    View Workshop Details
-                  </Button>
-                )}
-
-                {showEnrollmentForm === workshop.id && (
-                  <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-[#0b0b0f] border border-white/10 rounded-2xl p-8 w-full max-w-md shadow-2xl relative">
-                      <div className="flex justify-between items-center mb-6">
-                        <h3 className="text-2xl font-bold text-white" style={{ fontFamily: "'Outfit', sans-serif" }}>
-                          Enrollment Form
-                        </h3>
-                        <button
-                          onClick={() => setShowEnrollmentForm(null)}
-                          className="text-gray-400 hover:text-white text-2xl font-bold transition-colors"
-                        >
-                          ×
-                        </button>
-                      </div>
-                      <form onSubmit={handleFormSubmit} className="space-y-6">
-                        <div>
-                          <Label htmlFor="name" className="text-sm font-semibold text-gray-300" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                            Name
-                          </Label>
-                          <Input
-                            id="name"
-                            name="name"
-                            type="text"
-                            value={formData.name}
-                            onChange={handleInputChange}
-                            className="mt-2 border border-white/10 rounded-lg px-4 py-3 w-full bg-white/[0.03] text-white placeholder-gray-500 focus:border-purple-500 focus:ring-purple-500/20 text-base"
-                            placeholder="Enter your full name"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="email" className="text-sm font-semibold text-gray-300" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                            Email
-                          </Label>
-                          <Input
-                            id="email"
-                            name="email"
-                            type="email"
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            className="mt-2 border border-white/10 rounded-lg px-4 py-3 w-full bg-white/[0.03] text-white placeholder-gray-500 focus:border-purple-500 focus:ring-purple-500/20 text-base"
-                            placeholder="Enter your email"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="mobile" className="text-sm font-semibold text-gray-300" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                            Mobile Number
-                          </Label>
-                          <Input
-                            id="mobile"
-                            name="mobile"
-                            type="tel"
-                            value={formData.mobile}
-                            onChange={handleInputChange}
-                            className="mt-2 border border-white/10 rounded-lg px-4 py-3 w-full bg-white/[0.03] text-white placeholder-gray-500 focus:border-purple-500 focus:ring-purple-500/20 text-base"
-                            placeholder="Enter your mobile number"
-                            required
-                          />
-                        </div>
-                        <Button
-                          type="submit"
-                          className="w-full text-white py-4 rounded-full font-bold text-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 shadow-lg"
-                        >
-                          Proceed to Pay 💳
-                        </Button>
-                      </form>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Call to Action Section */}
-        <div className="text-center mt-20 px-4">
-          <div className="inline-block px-8 md:px-16 py-12 md:py-16 rounded-3xl shadow-xl mx-4 border border-white/5 bg-gradient-to-r from-purple-950/10 to-indigo-950/10 backdrop-blur-md max-w-4xl">
-            <h2 
-              className="text-2xl md:text-4xl font-extrabold mb-4 text-white" 
-              style={{ fontFamily: "'Outfit', sans-serif" }}
-            >
-              Ready to Start Your Journey?
+        {/* Workshops Coming Soon - Glass Card Placeholder */}
+        <div className="max-w-2xl mx-auto text-center py-16 px-8 rounded-3xl border border-[var(--border-color)] bg-[var(--bg-card)] backdrop-blur-md shadow-2xl relative overflow-hidden my-12">
+          {/* Decorative inner glow */}
+          <div className="absolute -top-10 -left-10 w-40 h-40 bg-[var(--glow-color)] rounded-full blur-[80px] pointer-events-none" />
+          
+          <div className="relative z-10">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--accent-primary)] mb-6 text-3xl shadow-md">
+              📅
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-extrabold mb-4" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>
+              Workshops Coming Soon
             </h2>
-            <p 
-              className="text-base md:text-lg mb-8 text-gray-300 max-w-xl mx-auto leading-relaxed" 
-              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-            >
-              Join thousands of students who have transformed their careers with VHASS
+            <p className="text-[var(--text-secondary)] text-base sm:text-lg mb-8 leading-relaxed max-w-md mx-auto" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              We are crafting interactive learning experiences driven by real-world projects. Stay tuned for dates, topics, and registration details!
             </p>
-            <Button
-              className="px-8 py-3.5 text-base md:text-lg font-bold rounded-full text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 shadow-[0_4px_20px_rgba(168,85,247,0.3)] transition-all duration-300"
-              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", border: 'none' }}
-              onClick={() => navigate('/auth')}
+            <button 
+              className="px-8 py-3.5 rounded-full font-bold text-white transition-all hover:scale-[1.02] active:scale-[0.98] shadow-md"
+              style={{ background: 'var(--accent-gradient)', boxShadow: '0 4px 15px var(--glow-color)', border: 'none' }}
+              onClick={() => navigate('/dashboard')}
             >
-              Get Started Today 🎯
-            </Button>
+              Go to Dashboard
+            </button>
           </div>
         </div>
       </main>
