@@ -19,7 +19,7 @@ export const computeDiscount = (coupon, originalAmount) => {
 // ─── Validate & preview a coupon (public — called from checkout) ──────────
 export const validateCoupon = async (req, res) => {
   try {
-    const { code, amount, type } = req.body; // type: 'course' | 'workshop'
+    const { code, amount, type, itemId } = req.body; // type: 'course' | 'workshop'
 
     if (!code || !amount) {
       return res.status(400).json({ message: "Coupon code and amount are required" });
@@ -55,11 +55,25 @@ export const validateCoupon = async (req, res) => {
 
     // Check applicability
     if (coupon.applicableTo !== "all") {
-      const itemType = type === "workshop" ? "workshops" : "courses";
-      if (coupon.applicableTo !== itemType) {
-        return res.status(400).json({
-          message: `This coupon is only valid for ${coupon.applicableTo}`,
-        });
+      if (coupon.applicableTo === "courses" || coupon.applicableTo === "workshops") {
+        const itemType = type === "workshop" ? "workshops" : "courses";
+        if (coupon.applicableTo !== itemType) {
+          return res.status(400).json({
+            message: `This coupon is only valid for ${coupon.applicableTo}`,
+          });
+        }
+      } else if (coupon.applicableTo === "specific_course") {
+        if (type !== "course" || !coupon.applicableItem || coupon.applicableItem.toString() !== String(itemId)) {
+          return res.status(400).json({
+            message: "This coupon is not valid for this specific course",
+          });
+        }
+      } else if (coupon.applicableTo === "specific_workshop") {
+        if (type !== "workshop" || !coupon.applicableItem || coupon.applicableItem.toString() !== String(itemId)) {
+          return res.status(400).json({
+            message: "This coupon is not valid for this specific workshop",
+          });
+        }
       }
     }
 
@@ -108,6 +122,7 @@ export const createCoupon = async (req, res) => {
       maxDiscount,
       minimumAmount,
       applicableTo,
+      applicableItem,
       maxUses,
       validFrom,
       validUntil,
@@ -132,6 +147,7 @@ export const createCoupon = async (req, res) => {
       maxDiscount: maxDiscount ? Number(maxDiscount) : null,
       minimumAmount: minimumAmount ? Number(minimumAmount) : 0,
       applicableTo: applicableTo || "all",
+      applicableItem: applicableItem || null,
       maxUses: maxUses ? Number(maxUses) : null,
       validFrom: validFrom ? new Date(validFrom) : new Date(),
       validUntil: validUntil ? new Date(validUntil) : null,
@@ -157,7 +173,7 @@ export const updateCoupon = async (req, res) => {
 
     const fields = [
       "description", "discountType", "discountValue", "maxDiscount",
-      "minimumAmount", "applicableTo", "maxUses", "validFrom", "validUntil", "isActive",
+      "minimumAmount", "applicableTo", "applicableItem", "maxUses", "validFrom", "validUntil", "isActive",
     ];
     fields.forEach((f) => {
       if (req.body[f] !== undefined) coupon[f] = req.body[f];

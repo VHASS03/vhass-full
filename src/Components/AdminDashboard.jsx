@@ -231,7 +231,7 @@ export default function AdminDashboard() {
   }
   const emptyCoupon = {
     code: "", description: "", discountType: "percentage", discountValue: "",
-    maxDiscount: "", minimumAmount: "", applicableTo: "all",
+    maxDiscount: "", minimumAmount: "", applicableTo: "all", applicableItem: "",
     maxUses: "", validFrom: "", validUntil: "", isActive: true,
   }
 
@@ -511,6 +511,7 @@ export default function AdminDashboard() {
       maxDiscount: couponForm.maxDiscount ? Number(couponForm.maxDiscount) : null,
       minimumAmount: couponForm.minimumAmount ? Number(couponForm.minimumAmount) : 0,
       applicableTo: couponForm.applicableTo,
+      applicableItem: couponForm.applicableItem || null,
       maxUses: couponForm.maxUses ? Number(couponForm.maxUses) : null,
       validFrom: couponForm.validFrom || undefined,
       validUntil: couponForm.validUntil || undefined,
@@ -570,6 +571,7 @@ export default function AdminDashboard() {
       maxDiscount: coupon.maxDiscount || "",
       minimumAmount: coupon.minimumAmount || "",
       applicableTo: coupon.applicableTo,
+      applicableItem: coupon.applicableItem || "",
       maxUses: coupon.maxUses || "",
       validFrom: coupon.validFrom ? new Date(coupon.validFrom).toISOString().slice(0, 10) : "",
       validUntil: coupon.validUntil ? new Date(coupon.validUntil).toISOString().slice(0, 10) : "",
@@ -905,7 +907,11 @@ export default function AdminDashboard() {
                           </div>
                           <div className="flex justify-between text-xs">
                             <span style={{ color: "var(--text-muted)" }}>Applies to</span>
-                            <span className="capitalize" style={{ color: "var(--text-secondary)" }}>{coupon.applicableTo}</span>
+                            <span className="capitalize" style={{ color: "var(--text-secondary)" }}>
+                              {coupon.applicableTo.replace("_", " ")}
+                              {coupon.applicableTo === "specific_course" && ` (${courses.find(c => c._id === coupon.applicableItem)?.title || "Unknown"})`}
+                              {coupon.applicableTo === "specific_workshop" && ` (${workshops.find(w => w._id === coupon.applicableItem)?.title || "Unknown"})`}
+                            </span>
                           </div>
                           {coupon.minimumAmount > 0 && (
                             <div className="flex justify-between text-xs">
@@ -1117,8 +1123,23 @@ export default function AdminDashboard() {
                   <option value="all">All (Courses &amp; Workshops)</option>
                   <option value="courses">Courses Only</option>
                   <option value="workshops">Workshops Only</option>
+                  <option value="specific_course">Specific Course</option>
+                  <option value="specific_workshop">Specific Workshop</option>
                 </Select>
               </Field>
+              {(couponForm.applicableTo === "specific_course" || couponForm.applicableTo === "specific_workshop") && (
+                <Field label={couponForm.applicableTo === "specific_course" ? "Select Course *" : "Select Workshop *"}>
+                  <Select value={couponForm.applicableItem} onChange={e => setCouponForm({ ...couponForm, applicableItem: e.target.value })} required>
+                    <option value="">-- Select --</option>
+                    {couponForm.applicableTo === "specific_course" && courses.map(c => (
+                      <option key={c._id} value={c._id}>{c.title}</option>
+                    ))}
+                    {couponForm.applicableTo === "specific_workshop" && workshops.map(w => (
+                      <option key={w._id} value={w._id}>{w.title}</option>
+                    ))}
+                  </Select>
+                </Field>
+              )}
               <Field label="Discount Type *">
                 <Select value={couponForm.discountType} onChange={e => setCouponForm({ ...couponForm, discountType: e.target.value })}>
                   <option value="percentage">Percentage (%)</option>

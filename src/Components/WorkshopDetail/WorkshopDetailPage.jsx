@@ -33,40 +33,7 @@ const getImageUrl = (imagePath) => {
   return imagePath;
 };
 
-"use client"
 
-import React, { useEffect, useState } from "react"
-import { useParams, useNavigate } from "react-router-dom"
-import { Button } from "@/Components/ui2/button"
-import { Input } from "@/Components/ui2/input"
-import { Label } from "@/Components/ui2/label"
-import { Phone, Mail, MapPin, Linkedin, Youtube, Instagram, ArrowLeft, X } from "lucide-react"
-import Navbar from "@/Components/navbar"
-import { useAuth } from "../../context/AuthContext.jsx"
-import phonepeService from "../../services/phonepeService.js"
-
-// API base — uploads are served by the backend server, not the frontend
-const API_BASE = import.meta.env.VITE_API_URL || ""
-
-// Helper function to construct proper image URL
-const getImageUrl = (imagePath) => {
-  if (!imagePath || imagePath === 'null' || imagePath === 'undefined') {
-    return "/images/circuit-board.png";
-  }
-  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-    return imagePath;
-  }
-  if (!imagePath.includes('/')) {
-    return `${API_BASE}/uploads/${imagePath}`;
-  }
-  if (imagePath.startsWith('uploads/')) {
-    return `${API_BASE}/${imagePath}`;
-  }
-  if (imagePath.startsWith('/uploads/')) {
-    return `${API_BASE}${imagePath}`;
-  }
-  return imagePath;
-};
 
 // No static data; fetch from backend
 
@@ -236,7 +203,8 @@ export default function WorkshopDetailPage() {
         body: JSON.stringify({
           code: couponCode,
           amount: baseAmount,
-          type: 'workshop'
+          type: 'workshop',
+          itemId: workshop._id || workshop.id
         })
       })
       

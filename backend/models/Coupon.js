@@ -34,8 +34,12 @@ const couponSchema = new mongoose.Schema(
     },
     applicableTo: {
       type: String,
-      enum: ["all", "courses", "workshops"],
+      enum: ["all", "courses", "workshops", "specific_course", "specific_workshop"],
       default: "all",
+    },
+    applicableItem: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: null,
     },
     maxUses: {
       type: Number,

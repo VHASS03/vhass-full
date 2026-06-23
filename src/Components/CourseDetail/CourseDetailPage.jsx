@@ -9,161 +9,6 @@ import { Phone, Mail, MapPin, Linkedin, Youtube, Instagram, ArrowLeft, X } from 
 import Navbar from "@/Components/navbar"
 import { useAuth } from "../../context/AuthContext.jsx"
 import ApiService from "../../services/api.js"
-// CouponInput removed
-
-const API_BASE = import.meta.env.VITE_API_URL || ""
-
-// Helper function to construct proper image URL
-const getImageUrl = (imagePath) => {
-  if (!imagePath || imagePath === 'null' || imagePath === 'undefined') {
-    return "/images/circuit-board.png";
-  }
-  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-    return imagePath;
-  }
-  if (!imagePath.includes('/')) {
-    return `${API_BASE}/uploads/${imagePath}`;
-  }
-  if (imagePath.startsWith('uploads/')) {
-    return `${API_BASE}/${imagePath}`;
-  }
-  if (imagePath.startsWith('/uploads/')) {
-    return `${API_BASE}${imagePath}`;
-  }
-  return imagePath;
-};
-
-// Legacy static fallback (kept for reference); dynamic fetch will be used first
-const courseData = {
-  "certified-ethical-hacker-ceh": {
-    id: 1,
-    title: "Certified Ethical Hacker (CEH)",
-    instructor: "Instructor: VHASS SOFTWARES PRIVATE LIMITED",
-    duration: "Duration: 28 hours",
-    price: "₹25000",
-    image: "/images/circuit-board.png",
-    about:
-      "About the CEH Certification The Certified Ethical Hacker (CEH) certification is the most trusted ethical hacking certification and accomplishment recommended by employers globally. It is the most desired information security certification and represents one of the fastest-growing cyber credentials required by critical infrastructure and essential service providers. CEH provides you with hands-on training covering 8 of the most current security domains, 100+ tools, and the latest security vulnerabilities, exploits, and countermeasures. You'll learn to think and act like a hacker (a legally ethical one) to better defend against attacks.",
-    syllabus: [
-      "Module : Introduction to Ethical Hacking: Information security overview Hacking concepts and types Ethical hacking concepts and scope Information security controls Information security laws and standards",
-      "Module : Footprinting and Reconnaissance: Footprinting concepts Footprinting through search engines Website footprinting Email footprinting Competitive intelligence WHOIS footprinting DNS footprinting Network footprinting Footprinting tools and countermeasures",
-      "Module : Scanning Networks: Network scanning concepts Scanning techniques Host discovery Port and service discovery OS discovery (banner grabbing/OS fingerprinting) Scanning beyond IDS and firewall Drawing network diagrams Scanning tools and countermeasures",
-      "Module : Enumeration: Enumeration concepts NetBIOS enumeration SNMP enumeration LDAP enumeration NTP enumeration SMTP enumeration DNS enumeration Enumeration countermeasures",
-      "Module : Vulnerability Analysis: Vulnerability assessment concepts Vulnerability classification and assessment types Vulnerability assessment solutions and tools Vulnerability scoring systems Vulnerability assessment reports",
-      "Module : Malware Threats: Malware concepts Types of malware (viruses, worms, Trojans, ransomware, etc.) Advanced malware techniques APT (Advanced Persistent Threats) Malware analysis and reverse engineering basics Anti-malware software and tools Malware countermeasures Real-world malware case studies",
-      "Module : Hacking Web Applications: Web application architecture Web application threat landscape Common web vulnerabilities (OWASP Top 10) SQL Injection Cross-Site Scripting (XSS) Cross-Site Request Forgery (CSRF) Broken Authentication and Session Management Insecure Deserialization Security Misconfiguration Sensitive Data Exposure Components with Known Vulnerabilities Insufficient Logging and Monitoring Web app penetration testing methodology Tools for web app testing (Burp Suite, OWASP ZAP, etc.) Web security best practices Countermeasures and secure coding",
-    ],
-    whoShouldAttend: [
-      "The CEH certification is ideal for IT / NON-IT professionals who want to specialize in security and penetration testing: Security Officers Auditors Security Professionals Site Administrators Network Administrators Anyone concerned about the integrity of network infrastructure IT professionals preparing for the CEH certification exam",
-    ],
-    prerequisites: [
-      "While there are no formal prerequisites for the CEH exam, we recommend: Laptop Or Pc with i5 processer and 8 GB ram No Basic knowledge required Interest Towards Learning",
-    ],
-  },
-  "awareness-of-cyber-crime-and-threats": {
-    id: 2,
-    title: "Awareness of Cyber Crime And Threats",
-    instructor: "Instructor: VHASS SOFTWARES PRIVATE LIMITED",
-    duration: "Duration: 20 hours",
-    price: "₹1000",
-    image: "/images/robot-desk.png",
-    about:
-      "This foundational course provides crucial knowledge about the growing threats in our digital world. You'll learn to recognize common cyber crimes, understand how attacks happen, and discover practical steps to protect yourself and your organization. Through real-world case studies and simple demonstrations, we make cybersecurity concepts accessible to everyone, regardless of technical background. The course covers personal and workplace security, social media risks, financial protection, and basic response strategies.",
-    syllabus: [
-      "Module : Understanding Cyber Crime: What is cyber crime? Common types of cyber attacks Who are cyber criminals? Real-world impact of cyber crime Global trends in digital threats",
-      "Module : Phishing & Social Engineering: How phishing scams work Spotting fake emails and messages Social media manipulation Impersonation scams Protecting yourself from social engineering",
-      "Module : Malware Threats: Viruses, worms, and trojans explained Ransomware - how it works How malware spreads Protecting your devices What to do if infected",
-      "Module : Online Financial Safety: Banking and payment scams Credit card fraud prevention Safe online shopping Recognizing fake websites Cryptocurrency scams",
-      "Module : Social Media & Privacy: Privacy settings explained Oversharing dangers Fake profiles and catfishing Location sharing risks Protecting your digital reputation",
-      "Module : Workplace Security: Handling sensitive information Password best practices Safe remote work habits Reporting suspicious activity Your role in organizational security",
-    ],
-    whoShouldAttend: [
-      "Cyber crime awareness is essential for everyone in today's digital world: Individual internet users Employees in any industry Parents and teachers Small business owners Senior citizens Students Community leaders",
-    ],
-    prerequisites: [
-      "This course has no prerequisites: No technical knowledge required Basic computer/phone usage skills Interest in staying safe online",
-    ],
-  },
-  "cyber-suraksha-30-day-cybersecurity-empowerment-for-small-businesses": {
-    id: 3,
-    title: "Cyber Suraksha – 30-Day Cybersecurity Empowerment for Small Businesses",
-    instructor: "Instructor: VHASS SOFTWARES PRIVATE LIMITED",
-    duration: "Duration: 45 hours",
-    price: "₹8000",
-    image: "/images/business-gears.png",
-    about:
-      "Cyber Suraksha is a 30-day practical cybersecurity training program specially designed for small businesses, startups, small-scale industries, and growing companies. The goal is to empower owners and teams to build their own in-house security systems, protect sensitive data, prevent digital threats, and create a culture of cyber responsibility across their organization. This program delivers easy-to-follow training with real tools, hands-on practice, and guidance that doesn't require any technical background. If your business uses digital devices, emails, payments, or customer data — this course is essential.",
-    syllabus: [
-      "Week 1: Basics & Awareness: Day 1: Why Cybersecurity Matters for Small Businesses Day 2: Understanding Common Threats (Phishing, Malware, etc.) Day 3: Business Risk Checkup Day 4: Basic Cyber Hygiene for Staff Day 5: What to Protect – People, Devices, and Data Day 6: Cyber Case Studies from Small Businesses Day 7: Weekly Review & Hands-on Tool: Cyber Checklist",
-      "Week 2: Threat Prevention: Day 8: Email Safety & Phishing Detection Day 9: Password Security for Teams Day 10: Device Protection & Antivirus Setup Day 11: Ransomware – How to Avoid It Day 12: Safe Browsing & Public Wi-Fi Day 13: Using VPNs & Securing Remote Work Day 14: Weekly Review & Setup Your 'Digital Lockdown'",
-      "Week 3: Business-Level Security: Day 15: Securing Customer & Payment Data Day 16: Cybersecurity for Small Teams Day 17: Access Control – Who Can Do What? Day 18: Safe Cloud Usage for Files and Emails Day 19: Mobile Device Safety & WhatsApp Scams Day 20: Create Your Company Security Policy Day 21: Weekly Review & Apply Your Policy",
-      "Week 4: Recovery, Tools & Certification: Day 22: Backup & Recovery Plans Day 23: Detecting and Reporting Incidents Day 24: Employee Training Techniques Day 25: Compliance Basics (Indian & Global Laws) Day 26: Security Tools You Can Use (Free & Paid) Day 27: DIY Audit – Test Your Business Cyber Readiness Day 28: Threat Simulation & Final Quiz Day 29: One-on-One Security Consultation (Optional) Day 30: Final Certification + Security Toolkit Download",
-    ],
-    whoShouldAttend: [
-      "Small businesses are big targets – Over 40% of cyberattacks are aimed at small businesses. Limited resources mean higher risk – Many small companies can't afford full-time IT security. One attack can shut down your operations – Data loss, fraud, or ransomware can destroy trust and revenue. You can build your own defense – With the right tools and training, even non-technical teams can build strong cybersecurity systems.",
-      "Small business owners and entrepreneurs Managers and staff of small-scale industries Finance, HR, admin, and operations teams Anyone who runs or supports a digital business",
-    ],
-    prerequisites: [
-      "No technical background is required. Participants should have basic computer or smartphone usage skills, a stable internet connection, and access to a laptop or desktop. A willingness to learn and apply practical security steps is essential.",
-    ],
-  },
-  "zero-to-founder-entrepreneurship-edition-full-course-for-beginners": {
-    id: 4,
-    title: "Zero to Founder (Entrepreneurship Edition - Full Course For beginners)",
-    instructor: "Instructor: VHASS SOFTWARES PRIVATE LIMITED",
-    duration: "Duration: 40 hours",
-    price: "₹12999",
-    image: "/images/entrepreneurship.png",
-    about:
-      "ScaleUp Mastery: Entrepreneurship Edition is a 2-month practical course designed to guide you from idea to launch. You'll learn how to find a startup idea, validate it, build an MVP, form a team, handle branding, marketing, legal setup, and pitch like a pro — all in just 1 hour a day. Perfect for students, first-time founders, and innovators who want to build real startups with confidence.",
-    syllabus: [
-      "Module 1: Foundation of Entrepreneurship : Understanding what entrepreneurship truly means, the mindset it requires, types of entrepreneurs,and busting common myths. entrepreneurs, and busting common myths.",
-      "Module 2: Startup Ideation Module 2: Startup Ideation& Validation: Learn how to generate impactful startup ideas, validate them with real users, and avoid common traps during the early stages.",
-      "Module 3: Building the Team & MVP: Discover how to form a strong founding team, build a Minimum Viable Product (MVP), and manage early operations effectively.",
-      "Module 4: Fundraising & Revenue Models : Explore various business models, plan your startup's budget, understand funding sources, and create compelling investor pitch decks",
-      "Module 5: Marketing & Launching: Learn branding basics, organic and paid marketing strategies, launch planning, and how to build an engaging community",
-      "Module 6: Scaling Your Startup: Dive into growth strategies, use scaling tools, build internal departments, and handle founder responsibilities with balance.",
-      "Module 7: Legal, Ethics & Culture: Cover essential legal registrations, contracts, ethical startup practices, and how to nurture a strong company culture",
-      "Bonus Module: Pitching, Public Speaking & Hackathons: Improve your pitch delivery, develop public speaking confidence, and win hackathons with structured strategy and presentation.",
-    ],
-    whoShouldAttend: [
-      "Students curious about startups and innovation",
-      "Aspiring entrepreneurs looking to start their first venture",
-      "Techies/Developers who want to launch products",
-      "Designers/Creators with ideas but no startup experience",
-      "Hackathon Participants preparing to pitch and build MVPs",
-      "Startup Founders seeking structure to scale their vision",
-      "Marketing/Business students wanting practical entrepreneurship training",
-    ],
-    prerequisites: [
-      "You don't need a business degree to join, but here's what helps:",
-      "Curiosity to learn and solve real-world problems",
-      "Willingness to brainstorm and build ideas",
-      "Basic digital skills (e.g., Google Docs, forms, Canva, etc.)",
-      "Openness to collaboration and teamwork",
-      "A smartphone or laptop with internet access",
-      "1 hour/day commitment for 8 weeks",
-      "No coding required. No business plan needed. Just come with your fire to build something great.",
-    ],
-  },
-}
-
-export default function CourseDetailsPage() {
-  const { slug } = useParams()
-  const navigate = useNavigate()
-  const { user } = useAuth()
-  const [showEnrollmentModal, setShowEnrollmentModal] = useState(false)
-"use client"
-
-import React, { useState, useEffect } from "react"
-import { useParams, useNavigate } from "react-router-dom"
-import { Button } from "@/Components/ui/button"
-import { Input } from "@/Components/ui/input"
-import { Label } from "@/Components/ui/label"
-import { Phone, Mail, MapPin, Linkedin, Youtube, Instagram, ArrowLeft, X } from "lucide-react"
-import Navbar from "@/Components/navbar"
-import { useAuth } from "../../context/AuthContext.jsx"
-import ApiService from "../../services/api.js"
 
 const API_BASE = import.meta.env.VITE_API_URL || ""
 
@@ -411,12 +256,12 @@ export default function CourseDetailsPage() {
   const handleFormSubmit = async (e) => {
     e.preventDefault()
     setIsProcessingPayment(true)
-    
+
     try {
       const apiBase = import.meta.env.VITE_API_URL || 'https://api.vhassacademy.com';
       const baseAmount = parseInt(course.price.replace(/[^0-9]/g, ''))
       const amount = finalAmount !== null ? finalAmount : baseAmount
-      
+
       const resp = await fetch(`${apiBase}/api/course/${course._id || course.id}/phonepe-checkout`, {
         method: 'POST',
         headers: {
@@ -435,7 +280,7 @@ export default function CourseDetailsPage() {
 
       const data = await resp.json();
       console.log('PhonePe response:', data);
-      
+
       if (data.checkoutPageUrl) {
         window.location.href = data.checkoutPageUrl;
       } else {
@@ -461,7 +306,7 @@ export default function CourseDetailsPage() {
     setIsApplyingCoupon(true)
     setCouponError("")
     setCouponSuccess("")
-    
+
     try {
       const baseAmount = parseInt(course.price.replace(/[^0-9]/g, ''))
       const token = localStorage.getItem('auth_token')
@@ -476,10 +321,11 @@ export default function CourseDetailsPage() {
         body: JSON.stringify({
           code: couponCode,
           amount: baseAmount,
-          type: 'course'
+          type: 'course',
+          itemId: course._id || course.id
         })
       })
-      
+
       const data = await res.json()
       if (res.ok && data.valid) {
         setFinalAmount(data.finalAmount)
@@ -638,7 +484,7 @@ export default function CourseDetailsPage() {
                 <X size={24} />
               </button>
             </div>
-            
+
             <form onSubmit={handleFormSubmit} className="space-y-6">
               <div>
                 <Label htmlFor="name" className="text-lg" style={{ color: "var(--text-secondary)" }}>
@@ -685,7 +531,7 @@ export default function CourseDetailsPage() {
                   style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--accent-primary)", color: "var(--text-primary)" }}
                 />
               </div>
-              
+
               <div className="bg-[var(--border-color)] p-4 rounded-lg">
                 <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
                   <strong>Course:</strong> {course.title}
@@ -702,7 +548,7 @@ export default function CourseDetailsPage() {
                   </p>
                 </div>
               </div>
-              
+
               {/* Coupon Section */}
               <div className="bg-[var(--bg-card)] p-4 rounded-lg border border-[var(--border-color)]">
                 <Label className="text-sm mb-2 block" style={{ color: "var(--text-secondary)" }}>Have a coupon code?</Label>
