@@ -1,15 +1,16 @@
-﻿@tailwind base;
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Global Reset */
+/* ═══════════════════════════════════════════
+   VHASS ACADEMY — APP STYLES
+   ═══════════════════════════════════════════ */
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   scroll-behavior: smooth;
-  user-select: none;
-  /* overflow-y: hidden; */
 }
 
 body {
@@ -19,28 +20,13 @@ body {
   z-index: 0;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url('/image.png');
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
-  opacity: 0.1; /* ✅ Adjust opacity here */
-  z-index: -1;
-}
-
-/* Gradient Animated Tag Box */
+/* ─── Gradient Animated Tag Box ─── */
 .tag-box {
   position: relative;
   width: 12rem;
   height: 2rem;
   border-radius: 50px;
-  background: linear-gradient(to right, #8e6a4a, #FFB162, #A35139, #FFB162, #8e6a4a, #A35139, #8e6a4a);
+  background: linear-gradient(to right, #8e6a4a, #FFB162, #e8944a, #FFB162, #8e6a4a, #e8944a, #8e6a4a);
   background-size: 300%;
   animation: landing-page-animationGradient 3s linear infinite;
   box-shadow: 0 0 18px rgba(255, 177, 98, 0.35);
@@ -90,44 +76,16 @@ body::before {
 }
 
 .landing-page .tag-box .tag:hover {
-  color: var(--accent-primary);
+  color: var(--accent, #FFB162);
 }
 
-/* Tag Box Gradient Animation */
 @keyframes landing-page-animationGradient {
   to {
     background-position: 200%;
   }
 }
 
-/* Down Arrow Animation */
-.arrDown {
-  animation: anime 1.5s linear infinite;
-}
-
-@keyframes anime {
-  0% {
-    transform: translateY(-10px);
-  }
-  50% {
-    transform: translateY(5px);
-  }
-  100% {
-    transform: translateY(-10px);
-  }
-}
-
-/* ─────────────────────────────── */
-/* FAQ Page Styles (Added Here)   */
-/* ─────────────────────────────── */
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-}
-
-/* Loading Spinner */
+/* ─── Loading Spinner ─── */
 .loading-spinner {
   display: flex;
   flex-direction: column;
@@ -139,8 +97,8 @@ body::before {
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid var(--border-color);
-  border-left: 4px solid var(--accent-primary);
+  border: 4px solid var(--border, rgba(255,255,255,0.06));
+  border-left: 4px solid var(--accent, #FFB162);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
@@ -152,8 +110,7 @@ body::before {
 }
 
 @layer base {
-  html,
-  body {
+  html, body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
     margin: 0;
@@ -161,9 +118,13 @@ body::before {
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
-  *,
-  *::before,
-  *::after {
-    border-color: var(--border-color);
+  *, *::before, *::after {
+    border-color: var(--border, rgba(255,255,255,0.06));
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
   }
 }

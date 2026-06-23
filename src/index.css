@@ -2,132 +2,339 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════
+   VHASS ACADEMY — PREMIUM DESIGN SYSTEM
+   Dark Mode Only • Single Accent • Minimal
+   ═══════════════════════════════════════════ */
+
 :root {
-  /* === DARK MODE (default) === */
-  --bg-primary: #0D1117;           /* Very deep dark - much darker than before */
-  --bg-secondary: #161B22;         /* Secondary dark layer */
-  --bg-card: rgba(22, 30, 42, 0.5);
-  --bg-card-hover: rgba(28, 40, 58, 0.7);
-  --text-primary: #EEE9DF;         /* Palladian */
-  --text-secondary: #C9C1B1;       /* Oatmeal */
-  --text-muted: #8e9fae;
-  --accent-primary: #FFB162;       /* Burning Flame */
-  --accent-secondary: #A35139;     /* Truffle Trouble */
-  --accent-gradient: linear-gradient(90deg, #FFB162 0%, #A35139 100%);
-  --accent-gradient-hover: linear-gradient(90deg, #ffa142 0%, #934129 100%);
-  --border-color: rgba(255, 255, 255, 0.07);
-  --border-color-hover: rgba(255, 255, 255, 0.15);
+  /* ─── Backgrounds ─── */
+  --bg-primary: #0D1117;
+  --bg-surface: #161E2A;
+  --bg-card: #1B2433;
+  --bg-card-hover: #212d3f;
+  --bg-elevated: #243040;
+
+  /* ─── Typography ─── */
+  --text-primary: #EEE9DF;
+  --text-secondary: #C9C1B1;
+  --text-muted: #6b7a8d;
+
+  /* ─── Accent (Single: Burning Flame) ─── */
+  --accent: #FFB162;
+  --accent-hover: #FFC182;
+  --accent-dim: #e89a4a;
+  --accent-glow: rgba(255, 177, 98, 0.15);
+  --accent-glow-strong: rgba(255, 177, 98, 0.30);
+
+  /* ─── Borders ─── */
+  --border: rgba(255, 255, 255, 0.06);
+  --border-hover: rgba(255, 255, 255, 0.12);
+  --border-accent: rgba(255, 177, 98, 0.3);
+
+  /* ─── Gradients ─── */
+  --accent-gradient: linear-gradient(135deg, #FFB162 0%, #e8944a 100%);
+  --accent-gradient-hover: linear-gradient(135deg, #FFC182 0%, #FFB162 100%);
+  --surface-gradient: linear-gradient(180deg, #161E2A 0%, #0D1117 100%);
+  --hero-glow: radial-gradient(ellipse at 30% 50%, rgba(255, 177, 98, 0.08) 0%, transparent 70%);
+
+  /* ─── Shadows ─── */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 16px 64px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 40px rgba(255, 177, 98, 0.15);
+
+  /* ─── Spacing ─── */
+  --section-padding: clamp(4rem, 8vw, 8rem);
+  --container-max: 1200px;
+
+  /* ─── Transitions ─── */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ─── Legacy Compat (for inner pages) ─── */
+  --bg-secondary: #161E2A;
+  --accent-primary: #FFB162;
+  --accent-secondary: #e8944a;
+  --border-color: rgba(255, 255, 255, 0.06);
+  --border-color-hover: rgba(255, 255, 255, 0.12);
   --glow-color: rgba(255, 177, 98, 0.12);
   --glow-color-hover: rgba(255, 177, 98, 0.25);
-  --hero-glow: rgba(255, 177, 98, 0.08);
-  --card-bg-raw: 22, 30, 42;
 }
 
-.light {
-  /* === LIGHT MODE === */
-  --bg-primary: #EEE9DF;           /* Palladian */
-  --bg-secondary: #D8D0C4;         /* Slightly darker than Palladian */
-  --bg-card: rgba(255, 255, 255, 0.6);
-  --bg-card-hover: rgba(255, 255, 255, 0.85);
-  --text-primary: #1B2632;         /* Abyssal Anchorfish Blue */
-  --text-secondary: #2C3B4D;       /* Blue Fantastic */
-  --text-muted: #4a5568;
-  --accent-primary: #A35139;       /* Truffle Trouble */
-  --accent-secondary: #FFB162;     /* Burning Flame */
-  --accent-gradient: linear-gradient(90deg, #A35139 0%, #FFB162 100%);
-  --accent-gradient-hover: linear-gradient(90deg, #934129 0%, #ffa142 100%);
-  --border-color: rgba(27, 38, 50, 0.12);
-  --border-color-hover: rgba(27, 38, 50, 0.25);
-  --glow-color: rgba(163, 81, 57, 0.1);
-  --glow-color-hover: rgba(163, 81, 57, 0.2);
-  --hero-glow: rgba(163, 81, 57, 0.06);
-  --card-bg-raw: 255, 255, 255;
+/* ─── Global Base ─── */
+html {
+  scroll-behavior: smooth;
 }
 
-/* Force global bg and text colors */
 html, body {
   background-color: var(--bg-primary) !important;
   color: var(--text-primary) !important;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
-/* ===== GLOBAL THEME OVERRIDES ===== */
-/* Replace ALL hardcoded purple/indigo/gray text with theme-aware colors */
-
-/* White text → theme text-primary in light mode */
-.light .text-white,
-.light h1.text-white,
-.light h2.text-white,
-.light h3.text-white,
-.light h4.text-white,
-.light h5.text-white,
-.light p.text-white,
-.light label.text-white,
-.light li.text-white,
-.light span.text-white,
-.light div.text-white {
-  color: var(--text-primary) !important;
+::selection {
+  background: rgba(255, 177, 98, 0.25);
+  color: #fff;
 }
 
-/* Gray overrides for light mode */
-.light .text-gray-100 { color: var(--text-primary) !important; }
-.light .text-gray-200 { color: var(--text-primary) !important; }
-.light .text-gray-300 { color: var(--text-secondary) !important; }
-.light .text-gray-400 { color: var(--text-muted) !important; }
-.light .text-gray-500 { color: var(--text-muted) !important; }
-
-/* Purple/Indigo accent → brand accent in light mode */
-.light .text-purple-300,
-.light .text-purple-400 { color: var(--accent-primary) !important; }
-.light .text-indigo-300,
-.light .text-indigo-400 { color: var(--accent-secondary) !important; }
-
-/* Card backgrounds: replace hardcoded black/white cards with theme-aware */
-.light .bg-white\/\[0\.02\],
-.light .bg-white\/\[0\.03\] {
-  background: var(--bg-card) !important;
+/* ─── Light Mode Compat (minimal, for inner pages that still reference .light) ─── */
+.light {
+  --bg-primary: #0D1117;
+  --bg-secondary: #161E2A;
+  --bg-card: #1B2433;
+  --bg-card-hover: #212d3f;
+  --text-primary: #EEE9DF;
+  --text-secondary: #C9C1B1;
+  --text-muted: #6b7a8d;
+  --accent-primary: #FFB162;
+  --accent-secondary: #e8944a;
+  --accent-gradient: linear-gradient(135deg, #FFB162 0%, #e8944a 100%);
+  --accent-gradient-hover: linear-gradient(135deg, #FFC182 0%, #FFB162 100%);
+  --border-color: rgba(255, 255, 255, 0.06);
+  --border-color-hover: rgba(255, 255, 255, 0.12);
+  --glow-color: rgba(255, 177, 98, 0.12);
+  --glow-color-hover: rgba(255, 177, 98, 0.25);
+  --hero-glow: rgba(255, 177, 98, 0.08);
+  --card-bg-raw: 27, 36, 51;
 }
 
-/* Border overrides in light mode */
-.light .border-white\/\[0\.06\],
-.light .border-white\/\[0\.08\],
-.light .border-white\/\[0\.10\],
-.light .border-white\/10 {
-  border-color: var(--border-color) !important;
+/* ═══════════════════════════════════════════
+   UTILITY CLASSES
+   ═══════════════════════════════════════════ */
+
+/* Glassmorphism */
+.glass {
+  background: rgba(22, 30, 42, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
 }
 
-/* Input fields in light mode */
-.light input,
-.light textarea {
-  color: var(--text-primary);
+.glass-strong {
+  background: rgba(22, 30, 42, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border);
+}
+
+/* Premium Card */
+.premium-card {
   background: var(--bg-card);
-  border-color: var(--border-color);
-}
-.light input::placeholder,
-.light textarea::placeholder {
-  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  transition: all 0.4s var(--ease-out);
 }
 
-/* Gradient brand text (Burning Flame → Truffle Trouble) for dark mode spans */
-.brand-gradient-text {
+.premium-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Accent Text */
+.text-accent {
+  color: var(--accent);
+}
+
+.gradient-text {
   background: var(--accent-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Cyber Grid Motif for section backgrounds */
-.bg-cyber-grid {
+/* Section Container */
+.section-container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 4vw, 2rem);
+}
+
+/* ═══════════════════════════════════════════
+   ANIMATIONS & KEYFRAMES
+   ═══════════════════════════════════════════ */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 177, 98, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(255, 177, 98, 0.25);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes drawLine {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ═══════════════════════════════════════════
+   MICRO-INTERACTIONS
+   ═══════════════════════════════════════════ */
+
+/* Magnetic Button Base */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  border-radius: 9999px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  color: #0D1117;
+  background: var(--accent-gradient);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s var(--ease-out);
+  box-shadow: 0 4px 20px var(--accent-glow);
+  letter-spacing: -0.01em;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px var(--accent-glow-strong);
+  background: var(--accent-gradient-hover);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  border-radius: 9999px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text-primary);
+  background: transparent;
+  border: 1px solid var(--border-hover);
+  cursor: pointer;
+  transition: all 0.3s var(--ease-out);
+}
+
+.btn-secondary:hover {
+  border-color: var(--accent);
+  background: rgba(255, 177, 98, 0.06);
+  transform: translateY(-2px);
+}
+
+/* Animated Underline Link */
+.link-animated {
+  position: relative;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.link-animated::after {
+  content: '';
   position: absolute;
-  top: 0;
+  bottom: -2px;
   left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--accent);
+  transition: width 0.3s var(--ease-out);
+}
+
+.link-animated:hover {
+  color: var(--accent);
+}
+
+.link-animated:hover::after {
   width: 100%;
-  height: 100%;
-  background-image: 
-    linear-gradient(to right, rgba(0, 229, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
-  background-size: 50px 50px;
-  background-position: center center;
-  z-index: -1;
-  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════
+   TAILWIND LAYER OVERRIDES
+   ═══════════════════════════════════════════ */
+
+@layer base {
+  html, body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    margin: 0;
+    padding: 0;
+  }
+
+  *, *::before, *::after {
+    border-color: var(--border);
+  }
+
+  /* Input styling */
+  input, textarea {
+    color: var(--text-primary);
+    background: var(--bg-card);
+    border-color: var(--border);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--text-muted);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
 }
