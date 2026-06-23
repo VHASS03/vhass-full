@@ -1,4 +1,4 @@
-﻿import Footer from "./Components/footer"
+import Footer from "./Components/footer"
 import React from "react"
 import { useNavigate } from "react-router-dom"  
 import Navbar from "./Components/navbar"
@@ -6,7 +6,7 @@ import Navbar from "./Components/navbar"
 export default function EntrepreneurshipPage() {
   const navigate = useNavigate();
   return (
-    <div className="font-sans antialiased" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
+    <div className="font-sans antialiased overflow-x-hidden" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
       <Navbar />
       
       <div

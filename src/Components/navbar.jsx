@@ -66,6 +66,36 @@ function Navbar() {
     };
   }, [isMobileMenuOpen]);
 
+  const renderUserMenu = (isSidebar) => (
+    <div className={`user-menu flex items-center gap-4 ${isSidebar ? 'sidebar-user-menu' : 'header-user-menu'}`}>
+      <button 
+        onClick={toggleTheme} 
+        className="theme-toggle-btn"
+        title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+        aria-label="Toggle Theme"
+      >
+        {theme === 'dark' ? (
+          <Sun className="w-5 h-5 text-amber-400" />
+        ) : (
+          <Moon className="w-5 h-5 text-[#2C3B4D]" />
+        )}
+      </button>
+
+      {loading ? (
+        <div className="text-sm">Loading...</div>
+      ) : user ? (
+        <div className="user-buttons">
+          <button className="login" onClick={() => { navigate("/dashboard"); closeMobileMenu(); }} onMouseMove={handleMouseMove}>Dashboard</button>
+          {user.role === 'admin' && (
+            <button className="login" onClick={() => { navigate("/admin"); closeMobileMenu(); }} onMouseMove={handleMouseMove} style={{ backgroundColor: 'var(--accent-primary)', color: '#000000' }}>Admin</button>
+          )}
+        </div>
+      ) : (
+        <button className="login" onClick={() => { navigate("/auth"); closeMobileMenu(); }} onMouseMove={handleMouseMove}>LOGIN</button>
+      )}
+    </div>
+  );
+
   return (
     <header>
       <div className={`navbar ${isMobileMenuOpen ? 'mobile-menu-open' : ''}`}>
@@ -85,43 +115,24 @@ function Navbar() {
             <li><button className="nav-libtn" onClick={() => { navigate("/helpdesk"); closeMobileMenu(); }} onMouseMove={handleMouseMove}>Help Desk</button></li>
             
           </ul>
-          </ul>
 
-          <div className="user-menu flex items-center gap-4">
-            <button 
-              onClick={toggleTheme} 
-              className="theme-toggle-btn"
-              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-              aria-label="Toggle Theme"
-            >
-              {theme === 'dark' ? (
-                <Sun className="w-5 h-5 text-amber-400" />
-              ) : (
-                <Moon className="w-5 h-5 text-[#2C3B4D]" />
-              )}
-            </button>
-
-            {loading ? (
-              <div className="text-sm">Loading...</div>
-            ) : user ? (
-              <div className="user-buttons">
-                <button className="login" onClick={() => { navigate("/dashboard"); closeMobileMenu(); }} onMouseMove={handleMouseMove}>Dashboard</button>
-                {user.role === 'admin' && (
-                  <button className="login" onClick={() => { navigate("/admin"); closeMobileMenu(); }} onMouseMove={handleMouseMove} style={{ backgroundColor: 'var(--accent-primary)', color: '#000000' }}>Admin</button>
-                )}
-              </div>
-            ) : (
-              <button className="login" onClick={() => { navigate("/auth"); closeMobileMenu(); }} onMouseMove={handleMouseMove}>LOGIN</button>
-            )}
+          <div className="sidebar-user-menu-wrapper">
+            {renderUserMenu(true)}
           </div>
         </nav>
 
-        {/* Mobile Menu Toggle */}
-        <button className="mobile-menu-toggle" onClick={toggleMobileMenu}>
-          <span className={`hamburger ${isMobileMenuOpen ? 'open' : ''}`}></span>
-          <span className={`hamburger ${isMobileMenuOpen ? 'open' : ''}`}></span>
-          <span className={`hamburger ${isMobileMenuOpen ? 'open' : ''}`}></span>
-        </button>
+        <div className="flex items-center gap-3 md:gap-4">
+          <div className={`header-user-menu-wrapper ${isMobileMenuOpen ? 'mobile-menu-open' : ''}`}>
+            {renderUserMenu(false)}
+          </div>
+
+          {/* Mobile Menu Toggle */}
+          <button className="mobile-menu-toggle" onClick={toggleMobileMenu}>
+            <span className={`hamburger ${isMobileMenuOpen ? 'open' : ''}`}></span>
+            <span className={`hamburger ${isMobileMenuOpen ? 'open' : ''}`}></span>
+            <span className={`hamburger ${isMobileMenuOpen ? 'open' : ''}`}></span>
+          </button>
+        </div>
 
         {isMobileMenuOpen && (
           <div className="nav-backdrop" onClick={closeMobileMenu} />

@@ -83,7 +83,7 @@ export default function VHASSWorkshopsPage() {
 
   return (
     <div
-      className="min-h-screen font-sans bg-[var(--bg-primary)] text-[var(--text-primary)]"
+      className="min-h-screen font-sans bg-[var(--bg-primary)] text-[var(--text-primary)] overflow-x-hidden"
       style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
     >
       <Navbar />

@@ -287,6 +287,11 @@ header {
   transform: translateY(-6px) rotate(-45deg);
 }
 
+/* Sidebar user menu is hidden on desktop by default */
+.sidebar-user-menu-wrapper {
+  display: none;
+}
+
 /* Mobile Responsive Styles */
 @media (max-width: 992px) {
   .nav-menu {
@@ -353,25 +358,51 @@ header {
     color: var(--accent-primary);
   }
 
-  .user-menu {
-    justify-content: flex-start;
-    margin-top: auto;
-    padding-top: 24px;
-    border-top: 1px solid var(--border-color);
+  /* Hide header user menu when mobile menu is open */
+  .header-user-menu-wrapper.mobile-menu-open {
+    display: none;
   }
 
-  .user-buttons {
+  /* Show the sidebar menu when mobile */
+  .sidebar-user-menu-wrapper {
+    display: block;
+    margin-top: auto;
+    width: 100%;
+  }
+
+  .sidebar-user-menu {
+    justify-content: flex-start;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-color);
+    width: 100%;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .sidebar-user-menu .user-buttons {
     flex-direction: column;
     width: 100%;
     gap: 12px;
   }
-
-  .user-buttons .login, .user-buttons .register {
+  
+  .sidebar-user-menu .user-buttons .login,
+  .sidebar-user-menu .user-buttons .register {
     width: 100%;
     text-align: center;
-    box-sizing: border-box;
     padding: 12px 16px;
     font-size: 15px;
+  }
+
+  /* Make sure header buttons fit on mobile */
+  .header-user-menu .user-buttons {
+    flex-direction: row;
+    gap: 8px;
+  }
+  
+  .header-user-menu .user-buttons .login,
+  .header-user-menu .user-buttons .register {
+    padding: 6px 12px;
+    font-size: 13px;
   }
 }
 
