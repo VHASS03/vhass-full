@@ -58,6 +58,7 @@ header {
 .nav-menu {
   display: flex;
   align-items: center;
+  gap: 24px;
 }
 
 .nav-menu ul {
@@ -353,22 +354,24 @@ header {
   }
 
   .user-menu {
-    justify-content: flex-end;
-    margin-right: 8px;
-    gap: 8px;
+    justify-content: flex-start;
+    margin-top: auto;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-color);
   }
 
   .user-buttons {
-    flex-direction: row;
-    width: auto;
-    gap: 8px;
+    flex-direction: column;
+    width: 100%;
+    gap: 12px;
   }
 
   .user-buttons .login, .user-buttons .register {
-    width: auto;
+    width: 100%;
     text-align: center;
     box-sizing: border-box;
-    padding: 6px 12px;
+    padding: 12px 16px;
+    font-size: 15px;
   }
 }
 

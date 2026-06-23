@@ -1,4 +1,4 @@
-﻿import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "./navbar.css";
 import React from "react";
@@ -85,35 +85,36 @@ function Navbar() {
             <li><button className="nav-libtn" onClick={() => { navigate("/helpdesk"); closeMobileMenu(); }} onMouseMove={handleMouseMove}>Help Desk</button></li>
             
           </ul>
-        </nav>
+          </ul>
 
-        <div className="user-menu flex items-center gap-4">
-          <button 
-            onClick={toggleTheme} 
-            className="theme-toggle-btn"
-            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            aria-label="Toggle Theme"
-          >
-            {theme === 'dark' ? (
-              <Sun className="w-5 h-5 text-amber-400" />
-            ) : (
-              <Moon className="w-5 h-5 text-[#2C3B4D]" />
-            )}
-          </button>
-
-          {loading ? (
-            <div className="text-sm">Loading...</div>
-          ) : user ? (
-            <div className="user-buttons">
-              <button className="login" onClick={() => { navigate("/dashboard"); closeMobileMenu(); }} onMouseMove={handleMouseMove}>Dashboard</button>
-              {user.role === 'admin' && (
-                <button className="login" onClick={() => { navigate("/admin"); closeMobileMenu(); }} onMouseMove={handleMouseMove} style={{ backgroundColor: 'var(--accent-primary)', color: '#000000' }}>Admin</button>
+          <div className="user-menu flex items-center gap-4">
+            <button 
+              onClick={toggleTheme} 
+              className="theme-toggle-btn"
+              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              aria-label="Toggle Theme"
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-5 h-5 text-amber-400" />
+              ) : (
+                <Moon className="w-5 h-5 text-[#2C3B4D]" />
               )}
-            </div>
-          ) : (
-            <button className="login" onClick={() => { navigate("/auth"); closeMobileMenu(); }} onMouseMove={handleMouseMove}>LOGIN</button>
-          )}
-        </div>
+            </button>
+
+            {loading ? (
+              <div className="text-sm">Loading...</div>
+            ) : user ? (
+              <div className="user-buttons">
+                <button className="login" onClick={() => { navigate("/dashboard"); closeMobileMenu(); }} onMouseMove={handleMouseMove}>Dashboard</button>
+                {user.role === 'admin' && (
+                  <button className="login" onClick={() => { navigate("/admin"); closeMobileMenu(); }} onMouseMove={handleMouseMove} style={{ backgroundColor: 'var(--accent-primary)', color: '#000000' }}>Admin</button>
+                )}
+              </div>
+            ) : (
+              <button className="login" onClick={() => { navigate("/auth"); closeMobileMenu(); }} onMouseMove={handleMouseMove}>LOGIN</button>
+            )}
+          </div>
+        </nav>
 
         {/* Mobile Menu Toggle */}
         <button className="mobile-menu-toggle" onClick={toggleMobileMenu}>

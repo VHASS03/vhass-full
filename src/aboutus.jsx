@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import Footer from './Components/footer';
 import Navbar from './Components/navbar';
 import { Link } from "react-router-dom";
@@ -15,7 +15,7 @@ const AboutUs = () => {
 
       <div className="min-h-screen relative">
         {/* Hero Section */}
-        <header
+        <section
           className="relative py-20 md:py-32 px-4 md:px-6 overflow-hidden"
         >
           <div className="relative max-w-6xl mx-auto text-center z-10">
@@ -50,7 +50,7 @@ const AboutUs = () => {
               </a>
             </div>
           </div>
-        </header>
+        </section>
 
         {/* Mission Section */}
         <section className="py-16  px-4 md:px-6 relative z-10">
