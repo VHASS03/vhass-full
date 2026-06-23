@@ -11,6 +11,8 @@ import Footer from "./Components/footer"
 import ApiService from "./services/api.js"
 import { useAuth } from "./context/AuthContext.jsx"
 
+const API_BASE = import.meta.env.VITE_API_URL || ""
+
 // Helper function to construct proper image URL
 const getImageUrl = (imagePath) => {
   if (!imagePath || imagePath === 'null' || imagePath === 'undefined') {
@@ -20,13 +22,13 @@ const getImageUrl = (imagePath) => {
     return imagePath;
   }
   if (!imagePath.includes('/')) {
-    return `/uploads/${imagePath}`;
+    return `${API_BASE}/uploads/${imagePath}`;
   }
   if (imagePath.startsWith('uploads/')) {
-    return `/${imagePath}`;
+    return `${API_BASE}/${imagePath}`;
   }
   if (imagePath.startsWith('/uploads/')) {
-    return imagePath;
+    return `${API_BASE}${imagePath}`;
   }
   return imagePath;
 };

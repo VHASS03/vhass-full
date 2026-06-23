@@ -540,7 +540,11 @@ export const createWorkshop = async (req, res) => {
     if (!title) missingFields.push('title');
     if (!description) missingFields.push('description/about');
     if (!createdBy) missingFields.push('createdBy/instructor');
-    if (!imagePath) missingFields.push('image/poster');
+    // image is now optional — use default placeholder if not provided
+    if (!imagePath) {
+      imagePath = '/images/circuit-board.png';
+      console.log('No image provided, using default placeholder');
+    }
     if (missingFields.length) {
       return res.status(400).json({ message: 'Missing required fields', missingFields });
     }

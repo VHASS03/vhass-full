@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import React, { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
@@ -10,34 +10,26 @@ import Navbar from "@/Components/navbar"
 import { useAuth } from "../../context/AuthContext.jsx"
 import phonepeService from "../../services/phonepeService.js"
 
+// API base — uploads are served by the backend server, not the frontend
+const API_BASE = import.meta.env.VITE_API_URL || ""
+
 // Helper function to construct proper image URL
 const getImageUrl = (imagePath) => {
-  // Handle null, undefined, or empty strings
   if (!imagePath || imagePath === 'null' || imagePath === 'undefined') {
     return "/images/circuit-board.png";
   }
-  
-  // If it's already a full URL (starts with http/https), return as is
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
     return imagePath;
   }
-  
-  // If it's a filename (no slashes), construct the uploads URL
   if (!imagePath.includes('/')) {
-    return `/uploads/${imagePath}`;
+    return `${API_BASE}/uploads/${imagePath}`;
   }
-  
-  // If it's a relative path starting with uploads/, return as is
   if (imagePath.startsWith('uploads/')) {
-    return `/${imagePath}`;
+    return `${API_BASE}/${imagePath}`;
   }
-  
-  // If it's already a relative path starting with /uploads/, return as is
   if (imagePath.startsWith('/uploads/')) {
-    return imagePath;
+    return `${API_BASE}${imagePath}`;
   }
-  
-  // If it's a relative path, return as is
   return imagePath;
 };
 
@@ -58,10 +50,11 @@ export default function WorkshopDetailPage() {
   })
 
   useEffect(() => {
-    const API = import.meta.env.VITE_API_URL || '/api'
     const load = async () => {
       try {
-        const res = await fetch(`${API}/workshop/${slug}`, { credentials: 'include' })
+        const token = localStorage.getItem('auth_token')
+        const headers = token ? { Authorization: `Bearer ${token}` } : {}
+        const res = await fetch(`${API_BASE}/api/workshop/${slug}`, { credentials: 'include', headers })
         if (!res.ok) throw new Error('Failed to load workshop')
         const data = await res.json()
         setWorkshop(data.workshop)

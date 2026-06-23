@@ -6,7 +6,8 @@ import Footer from "./Components/footer"
 import { useAuth } from "./context/AuthContext.jsx"
 import ApiService from "./services/api.js"
 
-// Helper to resolve image URL (same pattern used in Dashboard & WorkshopDetail)
+const API_BASE = import.meta.env.VITE_API_URL || ""
+
 const getImageUrl = (imagePath) => {
   if (!imagePath || imagePath === "null" || imagePath === "undefined") {
     return "/images/circuit-board.png";
@@ -15,10 +16,13 @@ const getImageUrl = (imagePath) => {
     return imagePath;
   }
   if (!imagePath.includes("/")) {
-    return `/uploads/${imagePath}`;
+    return `${API_BASE}/uploads/${imagePath}`;
   }
   if (imagePath.startsWith("uploads/")) {
-    return `/${imagePath}`;
+    return `${API_BASE}/${imagePath}`;
+  }
+  if (imagePath.startsWith("/uploads/")) {
+    return `${API_BASE}${imagePath}`;
   }
   return imagePath;
 };

@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import React, { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
@@ -11,34 +11,25 @@ import { useAuth } from "../../context/AuthContext.jsx"
 import ApiService from "../../services/api.js"
 // CouponInput removed
 
+const API_BASE = import.meta.env.VITE_API_URL || ""
+
 // Helper function to construct proper image URL
 const getImageUrl = (imagePath) => {
-  // Handle null, undefined, or empty strings
   if (!imagePath || imagePath === 'null' || imagePath === 'undefined') {
     return "/images/circuit-board.png";
   }
-  
-  // If it's already a full URL (starts with http/https), return as is
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
     return imagePath;
   }
-  
-  // If it's a filename (no slashes), construct the uploads URL
   if (!imagePath.includes('/')) {
-    return `/uploads/${imagePath}`;
+    return `${API_BASE}/uploads/${imagePath}`;
   }
-  
-  // If it's a relative path starting with uploads/, return as is
   if (imagePath.startsWith('uploads/')) {
-    return `/${imagePath}`;
+    return `${API_BASE}/${imagePath}`;
   }
-  
-  // If it's already a relative path starting with /uploads/, return as is
   if (imagePath.startsWith('/uploads/')) {
-    return imagePath;
+    return `${API_BASE}${imagePath}`;
   }
-  
-  // If it's a relative path, return as is
   return imagePath;
 };
 

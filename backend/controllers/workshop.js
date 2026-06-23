@@ -52,10 +52,10 @@ export const createWorkshop = TryCatch(async (req, res) => {
     console.log('Full request files:', req.files);
     console.log('Full request file:', req.file);
 
-    const { title, description, createdBy, duration, price, category, date, time, location,poster, syllabus, whoShouldAttend, prerequisites } = req.body;
+    const { title, description, createdBy, duration, price, category, date, time, location, poster, syllabus, whoShouldAttend, prerequisites } = req.body;
     
-    // Validate required fields
-    const requiredFields = ['title', 'description', 'createdBy', 'duration', 'price', 'category', 'date', 'time', 'location', 'poster'];
+    // Validate required fields (image/poster is optional, defaults to placeholder)
+    const requiredFields = ['title', 'description', 'createdBy', 'duration', 'price', 'category', 'date', 'time', 'location'];
     for (const field of requiredFields) {
       if (!req.body[field]) {
         return res.status(400).json({
@@ -102,7 +102,7 @@ export const createWorkshop = TryCatch(async (req, res) => {
       title,
       description,
       createdBy,
-      image: poster,
+      image: poster || '/images/circuit-board.png',
       duration,
       price,
       category,
