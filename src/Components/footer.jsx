@@ -127,57 +127,7 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Column 4: Contact us form */}
-          <div className="md:col-span-5">
-            <h4 className="text-sm font-bold uppercase tracking-wider text-white mb-5" style={{ fontFamily: "'Outfit', sans-serif" }}>
-              Contact us
-            </h4>
-            <form onSubmit={handleSubmit} className="space-y-4" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-              <div>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="Full name"
-                  className="footer-input"
-                  required
-                />
-              </div>
-              <div>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  placeholder="Enter email"
-                  className="footer-input"
-                  required
-                />
-              </div>
-              <div>
-                <textarea
-                  name="message"
-                  value={formData.message}
-                  onChange={handleInputChange}
-                  placeholder="Message"
-                  rows={3}
-                  className="footer-input footer-textarea"
-                  required
-                />
-              </div>
-              {status && (
-                <p className="text-xs font-medium" style={{ color: 'var(--accent-primary)' }}>{status}</p>
-              )}
-              <button
-                type="submit"
-                disabled={sending}
-                className="footer-submit-btn shadow-[0_4px_15px_rgba(168,85,247,0.2)] hover:shadow-[0_6px_20px_rgba(168,85,247,0.4)]"
-              >
-                {sending ? "Sending..." : "Send message"}
-              </button>
-            </form>
-          </div>
+
 
         </div>
 

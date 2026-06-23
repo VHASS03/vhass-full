@@ -33,9 +33,9 @@ function Home() {
             onUpdate: (self) => setProgress(self.progress),
           },
         })
-          .to(sceneWrapperRef.current, { x: "-50vw", y: "101vh" })
-          .to(sceneWrapperRef.current, { x: "0vw", y: "200vh" })
-          .to(sceneWrapperRef.current, { x: "-50vw", y: "300vh" });
+          .to(sceneWrapperRef.current, { x: "-50vw", y: "101vh", scale: 0.85, opacity: 0.8 })
+          .to(sceneWrapperRef.current, { x: "0vw", y: "200vh", scale: 0.7, opacity: 0.5 })
+          .to(sceneWrapperRef.current, { x: "-50vw", y: "300vh", scale: 0.5, opacity: 0.2 });
       }
 
       sectionRefs.forEach((ref) => {
@@ -82,17 +82,46 @@ function Home() {
           {/* Gradient glow behind intro text */}
           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[150px] pointer-events-none" style={{ background: 'var(--glow-color)', opacity: 0.6 }} />
           <div className="flex flex-col justify-center w-full md:w-1/2 mb-8 md:mb-20 md:ml-20 z-10">
-            <div className="relative md:absolute md:top-28 md:left-10 px-4 mt-8 md:mt-0 md:pt-14">
+            <div className="relative px-4 mt-8 md:mt-0 md:pt-14 max-w-2xl">
               <div className="landing-page">
                 <div className="tag-box">
                   <div className="tag">INTRODUCING</div>
                 </div>
               </div>
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[5.5rem] font-extrabold mb-2 leading-none tracking-tight" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>LEARN FROM</h1>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[5.5rem] font-extrabold mb-4 md:mb-6 leading-none tracking-tight" style={{ fontFamily: "'Outfit', sans-serif", background: 'var(--accent-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>VHASS</h1>
-              <p className="text-base sm:text-lg md:text-xl font-normal max-w-lg leading-relaxed opacity-90" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-secondary)' }}>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[5.5rem] font-extrabold mb-6 md:mb-8 leading-none tracking-tight" style={{ fontFamily: "'Outfit', sans-serif", background: 'var(--accent-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>VHASS</h1>
+              <p className="text-base sm:text-lg md:text-xl font-normal max-w-lg leading-relaxed opacity-90 mb-8" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-secondary)' }}>
                 VHASS Softwares is a leading ed-tech company focused on cybersecurity training, dedicated to addressing real-time problems, especially in the areas of privacy and security.
               </p>
+              
+              {/* CTA Buttons & Trust Indicators */}
+              <div className="flex flex-col sm:flex-row gap-4 mb-10">
+                <button 
+                  className="px-8 py-3.5 rounded-full font-bold text-white transition-all duration-300 hover:scale-105"
+                  style={{ background: 'var(--accent-gradient)', boxShadow: '0 4px 20px var(--glow-color-hover)' }}
+                  onClick={() => window.location.href='/course'}
+                >
+                  Explore Courses
+                </button>
+                <button 
+                  className="px-8 py-3.5 rounded-full font-bold transition-all duration-300 hover:bg-[var(--bg-card)] border"
+                  style={{ color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
+                  onClick={() => window.location.href='/aboutus'}
+                >
+                  Discover More
+                </button>
+              </div>
+              
+              <div className="flex items-center gap-4 text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
+                <div className="flex items-center gap-1">
+                  <svg className="w-5 h-5 text-[#00e5ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <span>Industry Experts</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <svg className="w-5 h-5 text-[#00e5ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <span>Hands-on Labs</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -105,6 +134,7 @@ function Home() {
         </section>
 
         <section className="relative flex flex-col md:flex-row items-center justify-evenly py-12 md:py-16 px-4 md:px-0 md:min-h-screen md:h-[100vh]">
+          <div className="bg-cyber-grid" />
           <div className="hidden md:block w-[50%]"></div>
           <div ref={sectionRefs[0]} className="w-full md:w-[50%] px-4 sm:px-8 md:px-12" style={{ color: 'var(--text-primary)' }}>
             <div className="relative backdrop-blur-md rounded-2xl p-6 sm:p-8 md:p-10 shadow-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
@@ -127,6 +157,7 @@ function Home() {
 
         {/* Section 2 */}
         <section className="relative flex flex-col md:flex-row items-center justify-evenly py-12 md:py-16 px-4 md:px-0 md:min-h-screen md:h-[100vh]">
+          <div className="bg-cyber-grid" style={{ opacity: 0.5 }} />
           <div ref={sectionRefs[1]} className="w-full md:w-[50%] px-4 sm:px-8 md:px-12 order-2 md:order-1" style={{ color: 'var(--text-primary)' }}>
             <div className="relative backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-2xl max-h-full overflow-auto" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
               <div className="absolute top-6 -left-2 w-4 h-4 rounded-full animate-ping" style={{ background: 'var(--accent-secondary)' }}></div>
