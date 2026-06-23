@@ -130,7 +130,7 @@ const AboutUs = () => {
                 className="text-3xl md:text-5xl font-bold mb-4"
                 style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}
               >
-                2025 Goals
+                2026 Goals
               </h2>
               <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-muted)' }}>Our ambitious targets for the coming year</p>
             </div>
@@ -182,26 +182,58 @@ const AboutUs = () => {
                   name: 'Pagadala Hemanth Krishna Vardhan',
                   role: 'Founder & CEO',
                   bio: 'Expert in ethical hacking and penetration testing with over a decade of experience in cybersecurity. Passionate about creating accessible security education.',
-                  tags: ['Ethical Hacking', 'Penetration Testing'],
+                  tags: [],
                   roleColor: 'var(--accent-primary)'
                 },
                 {
                   img: '/images/uday.jpg',
                   alt: 'Uday Venkat Charkanam',
                   name: 'Uday Venkat Charkanam',
-                  role: 'Chief Operating Officer',
-                  bio: 'Specialist in cloud security and threat intelligence with a background in enterprise security solutions. Focused on operational excellence.',
-                  tags: ['Cloud Security', 'Threat Intelligence'],
+                  role: 'Co-Founder & COO',
+                  bio: 'Cybersecurity professional with over a decade of experience in ethical hacking and penetration testing, dedicated to making security education accessible and practical for all.',
+                  tags: [],
                   roleColor: 'var(--accent-secondary)'
                 }
               ].map((leader, i) => (
                 <div key={i} className="backdrop-blur-md rounded-2xl p-8 transition-all duration-300 h-full flex flex-col justify-between" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
                   <div>
-                    <div className="flex items-start mb-6">
-                      <img src={leader.img} alt={leader.alt} className="rounded-xl w-16 h-16 mr-4 object-cover" style={{ border: '1px solid var(--border-color)' }} />
-                      <div>
-                        <h3 className="text-2xl font-bold" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>{leader.name}</h3>
-                        <div className="font-medium text-sm" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: leader.roleColor }}>{leader.role}</div>
+                    <div className="flex items-center gap-6 mb-6">
+                      <div
+                        className="w-36 h-36 rounded-xl overflow-hidden flex-shrink-0"
+                        style={{
+                          border: '1px solid var(--border-color)',
+                        }}
+                      >
+                        <img
+                          src={leader.img}
+                          alt={leader.alt}
+                          className={`w-full h-full transition-all duration-300 ${i === 0
+                            ? 'object-cover scale-150 object-[50%_15%]'
+                            : 'object-cover object-[50%_20%]'
+                            }`}
+                        />
+                      </div>
+
+                      <div className="flex-1">
+                        <h3
+                          className="text-2xl font-bold"
+                          style={{
+                            fontFamily: "'Outfit', sans-serif",
+                            color: 'var(--text-primary)',
+                          }}
+                        >
+                          {leader.name}
+                        </h3>
+
+                        <div
+                          className="font-medium text-sm"
+                          style={{
+                            fontFamily: "'Plus Jakarta Sans', sans-serif",
+                            color: leader.roleColor,
+                          }}
+                        >
+                          {leader.role}
+                        </div>
                       </div>
                     </div>
                     <p className="mb-6 leading-relaxed text-sm" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-secondary)' }}>
@@ -219,63 +251,6 @@ const AboutUs = () => {
           </div>
         </section>
 
-        {/* FAQ Section */}
-        <section className="py-16 px-6 relative z-10" style={{ background: 'var(--bg-primary)' }}>
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-16">
-              <h2
-                className="text-3xl md:text-5xl font-bold mb-4"
-                style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}
-              >
-                Frequently Asked Questions
-              </h2>
-              <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-muted)' }}>Find answers to common questions about our programs</p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              {[
-                {
-                  accentColor: 'var(--accent-primary)',
-                  category: 'Courses',
-                  faqs: [
-                    { q: 'How long are the courses?', a: 'Our courses range from 4-week intensives to 12-week comprehensive programs.' },
-                    { q: 'What prerequisites are required?', a: 'Basic computer knowledge. Some advanced courses require foundational cybersecurity concepts.' }
-                  ]
-                },
-                {
-                  accentColor: 'var(--accent-secondary)',
-                  category: 'Certification',
-                  faqs: [
-                    { q: 'Do you provide certification?', a: 'Yes, all our courses include industry-recognized certification upon completion.' },
-                    { q: 'Are certifications accredited?', a: 'Our certifications are recognized by major cybersecurity organizations and employers.' }
-                  ]
-                },
-                {
-                  accentColor: 'var(--accent-primary)',
-                  category: 'Payment',
-                  faqs: [
-                    { q: 'What payment options do you accept?', a: 'We accept credit cards, bank transfers, and offer flexible financing options.' },
-                    { q: 'Do you offer scholarships?', a: 'Yes, we have need-based scholarships and diversity initiatives.' }
-                  ]
-                }
-              ].map((block, i) => (
-                <div key={i} className="backdrop-blur-md rounded-2xl p-8 transition-all duration-300" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-                  <h3 className="text-xl font-bold mb-6 flex items-center" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>
-                    <span className="mr-2" style={{ color: block.accentColor }}>●</span> {block.category}
-                  </h3>
-                  <div className="space-y-4" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                    {block.faqs.map((faq, j) => (
-                      <div key={j} className={`pb-4 ${j < block.faqs.length - 1 ? 'border-b' : ''}`} style={{ borderColor: 'var(--border-color)' }}>
-                        <h4 className="font-semibold mb-2 text-sm" style={{ color: 'var(--text-primary)' }}>{faq.q}</h4>
-                        <p className="text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>{faq.a}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
         <Footer />
       </div>

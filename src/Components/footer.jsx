@@ -183,7 +183,7 @@ const Footer = () => {
 
         <div className="flex flex-col md:flex-row justify-between items-center gap-8 px-1 py-6" >
           <p className="text-xs" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-muted)' }}>
-            © 2026 VHASS Software® Pvt. Ltd. All rights reserved.
+            © 2026 VHASS Softwares® Pvt. Ltd. All rights reserved.
           </p>
           <div className="flex flex-wrap gap-6 text-xs" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-muted)' }}>
             <Link to="/policies" className="footer-link">Terms and Conditions</Link>
