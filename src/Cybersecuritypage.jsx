@@ -94,38 +94,19 @@ function CybersecurityPage() {
             and efficiency in identifying security gaps.
           </p>
 
-          <h3 className="text-3xl font-extrabold mb-20 text-center tracking-tight" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>What We Offer</h3>
-          <div className="relative max-w-5xl mx-auto py-10">
-            {/* Central Glowing Line */}
-            <div className="absolute hidden md:block left-1/2 top-0 bottom-0 w-[2px] -translate-x-1/2 opacity-30" style={{ background: 'linear-gradient(to bottom, transparent, var(--accent-primary), var(--accent-secondary), transparent)' }}></div>
-            
-            {auditServices.map(({ Icon, title, desc }, index) => {
-              const isEven = index % 2 === 0;
-              return (
-                <div key={title} className={`relative flex flex-col md:flex-row items-center mb-16 md:mb-24 group w-full ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
-                  
-                  {/* Content Side */}
-                  <div className={`w-full md:w-1/2 ${isEven ? 'md:pr-16 md:text-right' : 'md:pl-16 md:text-left'} text-center mb-8 md:mb-0`}>
-                    <h4 className="text-2xl md:text-3xl font-bold mb-4 transition-all duration-300 group-hover:scale-105 inline-block" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>{title}</h4>
-                    <p className="text-base md:text-lg leading-relaxed transition-colors duration-300 group-hover:text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-secondary)' }}>{desc}</p>
-                  </div>
-                  
-                  {/* Central Node */}
-                  <div className="relative md:absolute md:left-1/2 md:-translate-x-1/2 flex items-center justify-center mb-8 md:mb-0">
-                    {/* Connecting Hover Glow */}
-                    <div className="absolute inset-0 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: 'var(--accent-gradient)' }}></div>
-                    <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center z-10 transition-transform duration-500 group-hover:scale-110" style={{ background: 'var(--bg-primary)', border: '2px solid var(--accent-primary)' }}>
-                       <div className="w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center transition-all duration-500 group-hover:rotate-12" style={{ background: 'var(--accent-gradient)' }}>
-                         <Icon className="w-6 h-6 text-white" />
-                       </div>
-                    </div>
-                  </div>
-                  
-                  {/* Empty Spacer Side */}
-                  <div className="hidden md:block w-1/2"></div>
+          <h3 className="text-2xl font-bold mb-12 text-center" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>What We Offer</h3>
+          <div className="max-w-4xl mx-auto divide-y divide-white/10" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+            {auditServices.map(({ Icon, title, desc }) => (
+              <div key={title} className="py-8 flex flex-col md:flex-row gap-6 md:gap-10 items-start group hover:bg-white/[0.02] px-4 -mx-4 transition-colors duration-300 rounded-xl">
+                <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:border-white/30 transition-colors" style={{ background: 'var(--bg-card)' }}>
+                  <Icon className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
                 </div>
-              );
-            })}
+                <div>
+                  <h4 className="text-xl font-bold mb-2" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>{title}</h4>
+                  <p className="text-base leading-relaxed text-gray-400 group-hover:text-gray-300 transition-colors" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
 
           <div className="mt-16 text-center">
@@ -152,23 +133,21 @@ function CybersecurityPage() {
           </p>
 
           <h3 className="text-2xl font-bold mb-8 text-center" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>Our Training Programs Include:</h3>
-          <div className="flex flex-wrap justify-center gap-4 max-w-5xl mx-auto mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto mb-16 px-4">
             {trainingPrograms.map(({ Icon, title }) => (
-              <div key={title} className="flex items-center gap-3 backdrop-blur-md px-6 py-4 rounded-full transition-all duration-300 hover:scale-105" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'var(--bg-card-hover)' }}>
-                  <Icon className="w-4 h-4" style={{ color: 'var(--accent-primary)' }} />
-                </div>
-                <span className="text-sm font-semibold" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-primary)' }}>{title}</span>
+              <div key={title} className="flex items-center gap-4 px-6 py-5 rounded-xl border border-white/10 hover:border-white/30 transition-colors duration-300 group" style={{ background: 'var(--bg-card)' }}>
+                <Icon className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
+                <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{title}</span>
               </div>
             ))}
           </div>
 
           <h3 className="text-2xl font-bold mb-8 text-center" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>Why Choose Us:</h3>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto mb-16">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto mb-16 px-4">
             {benefits.map(({ Icon, title }) => (
-              <div key={title} className="backdrop-blur-md p-6 rounded-2xl text-center transition-all duration-300 hover:-translate-y-1" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-                <Icon className="w-8 h-8 mx-auto mb-4" style={{ color: 'var(--accent-primary)' }} />
-                <p className="text-sm leading-relaxed" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-secondary)' }}>{title}</p>
+              <div key={title} className="p-8 rounded-xl border border-white/10 text-center hover:bg-white/[0.02] transition-colors duration-300 group">
+                <Icon className="w-8 h-8 mx-auto mb-4 text-gray-400 group-hover:text-white transition-colors" />
+                <p className="text-sm leading-relaxed text-gray-400 group-hover:text-gray-300 transition-colors" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{title}</p>
               </div>
             ))}
           </div>

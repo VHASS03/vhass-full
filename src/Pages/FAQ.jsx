@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 import React from "react"
 import api from "../services/api"
 import { useNavigate } from "react-router-dom"
@@ -90,10 +90,10 @@ export default function HelpDeskPage() {
       <Navbar />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-12 md:py-16">
+      <main className="container mx-auto px-4 py-6 md:py-8">
         {/* Header Section */}
         <div
-          className="text-center mb-12 py-20 rounded-3xl relative overflow-hidden mx-4 md:mx-0"
+          className="text-center mb-8 py-12 rounded-3xl relative overflow-hidden mx-4 md:mx-0"
           style={{
             background: 'linear-gradient(to bottom, var(--bg-secondary), transparent)',
             border: '1px solid var(--border-color)'
@@ -116,7 +116,7 @@ export default function HelpDeskPage() {
         </div>
 
         {/* Search Bar */}
-        <div className="max-w-2xl mx-auto mb-10 px-4">
+        <div className="max-w-2xl mx-auto mb-6 px-4">
           <input
             type="text"
             placeholder="Search questions..."
@@ -133,7 +133,7 @@ export default function HelpDeskPage() {
         </div>
 
         {/* Filter Buttons */}
-        <div className="flex flex-wrap justify-center gap-3 mb-12 px-4" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+        <div className="flex flex-wrap justify-center gap-3 mb-6 px-4" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
           {["All", "Courses", "Certification", "Payment"].map((filter) => (
             <button
               key={filter}
@@ -151,7 +151,7 @@ export default function HelpDeskPage() {
         </div>
 
         {/* FAQ Items */}
-        <div className="max-w-3xl mx-auto mb-20 px-4">
+        <div className="max-w-3xl mx-auto mb-10 px-4">
           {filteredFaqs.length > 0 ? (
             filteredFaqs.map((faq) => (
               <div
@@ -190,7 +190,7 @@ export default function HelpDeskPage() {
         </div>
 
         {/* Contact & Message Section */}
-        <div className="max-w-5xl mx-auto px-4 mb-20">
+        <div className="max-w-5xl mx-auto px-4 mb-10">
           <div
             className="backdrop-blur-md rounded-3xl p-8 md:p-12 shadow-2xl transition-all duration-500"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}

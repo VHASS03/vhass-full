@@ -89,7 +89,7 @@ const Footer = () => {
                   <Youtube className="w-4 h-4" />
                 </a>
                 <a
-                  href="https://www.instagram.com/vhass_official"
+                  href="https://www.instagram.com/vhass_academy_official/"
                   aria-label="Instagram"
                   className="social-btn"
                 >

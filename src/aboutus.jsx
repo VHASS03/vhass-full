@@ -13,10 +13,10 @@ const AboutUs = () => {
     <div className="min-h-screen font-sans" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
       <Navbar />
 
-      <main className="container mx-auto px-4 py-12 md:py-16">
+      <main className="container mx-auto px-4 py-6 md:py-8">
         {/* Hero Section */}
         <div
-          className="text-center mb-12 py-20 rounded-3xl relative overflow-hidden mx-4 md:mx-0"
+          className="text-center mb-8 py-12 rounded-3xl relative overflow-hidden mx-4 md:mx-0"
           style={{
             background: 'linear-gradient(to bottom, var(--bg-secondary), transparent)',
             border: '1px solid var(--border-color)'
@@ -60,7 +60,7 @@ const AboutUs = () => {
         </div>
 
         {/* Mission Section */}
-        <section className="py-16  px-4 md:px-6 relative z-10">
+        <section className="py-8 px-4 md:px-6 relative z-10">
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
@@ -130,7 +130,7 @@ const AboutUs = () => {
         </section>
 
         {/* Goals Section */}
-        <section className="py-16 md:py-24 px-6 relative z-10">
+        <section className="py-8 md:py-12 px-6 relative z-10">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <h2
@@ -167,9 +167,8 @@ const AboutUs = () => {
             </div>
           </div>
         </section>
-
         {/* Leadership Section */}
-        <section className="py-16 md:py-24 px-4 md:px-6 relative z-10">
+        <section className="py-8 md:py-12 px-4 md:px-6 relative z-10">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <h2
