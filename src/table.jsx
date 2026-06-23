@@ -1,67 +1,106 @@
-import React, { forwardRef, useMemo } from 'react'
-import { useGLTF } from '@react-three/drei'
+import React, { forwardRef, useRef } from 'react'
+import { useFrame } from '@react-three/fiber'
+import { Icosahedron, Box, Torus, Sphere } from '@react-three/drei'
 import * as THREE from 'three'
 
 export const Model = forwardRef((props, ref) => {
-  const { nodes } = useGLTF('/vhass4d.glb')
+  const outerSphereRef = useRef();
   
-  // Custom glowing cyber material
-  const cyberMaterial = useMemo(() => new THREE.MeshStandardMaterial({
-    color: "#0a192f",
-    emissive: "#00e5ff",
-    emissiveIntensity: 0.8,
-    wireframe: true,
-    transparent: true,
-    opacity: 0.8,
-    side: THREE.DoubleSide
-  }), []);
-
-  const solidMaterial = useMemo(() => new THREE.MeshStandardMaterial({
-    color: "#00e5ff",
-    emissive: "#0044ff",
-    emissiveIntensity: 0.3,
-    roughness: 0.2,
-    metalness: 0.8,
-  }), []);
+  useFrame((state) => {
+    if (outerSphereRef.current) {
+      outerSphereRef.current.rotation.y = state.clock.elapsedTime * 0.2;
+      outerSphereRef.current.rotation.x = state.clock.elapsedTime * 0.1;
+    }
+  });
 
   return (
     <group ref={ref} {...props} dispose={null}>
-      <mesh
-        geometry={nodes.Cube.geometry}
-        material={cyberMaterial}
-        position={[-1.15, 2.66, -1.1]}
-        scale={0.4}
-      />
-      <mesh
-        geometry={nodes.Cube002.geometry}
-        material={solidMaterial}
-        position={[-0.06, 0, 0]}
-        scale={1.4}
-      />
-      <mesh
-        geometry={nodes.Cube001.geometry}
-        material={cyberMaterial}
-      />
-      <mesh
-        geometry={nodes.Cube003.geometry}
-        material={cyberMaterial}
-        position={[0.15, 0.14, 0.12]}
-        scale={[0.87, 0.87, 0.89]}
-      />
-      <mesh
-        geometry={nodes.Cube004.geometry}
-        material={cyberMaterial}
-        position={[-1.35, -1.08, 2.88]}
-        scale={0.4}
-      />
-      <mesh
-        geometry={nodes.Cube005.geometry}
-        material={cyberMaterial}
-        position={[2.8, -1.08, -1.1]}
-        scale={0.4}
-      />
+      
+      {/* 1. Outer Network Shield (Icosahedron wireframe) */}
+      <group ref={outerSphereRef}>
+        <Icosahedron args={[3.2, 2]}>
+          <meshStandardMaterial 
+            color="#0a192f"
+            emissive="#00e5ff"
+            emissiveIntensity={0.4}
+            wireframe={true}
+            transparent={true}
+            opacity={0.25}
+            side={THREE.DoubleSide}
+          />
+        </Icosahedron>
+        
+        {/* Glowing Nodes on the vertices of the shield */}
+        <points>
+          <icosahedronGeometry args={[3.2, 2]} />
+          <pointsMaterial 
+            color="#00e5ff" 
+            size={0.06} 
+            sizeAttenuation={true} 
+            transparent={true} 
+            opacity={0.8} 
+          />
+        </points>
+      </group>
+
+      {/* 2. Inner Cyber Lock */}
+      <group scale={1.2} position={[0, -0.6, 0]}>
+        {/* Lock Body */}
+        <Box args={[1.5, 1.2, 0.6]} position={[0, 0, 0]}>
+          <meshStandardMaterial 
+            color="#00e5ff"
+            emissive="#0044ff"
+            emissiveIntensity={0.5}
+            roughness={0.2}
+            metalness={0.8}
+            wireframe={false}
+          />
+        </Box>
+        
+        {/* Glowing Circuit Lines on Lock Body */}
+        <Box args={[1.52, 1.22, 0.62]} position={[0, 0, 0]}>
+          <meshStandardMaterial 
+            color="#0a192f"
+            emissive="#00e5ff"
+            emissiveIntensity={1}
+            wireframe={true}
+            transparent={true}
+            opacity={0.5}
+          />
+        </Box>
+
+        {/* Lock Keyhole */}
+        <Sphere args={[0.2, 16, 16]} position={[0, 0, 0.31]}>
+          <meshStandardMaterial color="#000" />
+        </Sphere>
+        <Box args={[0.1, 0.3, 0.1]} position={[0, -0.15, 0.31]}>
+          <meshStandardMaterial color="#000" />
+        </Box>
+
+        {/* Lock Shackle (Torus cut in half) */}
+        <Torus args={[0.6, 0.15, 16, 32, Math.PI]} position={[0, 0.6, 0]} rotation={[0, 0, 0]}>
+          <meshStandardMaterial 
+            color="#00e5ff"
+            emissive="#0044ff"
+            emissiveIntensity={0.5}
+            roughness={0.2}
+            metalness={0.8}
+          />
+        </Torus>
+        
+        {/* Shackle glow wireframe */}
+        <Torus args={[0.62, 0.16, 8, 16, Math.PI]} position={[0, 0.6, 0]} rotation={[0, 0, 0]}>
+          <meshStandardMaterial 
+            color="#0a192f"
+            emissive="#00e5ff"
+            emissiveIntensity={1}
+            wireframe={true}
+            transparent={true}
+            opacity={0.4}
+          />
+        </Torus>
+      </group>
+      
     </group>
   )
 });
-
-useGLTF.preload('/vhass4d.glb');

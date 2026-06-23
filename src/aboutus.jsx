@@ -13,12 +13,19 @@ const AboutUs = () => {
     <div className="min-h-screen font-sans" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
       <Navbar />
 
-      <div className="min-h-screen relative">
+      <main className="container mx-auto px-4 py-12 md:py-16">
         {/* Hero Section */}
-        <section
-          className="relative py-20 md:py-32 px-4 md:px-6 overflow-hidden"
+        <div
+          className="text-center mb-12 py-20 rounded-3xl relative overflow-hidden mx-4 md:mx-0"
+          style={{
+            background: 'linear-gradient(to bottom, var(--bg-secondary), transparent)',
+            border: '1px solid var(--border-color)'
+          }}
         >
-          <div className="relative max-w-6xl mx-auto text-center z-10">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none">
+            <div className="absolute top-1/4 left-1/3 w-[350px] h-[350px] rounded-full blur-[120px]" style={{ background: 'var(--hero-glow)' }} />
+          </div>
+          <div className="relative z-10 px-4">
             <h1
               className="text-4xl sm:text-5xl md:text-7xl font-extrabold mb-6 tracking-tight leading-none"
               style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}
@@ -26,7 +33,7 @@ const AboutUs = () => {
               About <span style={{ background: 'var(--accent-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>VHASS</span>
             </h1>
             <p
-              className="text-lg md:text-xl max-w-2xl mx-auto mb-10 px-4 leading-relaxed"
+              className="text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed"
               style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-secondary)' }}
             >
               Empowering the digital world through cutting-edge cybersecurity education and next-generation learning models.
@@ -50,7 +57,7 @@ const AboutUs = () => {
               </a>
             </div>
           </div>
-        </section>
+        </div>
 
         {/* Mission Section */}
         <section className="py-16  px-4 md:px-6 relative z-10">
@@ -252,8 +259,8 @@ const AboutUs = () => {
         </section>
 
 
-        <Footer />
-      </div>
+      </main>
+      <Footer />
     </div>
   );
 };

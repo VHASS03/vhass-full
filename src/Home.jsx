@@ -22,7 +22,7 @@ function Home() {
     const ctx = gsap.context(() => {
       // Only run complex animations on desktop
       const isMobile = window.innerWidth < 768;
-      
+
       if (!isMobile && sceneWrapperRef.current) {
         gsap.timeline({
           scrollTrigger: {
@@ -88,30 +88,29 @@ function Home() {
                   <div className="tag">INTRODUCING</div>
                 </div>
               </div>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[5.5rem] font-extrabold mb-2 leading-none tracking-tight" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>LEARN FROM</h1>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[5.5rem] font-extrabold mb-6 md:mb-8 leading-none tracking-tight" style={{ fontFamily: "'Outfit', sans-serif", background: 'var(--accent-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>VHASS</h1>
-              <p className="text-base sm:text-lg md:text-xl font-normal max-w-lg leading-relaxed opacity-90 mb-8" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-secondary)' }}>
-                VHASS Softwares is a leading ed-tech company focused on cybersecurity training, dedicated to addressing real-time problems, especially in the areas of privacy and security.
-              </p>
-              
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[5.5rem] font-extrabold mb-1 leading-none tracking-tight" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>LEARN FROM</h1>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[5.5rem] font-extrabold mb-2 md:mb-2 leading-none tracking-tight" style={{ fontFamily: "'Outfit', sans-serif", background: 'var(--accent-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>VHASS</h1>
+              <p className="mt-4 mb-8 text-lg text-gray-400 max-w-xl leading-relaxed">Empowering India's next generation of Cybersecurity and AI leaders. Discover expert-led programs, hands-on labs, and real-world skills that transform careers. Join the VHASS Academy community and step into the future of technology.</p>
+
+
               {/* CTA Buttons & Trust Indicators */}
               <div className="flex flex-col sm:flex-row gap-4 mb-10">
-                <button 
+                <button
                   className="px-8 py-3.5 rounded-full font-bold text-white transition-all duration-300 hover:scale-105"
                   style={{ background: 'var(--accent-gradient)', boxShadow: '0 4px 20px var(--glow-color-hover)' }}
-                  onClick={() => window.location.href='/course'}
+                  onClick={() => window.location.href = '/course'}
                 >
                   Explore Courses
                 </button>
-                <button 
+                <button
                   className="px-8 py-3.5 rounded-full font-bold transition-all duration-300 hover:bg-[var(--bg-card)] border"
                   style={{ color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
-                  onClick={() => window.location.href='/aboutus'}
+                  onClick={() => window.location.href = '/aboutus'}
                 >
                   Discover More
                 </button>
               </div>
-              
+
               <div className="flex items-center gap-4 text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
                 <div className="flex items-center gap-1">
                   <svg className="w-5 h-5 text-[#00e5ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -201,8 +200,8 @@ function Home() {
               </div>
               <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 md:mb-6 tracking-tight" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>Your Cybersecurity Journey</h3>
               <p className="text-base sm:text-lg md:text-xl font-light leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                Join our global community of cybersecurity professionals and take the next step toward a rewarding, future-proof career. 
-                Gain access to industry-recognized certifications, personalized career mentorship, hands-on labs, and job placement assistance 
+                Join our global community of cybersecurity professionals and take the next step toward a rewarding, future-proof career.
+                Gain access to industry-recognized certifications, personalized career mentorship, hands-on labs, and job placement assistance
                 that connects you with leading employers. We don't just teach — we guide, support, and empower you to succeed.
               </p>
             </div>

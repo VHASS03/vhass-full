@@ -53,11 +53,11 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-12 mb-16">
+      <div className="max-w-7xl mx-auto px-6 py-8 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
 
           {/* Column 1: Brand Info */}
-          <div className="md:col-span-3 flex flex-col justify-between">
+          <div className="md:col-span-2 flex flex-col justify-between">
             <div>
               <h2 className="text-3xl font-extrabold tracking-tight mb-4" style={{ fontFamily: "'Outfit', sans-serif" }}>
                 <span style={{ background: 'var(--accent-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>VHASS</span>
@@ -100,7 +100,7 @@ const Footer = () => {
           </div>
 
           {/* Column 2: Company */}
-          <div className="md:col-span-2">
+          <div className="md:col-span-1">
             <h4 className="text-sm font-bold uppercase tracking-wider text-white mb-5" style={{ fontFamily: "'Outfit', sans-serif" }}>
               Company
             </h4>
@@ -114,7 +114,7 @@ const Footer = () => {
           </div>
 
           {/* Column 3: Programs */}
-          <div className="md:col-span-2">
+          <div className="md:col-span-1">
             <h4 className="text-sm font-bold uppercase tracking-wider text-white mb-5" style={{ fontFamily: "'Outfit', sans-serif" }}>
               Programs
             </h4>
@@ -131,7 +131,7 @@ const Footer = () => {
 
         </div>
 
-        <div className="flex flex-col md:flex-row justify-between items-center gap-8 px-1 py-6" >
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 px-1 py-4 " >
           <p className="text-xs" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-muted)' }}>
             © 2026 VHASS Softwares® Pvt. Ltd. All rights reserved.
           </p>
