@@ -33,6 +33,41 @@ const getImageUrl = (imagePath) => {
   return imagePath;
 };
 
+"use client"
+
+import React, { useEffect, useState } from "react"
+import { useParams, useNavigate } from "react-router-dom"
+import { Button } from "@/Components/ui2/button"
+import { Input } from "@/Components/ui2/input"
+import { Label } from "@/Components/ui2/label"
+import { Phone, Mail, MapPin, Linkedin, Youtube, Instagram, ArrowLeft, X } from "lucide-react"
+import Navbar from "@/Components/navbar"
+import { useAuth } from "../../context/AuthContext.jsx"
+import phonepeService from "../../services/phonepeService.js"
+
+// API base — uploads are served by the backend server, not the frontend
+const API_BASE = import.meta.env.VITE_API_URL || ""
+
+// Helper function to construct proper image URL
+const getImageUrl = (imagePath) => {
+  if (!imagePath || imagePath === 'null' || imagePath === 'undefined') {
+    return "/images/circuit-board.png";
+  }
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
+  }
+  if (!imagePath.includes('/')) {
+    return `${API_BASE}/uploads/${imagePath}`;
+  }
+  if (imagePath.startsWith('uploads/')) {
+    return `${API_BASE}/${imagePath}`;
+  }
+  if (imagePath.startsWith('/uploads/')) {
+    return `${API_BASE}${imagePath}`;
+  }
+  return imagePath;
+};
+
 // No static data; fetch from backend
 
 export default function WorkshopDetailPage() {
@@ -43,6 +78,14 @@ export default function WorkshopDetailPage() {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false)
   const [loading, setLoading] = useState(true)
   const [workshop, setWorkshop] = useState(null)
+  
+  // Coupon state
+  const [couponCode, setCouponCode] = useState("")
+  const [couponError, setCouponError] = useState("")
+  const [couponSuccess, setCouponSuccess] = useState("")
+  const [finalAmount, setFinalAmount] = useState(null)
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false)
+
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
@@ -114,8 +157,9 @@ export default function WorkshopDetailPage() {
       // Generate unique order ID
       const orderId = phonepeService.generateOrderId()
       
-      // Extract amount (remove ₹ symbol and convert to number)
-      const amount = parseInt(workshop.price.replace('₹', ''))
+      // Extract amount
+      const baseAmount = parseInt(workshop.price.replace(/[^0-9]/g, ''))
+      const amount = finalAmount !== null ? finalAmount : baseAmount
       
       // Prepare user data
       const userData = {
@@ -144,7 +188,7 @@ export default function WorkshopDetailPage() {
           userName: formData.name,
           userEmail: formData.email,
           userMobile: formData.mobile,
-          amount: workshop.price,
+          amount: amount,
           orderId: orderId,
           transactionId: paymentResponse.transactionId,
           paymentStatus: "pending",
@@ -171,6 +215,52 @@ export default function WorkshopDetailPage() {
       ...formData,
       [e.target.name]: e.target.value,
     })
+  }
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return
+    setIsApplyingCoupon(true)
+    setCouponError("")
+    setCouponSuccess("")
+    
+    try {
+      const baseAmount = parseInt(workshop.price.replace(/[^0-9]/g, ''))
+      const token = localStorage.getItem('auth_token')
+      const res = await fetch(`${API_BASE}/api/coupon/validate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` })
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          code: couponCode,
+          amount: baseAmount,
+          type: 'workshop'
+        })
+      })
+      
+      const data = await res.json()
+      if (res.ok && data.valid) {
+        setFinalAmount(data.finalAmount)
+        setCouponSuccess(data.message)
+      } else {
+        setCouponError(data.message || 'Invalid coupon code')
+        setFinalAmount(null)
+      }
+    } catch (err) {
+      setCouponError('Error applying coupon. Please try again.')
+      setFinalAmount(null)
+    } finally {
+      setIsApplyingCoupon(false)
+    }
+  }
+
+  const handleRemoveCoupon = () => {
+    setCouponCode("")
+    setCouponError("")
+    setCouponSuccess("")
+    setFinalAmount(null)
   }
 
   return (
@@ -349,11 +439,45 @@ export default function WorkshopDetailPage() {
                 <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
                   <strong>Workshop:</strong> {workshop.title}
                 </p>
-                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                  <strong>Price:</strong> {workshop.price}
-                </p>
+                <div className="flex justify-between items-center mt-2">
+                  <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                    <strong>Price:</strong>
+                  </p>
+                  <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
+                    <span className={finalAmount !== null ? "line-through text-gray-500 text-xs mr-2" : ""}>
+                      ₹{parseInt(workshop.price.replace(/[^0-9]/g, ''))}
+                    </span>
+                    {finalAmount !== null && <span style={{ color: "var(--accent-primary)" }}>₹{finalAmount}</span>}
+                  </p>
+                </div>
               </div>
               
+              {/* Coupon Section */}
+              <div className="bg-[var(--bg-card)] p-4 rounded-lg border border-[var(--border-color)]">
+                <Label className="text-sm mb-2 block" style={{ color: "var(--text-secondary)" }}>Have a coupon code?</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={couponCode}
+                    onChange={e => setCouponCode(e.target.value.toUpperCase())}
+                    placeholder="Enter code"
+                    disabled={couponSuccess || isApplyingCoupon}
+                    className="flex-1"
+                    style={{ backgroundColor: "var(--bg-primary)", border: "1px solid var(--border-color)", color: "var(--text-primary)", textTransform: "uppercase" }}
+                  />
+                  {couponSuccess ? (
+                    <Button type="button" onClick={handleRemoveCoupon} variant="outline" className="px-3" style={{ color: "#f87171", borderColor: "#f87171" }}>
+                      Remove
+                    </Button>
+                  ) : (
+                    <Button type="button" onClick={handleApplyCoupon} disabled={!couponCode || isApplyingCoupon} style={{ background: "var(--bg-secondary)", color: "var(--accent-primary)", border: "1px solid var(--accent-primary)" }}>
+                      {isApplyingCoupon ? "..." : "Apply"}
+                    </Button>
+                  )}
+                </div>
+                {couponError && <p className="text-xs mt-2" style={{ color: "#f87171" }}>{couponError}</p>}
+                {couponSuccess && <p className="text-xs mt-2 font-medium" style={{ color: "#34d399" }}>{couponSuccess}</p>}
+              </div>
+
               <div className="flex gap-4">
                 <Button
                   type="submit"
@@ -361,7 +485,7 @@ export default function WorkshopDetailPage() {
                   disabled={isProcessingPayment}
                   style={{ background: "var(--accent-gradient)", color: "white" }}
                 >
-                  {isProcessingPayment ? "Processing Payment..." : `Pay ${workshop.price}`}
+                  {isProcessingPayment ? "Processing Payment..." : `Pay ₹${finalAmount !== null ? finalAmount : parseInt(workshop.price.replace(/[^0-9]/g, ''))}`}
                 </Button>
                 <Button
                   type="button"

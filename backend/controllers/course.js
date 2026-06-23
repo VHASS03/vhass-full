@@ -245,10 +245,9 @@ export const phonepeCheckout = async (req, res) => {
       return res.status(400).json({ message: 'You already have this course' });
     }
 
-    // Coupon support removed: always use course price as final amount
     const originalAmount = Number(course.price);
-    const finalAmount = originalAmount;
-    const discountAmount = 0;
+    const finalAmount = req.body.amount !== undefined ? Number(req.body.amount) : originalAmount;
+    const discountAmount = Math.max(0, originalAmount - finalAmount);
 
     const merchantOrderId = randomUUID();
     const amount = Math.round(finalAmount * 100); // in paise

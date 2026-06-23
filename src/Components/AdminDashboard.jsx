@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { X, Plus, Edit, Trash2, Users, BookOpen, Calendar, LayoutDashboard, LogOut, ChevronRight, AlertCircle } from "lucide-react"
+import { X, Plus, Edit, Trash2, Users, BookOpen, Calendar, LayoutDashboard, LogOut, ChevronRight, AlertCircle, Tag, ToggleLeft, ToggleRight, Copy } from "lucide-react"
 import Navbar from "./navbar"
 import { useAuth } from "../context/AuthContext.jsx"
 import Footer from "./footer"
@@ -204,6 +204,7 @@ export default function AdminDashboard() {
   const [courses, setCourses] = useState([])
   const [workshops, setWorkshops] = useState([])
   const [enrollments, setEnrollments] = useState([])
+  const [coupons, setCoupons] = useState([])
   const [loading, setLoading] = useState(true)
   const [toast, setToast] = useState(null)
 
@@ -211,6 +212,7 @@ export default function AdminDashboard() {
   const [showAddUser, setShowAddUser] = useState(false)
   const [showAddCourse, setShowAddCourse] = useState(false)
   const [showAddWorkshop, setShowAddWorkshop] = useState(false)
+  const [showAddCoupon, setShowAddCoupon] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
   const [isEditing, setIsEditing] = useState(false)
 
@@ -227,10 +229,16 @@ export default function AdminDashboard() {
     date: "", time: "10:00", location: "Online",
     syllabus: [""], whoShouldAttend: [""], prerequisites: [""],
   }
+  const emptyCoupon = {
+    code: "", description: "", discountType: "percentage", discountValue: "",
+    maxDiscount: "", minimumAmount: "", applicableTo: "all",
+    maxUses: "", validFrom: "", validUntil: "", isActive: true,
+  }
 
   const [userForm, setUserForm] = useState(emptyUser)
   const [courseForm, setCourseForm] = useState(emptyCourse)
   const [workshopForm, setWorkshopForm] = useState(emptyWorkshop)
+  const [couponForm, setCouponForm] = useState(emptyCoupon)
   const [courseImage, setCourseImage] = useState(null)
   const [workshopImage, setWorkshopImage] = useState(null)
 
@@ -275,6 +283,11 @@ export default function AdminDashboard() {
       if (enrollmentsRes.status === "fulfilled" && enrollmentsRes.value.ok) {
         const d = await enrollmentsRes.value.json(); setEnrollments(d.transactions || [])
       }
+      // Load coupons
+      const couponsRes = await fetch(`${API_BASE}/api/coupon/admin`, { credentials: "include", headers })
+      if (couponsRes.ok) {
+        const d = await couponsRes.json(); setCoupons(d.coupons || [])
+      }
     } catch (err) {
       console.error("Error loading admin data:", err)
     } finally {
@@ -287,11 +300,13 @@ export default function AdminDashboard() {
     setShowAddCourse(false)
     setShowAddWorkshop(false)
     setShowAddUser(false)
+    setShowAddCoupon(false)
     setIsEditing(false)
     setEditingItem(null)
     setCourseForm(emptyCourse)
     setWorkshopForm(emptyWorkshop)
     setUserForm(emptyUser)
+    setCouponForm(emptyCoupon)
     setCourseImage(null)
     setWorkshopImage(null)
   }
@@ -481,6 +496,89 @@ export default function AdminDashboard() {
     } catch { showToast("Error deleting workshop", "error") }
   }
 
+  // ── Coupon handlers ────────────────────────────────────────────────────────
+  const handleAddCoupon = async (e) => {
+    e.preventDefault()
+    if (!couponForm.code.trim() || !couponForm.discountValue) {
+      showToast("Code and discount value are required", "error"); return
+    }
+    const token = localStorage.getItem("auth_token")
+    const payload = {
+      code: couponForm.code.trim().toUpperCase(),
+      description: couponForm.description,
+      discountType: couponForm.discountType,
+      discountValue: Number(couponForm.discountValue),
+      maxDiscount: couponForm.maxDiscount ? Number(couponForm.maxDiscount) : null,
+      minimumAmount: couponForm.minimumAmount ? Number(couponForm.minimumAmount) : 0,
+      applicableTo: couponForm.applicableTo,
+      maxUses: couponForm.maxUses ? Number(couponForm.maxUses) : null,
+      validFrom: couponForm.validFrom || undefined,
+      validUntil: couponForm.validUntil || undefined,
+      isActive: couponForm.isActive,
+    }
+    try {
+      const url = isEditing ? `${API_BASE}/api/coupon/admin/${editingItem.data._id}` : `${API_BASE}/api/coupon/admin`
+      const method = isEditing ? "PUT" : "POST"
+      const res = await fetch(url, {
+        method,
+        credentials: "include",
+        headers: { "Content-Type": "application/json", ...(token && { Authorization: `Bearer ${token}` }) },
+        body: JSON.stringify(payload),
+      })
+      const d = await res.json()
+      if (res.ok) {
+        handleCancel(); loadData()
+        showToast(isEditing ? "Coupon updated!" : "Coupon created!")
+      } else {
+        showToast(d.message || "Failed to save coupon", "error")
+      }
+    } catch { showToast("Error saving coupon", "error") }
+  }
+
+  const handleDeleteCoupon = async (id) => {
+    if (!window.confirm("Delete this coupon?")) return
+    const token = localStorage.getItem("auth_token")
+    try {
+      const res = await fetch(`${API_BASE}/api/coupon/admin/${id}`, {
+        method: "DELETE", credentials: "include",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      })
+      if (res.ok) { loadData(); showToast("Coupon deleted") }
+      else showToast("Failed to delete coupon", "error")
+    } catch { showToast("Error deleting coupon", "error") }
+  }
+
+  const handleToggleCoupon = async (id) => {
+    const token = localStorage.getItem("auth_token")
+    try {
+      const res = await fetch(`${API_BASE}/api/coupon/admin/${id}/toggle`, {
+        method: "PATCH", credentials: "include",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      })
+      if (res.ok) { loadData(); showToast("Coupon status updated") }
+      else showToast("Failed to toggle coupon", "error")
+    } catch { showToast("Error toggling coupon", "error") }
+  }
+
+  const handleEditCoupon = (coupon) => {
+    setEditingItem({ type: "coupon", data: coupon })
+    setCouponForm({
+      code: coupon.code,
+      description: coupon.description || "",
+      discountType: coupon.discountType,
+      discountValue: coupon.discountValue,
+      maxDiscount: coupon.maxDiscount || "",
+      minimumAmount: coupon.minimumAmount || "",
+      applicableTo: coupon.applicableTo,
+      maxUses: coupon.maxUses || "",
+      validFrom: coupon.validFrom ? new Date(coupon.validFrom).toISOString().slice(0, 10) : "",
+      validUntil: coupon.validUntil ? new Date(coupon.validUntil).toISOString().slice(0, 10) : "",
+      isActive: coupon.isActive,
+    })
+    setIsEditing(true)
+    setShowAddCoupon(true)
+  }
+
   const handleLogout = async () => { await logout(); navigate("/") }
 
   if (!user || user.role !== "admin") return null
@@ -491,6 +589,7 @@ export default function AdminDashboard() {
     { id: "courses", label: `Courses (${courses.length})`, icon: BookOpen },
     { id: "workshops", label: `Workshops (${workshops.length})`, icon: Calendar },
     { id: "enrollments", label: `Enrollments (${enrollments.length})`, icon: ChevronRight },
+    { id: "coupons", label: `Coupons (${coupons.length})`, icon: Tag },
   ]
 
   return (
@@ -757,6 +856,97 @@ export default function AdminDashboard() {
                 )}
               </div>
             )}
+
+            {/* ── Coupons Tab ─────────────────────────────────────────────────────── */}
+            {activeTab === "coupons" && (
+              <div>
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Coupon Codes</h2>
+                  <Btn variant="primary" onClick={() => { setIsEditing(false); setEditingItem(null); setCouponForm(emptyCoupon); setShowAddCoupon(true) }}>
+                    <Plus size={16} /> Create Coupon
+                  </Btn>
+                </div>
+
+                {coupons.length === 0 ? (
+                  <Card className="p-10 text-center">
+                    <Tag size={32} className="mx-auto mb-3 opacity-30" style={{ color: "var(--accent-primary)" }} />
+                    <p className="text-sm" style={{ color: "var(--text-muted)" }}>No coupon codes created yet</p>
+                  </Card>
+                ) : (
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {coupons.map(coupon => (
+                      <Card key={coupon._id} className={`p-5 transition-all duration-200 ${!coupon.isActive ? "opacity-50" : ""}`}>
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg font-extrabold tracking-widest" style={{ fontFamily: "'Outfit', monospace", background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+                              {coupon.code}
+                            </span>
+                          </div>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${ coupon.isActive ? "" : "" }`}
+                            style={{
+                              backgroundColor: coupon.isActive ? "rgba(52,211,153,0.15)" : "rgba(239,68,68,0.12)",
+                              color: coupon.isActive ? "#34d399" : "#f87171",
+                            }}>
+                            {coupon.isActive ? "Active" : "Inactive"}
+                          </span>
+                        </div>
+
+                        {coupon.description && (
+                          <p className="text-xs mb-3 leading-relaxed" style={{ color: "var(--text-muted)" }}>{coupon.description}</p>
+                        )}
+
+                        <div className="space-y-1.5 mb-4">
+                          <div className="flex justify-between text-xs">
+                            <span style={{ color: "var(--text-muted)" }}>Discount</span>
+                            <span className="font-bold" style={{ color: "var(--accent-primary)" }}>
+                              {coupon.discountType === "percentage" ? `${coupon.discountValue}%` : `₹${coupon.discountValue}`}
+                              {coupon.maxDiscount ? ` (max ₹${coupon.maxDiscount})` : ""}
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-xs">
+                            <span style={{ color: "var(--text-muted)" }}>Applies to</span>
+                            <span className="capitalize" style={{ color: "var(--text-secondary)" }}>{coupon.applicableTo}</span>
+                          </div>
+                          {coupon.minimumAmount > 0 && (
+                            <div className="flex justify-between text-xs">
+                              <span style={{ color: "var(--text-muted)" }}>Min. amount</span>
+                              <span style={{ color: "var(--text-secondary)" }}>₹{coupon.minimumAmount}</span>
+                            </div>
+                          )}
+                          <div className="flex justify-between text-xs">
+                            <span style={{ color: "var(--text-muted)" }}>Uses</span>
+                            <span style={{ color: "var(--text-secondary)" }}>
+                              {coupon.usedCount} / {coupon.maxUses ?? "∞"}
+                            </span>
+                          </div>
+                          {coupon.validUntil && (
+                            <div className="flex justify-between text-xs">
+                              <span style={{ color: "var(--text-muted)" }}>Expires</span>
+                              <span style={{ color: new Date(coupon.validUntil) < new Date() ? "#f87171" : "var(--text-secondary)" }}>
+                                {new Date(coupon.validUntil).toLocaleDateString("en-IN")}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex gap-2 mt-auto">
+                          <Btn variant="secondary" className="flex-1 text-xs" onClick={() => handleToggleCoupon(coupon._id)}>
+                            {coupon.isActive ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                            {coupon.isActive ? "Deactivate" : "Activate"}
+                          </Btn>
+                          <Btn variant="secondary" className="px-2" onClick={() => handleEditCoupon(coupon)}>
+                            <Edit size={13} />
+                          </Btn>
+                          <Btn variant="danger" className="px-2" onClick={() => handleDeleteCoupon(coupon._id)}>
+                            <Trash2 size={13} />
+                          </Btn>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </>
         )}
       </main>
@@ -858,6 +1048,121 @@ export default function AdminDashboard() {
                 <Select value={workshopForm.category} onChange={e => setWorkshopForm({ ...workshopForm, category: e.target.value })}>
                   <option>Cybersecurity</option>
                   <option>Programming</option>
+                  <option>Networking</option>
+                  <option>Cloud</option>
+                  <option>General</option>
+                </Select>
+              </Field>
+              <Field label="Instructor">
+                <Input value={workshopForm.instructor} onChange={e => setWorkshopForm({ ...workshopForm, instructor: e.target.value })} placeholder="Instructor name" required />
+              </Field>
+              <Field label="Duration (hours)">
+                <Input type="number" value={workshopForm.duration} onChange={e => setWorkshopForm({ ...workshopForm, duration: e.target.value })} placeholder="e.g. 8" />
+              </Field>
+              <Field label="Price (₹)">
+                <Input type="number" value={workshopForm.price} onChange={e => setWorkshopForm({ ...workshopForm, price: e.target.value })} placeholder="e.g. 999" />
+              </Field>
+              <Field label="Date">
+                <Input type="date" value={workshopForm.date} onChange={e => setWorkshopForm({ ...workshopForm, date: e.target.value })} />
+              </Field>
+              <Field label="Time">
+                <Input type="time" value={workshopForm.time} onChange={e => setWorkshopForm({ ...workshopForm, time: e.target.value })} />
+              </Field>
+              <Field label="Location">
+                <Input value={workshopForm.location} onChange={e => setWorkshopForm({ ...workshopForm, location: e.target.value })} placeholder="Online / City" />
+              </Field>
+              <Field label={`Workshop Image${isEditing ? " (leave blank to keep existing)" : " (optional)"}` }>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={e => setWorkshopImage(e.target.files[0])}
+                  className="w-full text-sm rounded-xl px-3 py-2 cursor-pointer"
+                  style={{ backgroundColor: "var(--bg-primary)", border: "1px solid var(--border-color)", color: "var(--text-secondary)" }}
+                />
+                {workshopImage && <p className="text-xs mt-1" style={{ color: "var(--accent-primary)" }}>📎 {workshopImage.name}</p>}
+              </Field>
+            </div>
+            <Field label="Description *">
+              <Textarea value={workshopForm.about} onChange={e => setWorkshopForm({ ...workshopForm, about: e.target.value })} placeholder="Describe the workshop..." required />
+            </Field>
+            <ArrayEditor label="Syllabus" items={workshopForm.syllabus} onChange={v => setWorkshopForm({ ...workshopForm, syllabus: v })} placeholder="e.g. Introduction to OWASP Top 10" />
+            <ArrayEditor label="Who Should Attend" items={workshopForm.whoShouldAttend} onChange={v => setWorkshopForm({ ...workshopForm, whoShouldAttend: v })} placeholder="e.g. Security enthusiasts" />
+            <ArrayEditor label="Prerequisites" items={workshopForm.prerequisites} onChange={v => setWorkshopForm({ ...workshopForm, prerequisites: v })} placeholder="e.g. Basic Linux knowledge" />
+            <div className="flex gap-3 pt-2">
+              <Btn type="submit" variant="primary" className="flex-1">{isEditing ? "Update Workshop" : "Create Workshop"}</Btn>
+              <Btn type="button" variant="outline" onClick={handleCancel}>Cancel</Btn>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {/* ── Add / Edit Coupon Modal ───────────────────────────────────────────── */}
+      {showAddCoupon && (
+        <Modal title={isEditing ? "Edit Coupon" : "Create Coupon Code"} onClose={handleCancel} wide>
+          <form onSubmit={handleAddCoupon} className="space-y-5">
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Field label="Coupon Code *">
+                <input
+                  value={couponForm.code}
+                  onChange={e => setCouponForm({ ...couponForm, code: e.target.value.toUpperCase() })}
+                  placeholder="e.g. VHASS50"
+                  disabled={isEditing}
+                  className="w-full rounded-xl px-4 py-2.5 text-sm font-bold tracking-widest outline-none"
+                  style={{ backgroundColor: isEditing ? "var(--bg-primary)" : "var(--bg-secondary)", border: "1px solid var(--border-color)", color: "var(--accent-primary)", cursor: isEditing ? "not-allowed" : "auto" }}
+                  required
+                />
+              </Field>
+              <Field label="Applies To">
+                <Select value={couponForm.applicableTo} onChange={e => setCouponForm({ ...couponForm, applicableTo: e.target.value })}>
+                  <option value="all">All (Courses &amp; Workshops)</option>
+                  <option value="courses">Courses Only</option>
+                  <option value="workshops">Workshops Only</option>
+                </Select>
+              </Field>
+              <Field label="Discount Type *">
+                <Select value={couponForm.discountType} onChange={e => setCouponForm({ ...couponForm, discountType: e.target.value })}>
+                  <option value="percentage">Percentage (%)</option>
+                  <option value="flat">Flat Amount (₹)</option>
+                </Select>
+              </Field>
+              <Field label={couponForm.discountType === "percentage" ? "Discount Value (%) *" : "Discount Amount (₹) *"}>
+                <Input type="number" value={couponForm.discountValue} onChange={e => setCouponForm({ ...couponForm, discountValue: e.target.value })} placeholder={couponForm.discountType === "percentage" ? "e.g. 20" : "e.g. 500"} required />
+              </Field>
+              {couponForm.discountType === "percentage" && (
+                <Field label="Max Discount Cap (₹) — optional">
+                  <Input type="number" value={couponForm.maxDiscount} onChange={e => setCouponForm({ ...couponForm, maxDiscount: e.target.value })} placeholder="e.g. 1000" />
+                </Field>
+              )}
+              <Field label="Minimum Order Amount (₹)">
+                <Input type="number" value={couponForm.minimumAmount} onChange={e => setCouponForm({ ...couponForm, minimumAmount: e.target.value })} placeholder="e.g. 500 (0 = no minimum)" />
+              </Field>
+              <Field label="Max Uses (leave blank = unlimited)">
+                <Input type="number" value={couponForm.maxUses} onChange={e => setCouponForm({ ...couponForm, maxUses: e.target.value })} placeholder="e.g. 100" />
+              </Field>
+              <Field label="Valid From">
+                <Input type="date" value={couponForm.validFrom} onChange={e => setCouponForm({ ...couponForm, validFrom: e.target.value })} />
+              </Field>
+              <Field label="Valid Until (leave blank = no expiry)">
+                <Input type="date" value={couponForm.validUntil} onChange={e => setCouponForm({ ...couponForm, validUntil: e.target.value })} />
+              </Field>
+              <Field label="Status">
+                <Select value={couponForm.isActive ? "true" : "false"} onChange={e => setCouponForm({ ...couponForm, isActive: e.target.value === "true" })}>
+                  <option value="true">Active</option>
+                  <option value="false">Inactive</option>
+                </Select>
+              </Field>
+            </div>
+            <Field label="Description (shown to users)">
+              <Textarea value={couponForm.description} onChange={e => setCouponForm({ ...couponForm, description: e.target.value })} placeholder="e.g. Special launch discount - 20% off all courses" rows={2} />
+            </Field>
+            <div className="flex gap-3 pt-2">
+              <Btn type="submit" variant="primary" className="flex-1">{isEditing ? "Update Coupon" : "Create Coupon"}</Btn>
+              <Btn type="button" variant="outline" onClick={handleCancel}>Cancel</Btn>
+            </div>
+          </form>
+        </Modal>
+      )}
+n>Programming</option>
                   <option>Networking</option>
                   <option>Cloud</option>
                   <option>General</option>

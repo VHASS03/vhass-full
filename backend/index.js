@@ -256,6 +256,7 @@ import courseRoutes from "./routes/course.js";
 import adminRoutes from "./routes/admin.js";
 import workshopRoutes from "./routes/workshop.js";
 import paymentRoutes from "./routes/payment.js";
+import couponRoutes from "./routes/coupon.js";
 
 // using routes
 app.use("/api/admin", adminRoutes);
@@ -275,6 +276,9 @@ console.log('Registered workshop routes:', workshopRoutes.stack.map(r => r.route
 
 app.use("/api/payment", paymentRoutes);
 console.log('Registered payment routes:', paymentRoutes.stack.map(r => r.route ? r.route.path : 'unknown'));
+
+app.use("/api/coupon", couponRoutes);
+console.log('Registered coupon routes:', couponRoutes.stack.map(r => r.route ? r.route.path : 'unknown'));
 
 
 
