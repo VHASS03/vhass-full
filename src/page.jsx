@@ -210,7 +210,7 @@ export default function VHASSCoursesPage() {
 
                 {showEnrollmentForm === (course._id || index) && (
                   <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4" style={{ background: 'rgba(13, 17, 23, 0.75)' }}>
-                    <div className="border rounded-2xl p-8 w-full max-w-md shadow-2xl relative backdrop-blur-md" style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
+                    <div className="border rounded-2xl p-6 md:p-8 w-full max-w-md shadow-2xl relative backdrop-blur-md max-h-[90vh] overflow-y-auto" style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
                       <div className="flex justify-between items-center mb-6">
                         <h3 className="text-2xl font-bold text-[var(--text-primary)]" style={{ fontFamily: "'Outfit', sans-serif" }}>
                           Enrollment Form

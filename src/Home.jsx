@@ -1,4 +1,4 @@
-﻿import React, { useLayoutEffect, useRef, Suspense, useState } from "react";
+import React, { useLayoutEffect, useRef, Suspense, useState } from "react";
 
 import Navbar from "./Components/navbar";
 import Footer from "./Components/footer";
@@ -78,11 +78,11 @@ function Home() {
         <Navbar />
 
         {/* Intro Section */}
-        <section className="relative flex flex-col md:flex-row items-center justify-between min-h-screen h-auto md:h-[100vh] px-4 md:px-8 py-20 md:py-0">
+        <section className="relative flex flex-col md:flex-row items-center justify-start md:justify-between min-h-screen md:h-[100vh] px-4 md:px-8 pt-24 pb-8 md:py-0">
           {/* Gradient glow behind intro text */}
           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[150px] pointer-events-none" style={{ background: 'var(--glow-color)', opacity: 0.6 }} />
           <div className="flex flex-col justify-center w-full md:w-1/2 mb-8 md:mb-20 md:ml-20 z-10">
-            <div className="relative md:absolute md:top-28 md:left-10 px-4 pt-14">
+            <div className="relative md:absolute md:top-28 md:left-10 px-4 mt-8 md:mt-0 md:pt-14">
               <div className="landing-page">
                 <div className="tag-box">
                   <div className="tag">INTRODUCING</div>
@@ -104,8 +104,7 @@ function Home() {
           </div>
         </section>
 
-        {/* Section 1 */}
-        <section className="relative flex flex-col md:flex-row items-center justify-evenly min-h-screen h-auto md:h-[100vh] py-8 md:py-16 px-4 md:px-0">
+        <section className="relative flex flex-col md:flex-row items-center justify-evenly py-12 md:py-16 px-4 md:px-0 md:min-h-screen md:h-[100vh]">
           <div className="hidden md:block w-[50%]"></div>
           <div ref={sectionRefs[0]} className="w-full md:w-[50%] px-4 sm:px-8 md:px-12" style={{ color: 'var(--text-primary)' }}>
             <div className="relative backdrop-blur-md rounded-2xl p-6 sm:p-8 md:p-10 shadow-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
@@ -127,7 +126,7 @@ function Home() {
         </section>
 
         {/* Section 2 */}
-        <section className="relative flex flex-col md:flex-row items-center justify-evenly min-h-screen h-auto md:h-[100vh] py-8 md:py-16 px-4 md:px-0">
+        <section className="relative flex flex-col md:flex-row items-center justify-evenly py-12 md:py-16 px-4 md:px-0 md:min-h-screen md:h-[100vh]">
           <div ref={sectionRefs[1]} className="w-full md:w-[50%] px-4 sm:px-8 md:px-12 order-2 md:order-1" style={{ color: 'var(--text-primary)' }}>
             <div className="relative backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-2xl max-h-full overflow-auto" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
               <div className="absolute top-6 -left-2 w-4 h-4 rounded-full animate-ping" style={{ background: 'var(--accent-secondary)' }}></div>
@@ -160,7 +159,7 @@ function Home() {
         </section>
 
         {/* Section 3 */}
-        <section className="relative flex flex-col md:flex-row items-center justify-evenly min-h-screen h-auto md:h-[100vh] py-8 md:py-16 px-4 md:px-0">
+        <section className="relative flex flex-col md:flex-row items-center justify-evenly py-12 md:py-16 px-4 md:px-0 md:min-h-screen md:h-[100vh]">
           <div className="hidden md:block w-[50%]"></div>
           <div ref={sectionRefs[2]} className="w-full md:w-[50%] px-4 sm:px-8 md:px-12" style={{ color: 'var(--text-primary)' }}>
             <div className="relative backdrop-blur-md rounded-2xl p-6 sm:p-8 md:p-10 shadow-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>

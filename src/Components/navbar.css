@@ -1,4 +1,4 @@
-﻿/* VHASS Platform Modern Navigation System */
+/* VHASS Platform Modern Navigation System */
 
 header {
   position: sticky;
@@ -353,23 +353,22 @@ header {
   }
 
   .user-menu {
-    position: absolute;
-    bottom: 40px;
-    left: 24px;
-    right: 24px;
-    justify-content: center;
+    justify-content: flex-end;
+    margin-right: 8px;
+    gap: 8px;
   }
 
   .user-buttons {
-    width: 100%;
-    flex-direction: column;
-    gap: 12px;
+    flex-direction: row;
+    width: auto;
+    gap: 8px;
   }
 
   .user-buttons .login, .user-buttons .register {
-    width: 100%;
+    width: auto;
     text-align: center;
     box-sizing: border-box;
+    padding: 6px 12px;
   }
 }
 

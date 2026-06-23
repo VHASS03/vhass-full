@@ -368,28 +368,28 @@ export default function CourseDetailsPage() {
         </Button>
 
         {/* Course Hero Section */}
-        <div className="text-center mb-12 py-16 rounded-3xl shadow-2xl" style={{ backgroundColor: "var(--bg-secondary)" }}>
-          <h1 className="text-4xl md:text-5xl font-bold mb-8" style={{ color: "var(--text-primary)" }}>
+        <div className="text-center mb-8 md:mb-12 py-8 md:py-16 px-4 rounded-3xl shadow-2xl" style={{ backgroundColor: "var(--bg-secondary)" }}>
+          <h1 className="text-3xl md:text-5xl font-bold mb-6 md:mb-8" style={{ color: "var(--text-primary)" }}>
             {course.title}
           </h1>
-          <div className="max-w-4xl mx-auto mb-8">
+          <div className="max-w-4xl mx-auto mb-6 md:mb-8">
             <img
               src={getImageUrl(course.image)}
               alt={course.title}
-              className="w-full h-64 md:h-80 object-cover rounded-2xl shadow-xl"
+              className="w-full h-48 md:h-80 object-cover rounded-2xl shadow-xl"
             />
           </div>
-          <div className="flex flex-wrap justify-center items-center gap-8 text-lg">
+          <div className="flex flex-col md:flex-row flex-wrap justify-center items-center gap-4 md:gap-8 text-base md:text-lg">
             <span style={{ color: "var(--accent-primary)" }}>{course.instructor}</span>
             <span style={{ color: "var(--accent-primary)" }}>{course.duration}</span>
-            <span className="text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
+            <span className="text-2xl md:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
               {course.price}
             </span>
           </div>
         </div>
 
         {/* About This Course */}
-        <section className="mb-12 p-8 rounded-2xl shadow-xl" style={{ backgroundColor: "var(--bg-card)", border: "2px solid var(--accent-primary)", backdropFilter: "blur(10px)" }}>
+        <section className="mb-8 md:mb-12 p-5 md:p-8 rounded-2xl shadow-xl" style={{ backgroundColor: "var(--bg-card)", border: "2px solid var(--accent-primary)", backdropFilter: "blur(10px)" }}>
           <h2 className="text-3xl font-bold mb-6 pb-4 border-b-4" style={{ color: "var(--text-primary)", borderColor: "var(--accent-primary)" }}>
             About This Course
           </h2>
@@ -399,7 +399,7 @@ export default function CourseDetailsPage() {
         </section>
 
         {/* Syllabus */}
-        <section className="mb-12 p-8 rounded-2xl shadow-xl" style={{ backgroundColor: "var(--bg-card)", border: "2px solid var(--accent-primary)", backdropFilter: "blur(10px)" }}>
+        <section className="mb-8 md:mb-12 p-5 md:p-8 rounded-2xl shadow-xl" style={{ backgroundColor: "var(--bg-card)", border: "2px solid var(--accent-primary)", backdropFilter: "blur(10px)" }}>
           <h2 className="text-3xl font-bold mb-6 pb-4 border-b-4" style={{ color: "var(--text-primary)", borderColor: "var(--accent-primary)" }}>
             Course Syllabus
           </h2>
@@ -415,7 +415,7 @@ export default function CourseDetailsPage() {
         </section>
 
         {/* Who Should Attend */}
-        <section className="mb-12 p-8 rounded-2xl shadow-xl" style={{ backgroundColor: "var(--bg-card)", border: "2px solid var(--accent-primary)", backdropFilter: "blur(10px)" }}>
+        <section className="mb-8 md:mb-12 p-5 md:p-8 rounded-2xl shadow-xl" style={{ backgroundColor: "var(--bg-card)", border: "2px solid var(--accent-primary)", backdropFilter: "blur(10px)" }}>
           <h2 className="text-3xl font-bold mb-6 pb-4 border-b-4" style={{ color: "var(--text-primary)", borderColor: "var(--accent-primary)" }}>
             Who Should Attend
           </h2>
@@ -431,7 +431,7 @@ export default function CourseDetailsPage() {
         </section>
 
         {/* Prerequisites */}
-        <section className="mb-12 p-8 rounded-2xl shadow-xl" style={{ backgroundColor: "var(--bg-card)", border: "2px solid var(--accent-primary)", backdropFilter: "blur(10px)" }}>
+        <section className="mb-8 md:mb-12 p-5 md:p-8 rounded-2xl shadow-xl" style={{ backgroundColor: "var(--bg-card)", border: "2px solid var(--accent-primary)", backdropFilter: "blur(10px)" }}>
           <h2 className="text-3xl font-bold mb-6 pb-4 border-b-4" style={{ color: "var(--text-primary)", borderColor: "var(--accent-primary)" }}>
             Prerequisites
           </h2>
@@ -472,7 +472,7 @@ export default function CourseDetailsPage() {
       {/* Enrollment Modal */}
       {showEnrollmentModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-2xl p-8 max-w-md w-full border-2 border-[var(--accent-primary)]">
+          <div className="bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-2xl p-6 md:p-8 max-w-md w-full border-2 border-[var(--accent-primary)] max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
                 Enroll in Course

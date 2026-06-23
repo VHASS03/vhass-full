@@ -130,7 +130,7 @@ const Select = ({ value, onChange, children, required = false }) => (
 const Modal = ({ title, onClose, children, wide = false }) => (
   <div className="fixed inset-0 z-50 flex items-start justify-center p-4 py-8 overflow-y-auto" style={{ backgroundColor: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)" }}>
     <div
-      className={`w-full ${wide ? "max-w-3xl" : "max-w-md"} rounded-3xl p-8 shadow-2xl relative`}
+      className={`w-full ${wide ? "max-w-3xl" : "max-w-md"} rounded-3xl p-6 md:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto`}
       style={{
         backgroundColor: "var(--bg-secondary)",
         border: "1px solid var(--border-color)",
@@ -708,8 +708,8 @@ export default function AdminDashboard() {
                   {users.length === 0 && <Card className="p-8 text-center"><p style={{ color: "var(--text-muted)" }}>No users found</p></Card>}
                   {users.map(u => (
                     <Card key={u._id} className="p-5">
-                      <div className="flex justify-between items-center gap-4">
-                        <div className="flex items-center gap-4">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                        <div className="flex items-center gap-4 truncate">
                           <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white"
                             style={{ background: "var(--accent-gradient)" }}>
                             {u.name?.charAt(0).toUpperCase()}
@@ -1183,54 +1183,7 @@ export default function AdminDashboard() {
           </form>
         </Modal>
       )}
-n>Programming</option>
-                  <option>Networking</option>
-                  <option>Cloud</option>
-                  <option>General</option>
-                </Select>
-              </Field>
-              <Field label="Instructor">
-                <Input value={workshopForm.instructor} onChange={e => setWorkshopForm({ ...workshopForm, instructor: e.target.value })} placeholder="Instructor name" required />
-              </Field>
-              <Field label="Duration (hours)">
-                <Input type="number" value={workshopForm.duration} onChange={e => setWorkshopForm({ ...workshopForm, duration: e.target.value })} placeholder="e.g. 8" />
-              </Field>
-              <Field label="Price (₹)">
-                <Input type="number" value={workshopForm.price} onChange={e => setWorkshopForm({ ...workshopForm, price: e.target.value })} placeholder="e.g. 999" />
-              </Field>
-              <Field label="Date">
-                <Input type="date" value={workshopForm.date} onChange={e => setWorkshopForm({ ...workshopForm, date: e.target.value })} />
-              </Field>
-              <Field label="Time">
-                <Input type="time" value={workshopForm.time} onChange={e => setWorkshopForm({ ...workshopForm, time: e.target.value })} />
-              </Field>
-              <Field label="Location">
-                <Input value={workshopForm.location} onChange={e => setWorkshopForm({ ...workshopForm, location: e.target.value })} placeholder="Online / City" />
-              </Field>
-              <Field label={`Workshop Image${isEditing ? " (leave blank to keep existing)" : " (optional)"}`}>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={e => setWorkshopImage(e.target.files[0])}
-                  className="w-full text-sm rounded-xl px-3 py-2 cursor-pointer"
-                  style={{ backgroundColor: "var(--bg-primary)", border: "1px solid var(--border-color)", color: "var(--text-secondary)" }}
-                />
-                {workshopImage && <p className="text-xs mt-1" style={{ color: "var(--accent-primary)" }}>📎 {workshopImage.name}</p>}
-              </Field>
-            </div>
-            <Field label="Description *">
-              <Textarea value={workshopForm.about} onChange={e => setWorkshopForm({ ...workshopForm, about: e.target.value })} placeholder="Describe the workshop..." required />
-            </Field>
-            <ArrayEditor label="Syllabus" items={workshopForm.syllabus} onChange={v => setWorkshopForm({ ...workshopForm, syllabus: v })} placeholder="e.g. Introduction to OWASP Top 10" />
-            <ArrayEditor label="Who Should Attend" items={workshopForm.whoShouldAttend} onChange={v => setWorkshopForm({ ...workshopForm, whoShouldAttend: v })} placeholder="e.g. Security enthusiasts" />
-            <ArrayEditor label="Prerequisites" items={workshopForm.prerequisites} onChange={v => setWorkshopForm({ ...workshopForm, prerequisites: v })} placeholder="e.g. Basic Linux knowledge" />
-            <div className="flex gap-3 pt-2">
-              <Btn type="submit" variant="primary" className="flex-1">{isEditing ? "Update Workshop" : "Create Workshop"}</Btn>
-              <Btn type="button" variant="outline" onClick={handleCancel}>Cancel</Btn>
-            </div>
-          </form>
-        </Modal>
-      )}
+
 
       <Footer />
     </div>
