@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import Footer from './Components/footer';
 import Navbar from './Components/navbar';
 import { Link } from "react-router-dom";
@@ -173,49 +173,67 @@ const AboutUs = () => {
             <div className="text-center mb-16">
               <h2
                 className="text-3xl md:text-5xl font-bold mb-4"
-                style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}
+                style={{
+                  fontFamily: "'Outfit', sans-serif",
+                  color: "var(--text-primary)",
+                }}
               >
                 Leadership Team
               </h2>
-              <p className="max-w-2xl mx-auto px-4" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-muted)' }}>The visionaries driving our cybersecurity mission</p>
+              <p
+                className="max-w-2xl mx-auto px-4"
+                style={{
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                  color: "var(--text-muted)",
+                }}
+              >
+                The visionaries driving our cybersecurity mission
+              </p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {[
                 {
-                  img: '/images/hemanth.webp',
-                  alt: 'Pagadala Hemanth Krishna Vardhan',
-                  name: 'Pagadala Hemanth Krishna Vardhan',
-                  role: 'Founder & CEO',
-                  bio: 'Expert in ethical hacking and penetration testing with over a decade of experience in cybersecurity. Passionate about creating accessible security education.',
+                  img: "/images/hemanth.webp",
+                  alt: "Pagadala Hemanth Krishna Vardhan",
+                  name: "Pagadala Hemanth Krishna Vardhan",
+                  role: "Founder & CEO",
+                  bio: "Expert in ethical hacking and penetration testing with over a decade of experience in cybersecurity. Passionate about creating accessible security education.",
                   tags: [],
-                  roleColor: 'var(--accent-primary)'
+                  roleColor: "var(--accent-primary)",
                 },
                 {
-                  img: '/images/uday.jpg',
-                  alt: 'Uday Venkat Charkanam',
-                  name: 'Uday Venkat Charkanam',
-                  role: 'Co-Founder & COO',
-                  bio: 'Cybersecurity professional with over a decade of experience in ethical hacking and penetration testing, dedicated to making security education accessible and practical for all.',
+                  img: "/images/uday.jpg",
+                  alt: "Uday Venkat Charkanam",
+                  name: "Uday Venkat Charkanam",
+                  role: "Co-Founder & COO",
+                  bio: "Cybersecurity professional with over a decade of experience in ethical hacking and penetration testing, dedicated to making security education accessible and practical for all.",
                   tags: [],
-                  roleColor: 'var(--accent-secondary)'
-                }
+                  roleColor: "var(--accent-secondary)",
+                },
               ].map((leader, i) => (
-                <div key={i} className="backdrop-blur-md rounded-2xl p-8 transition-all duration-300 h-full flex flex-col justify-between" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+                <div
+                  key={i}
+                  className="backdrop-blur-md rounded-2xl p-8 transition-all duration-300 h-full flex flex-col justify-between"
+                  style={{
+                    background: "var(--bg-card)",
+                    border: "1px solid var(--border-color)",
+                  }}
+                >
                   <div>
                     <div className="flex items-center gap-6 mb-6">
                       <div
                         className="w-36 h-36 rounded-xl overflow-hidden flex-shrink-0"
                         style={{
-                          border: '1px solid var(--border-color)',
+                          border: "1px solid var(--border-color)",
                         }}
                       >
                         <img
                           src={leader.img}
                           alt={leader.alt}
                           className={`w-full h-full transition-all duration-300 ${i === 0
-                            ? 'object-cover scale-150 object-[50%_15%]'
-                            : 'object-cover object-[50%_20%]'
+                            ? "object-cover scale-150 object-[50%_5 %]"
+                            : "object-cover object-[50%_1%]"
                             }`}
                         />
                       </div>
@@ -225,7 +243,7 @@ const AboutUs = () => {
                           className="text-2xl font-bold"
                           style={{
                             fontFamily: "'Outfit', sans-serif",
-                            color: 'var(--text-primary)',
+                            color: "var(--text-primary)",
                           }}
                         >
                           {leader.name}
@@ -242,13 +260,34 @@ const AboutUs = () => {
                         </div>
                       </div>
                     </div>
-                    <p className="mb-6 leading-relaxed text-sm" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-secondary)' }}>
+
+                    <p
+                      className="mb-6 leading-relaxed text-sm"
+                      style={{
+                        fontFamily: "'Plus Jakarta Sans', sans-serif",
+                        color: "var(--text-secondary)",
+                      }}
+                    >
                       {leader.bio}
                     </p>
                   </div>
-                  <div className="flex gap-3" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+
+                  <div
+                    className="flex gap-3"
+                    style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                  >
                     {leader.tags.map((tag, j) => (
-                      <div key={j} className="px-3 py-1 rounded-full text-xs" style={{ background: 'var(--bg-card-hover)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>{tag}</div>
+                      <div
+                        key={j}
+                        className="px-3 py-1 rounded-full text-xs"
+                        style={{
+                          background: "var(--bg-card-hover)",
+                          border: "1px solid var(--border-color)",
+                          color: "var(--text-secondary)",
+                        }}
+                      >
+                        {tag}
+                      </div>
                     ))}
                   </div>
                 </div>

@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef, Suspense, useState, useEffect } from "react";
+﻿import React, { useLayoutEffect, useRef, Suspense, useState, useEffect } from "react";
 import Navbar from "./Components/navbar";
 import Footer from "./Components/footer";
 import SEO from "./Components/SEO";
@@ -54,7 +54,7 @@ const StatItem = ({ number, suffix = "+", label }) => {
   const [ref, count] = useCountUp(number, 2200);
   return (
     <div ref={ref} className="text-center px-6 py-4">
-      <div className="text-5xl md:text-7xl font-extrabold tracking-tight mb-2" style={{ fontFamily: "'Outfit', sans-serif", color: '#FFB162' }}>
+      <div className="text-5xl md:text-7xl font-extrabold tracking-tight mb-1" style={{ fontFamily: "'Outfit', sans-serif", color: '#FFB162' }}>
         {count}{suffix}
       </div>
       <div className="text-sm md:text-base font-medium" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-secondary)' }}>
@@ -172,18 +172,12 @@ function Home() {
                 >
                   Explore Programs <ArrowRight className="w-4 h-4" />
                 </button>
-                <button
-                  className="btn-secondary"
-                  onClick={() => navigate('/helpdesk')}
-                >
-                  Book Free Consultation
-                </button>
+
               </div>
 
               {/* Trust Metrics */}
               <div className="flex flex-wrap gap-x-8 gap-y-3 text-sm" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                 {[
-                  { icon: Users, label: "500+ Students Trained" },
                   { icon: Award, label: "Industry Certifications" },
                   { icon: Briefcase, label: "Internship Programs" },
                   { icon: Rocket, label: "Startup Incubation" },
@@ -208,10 +202,12 @@ function Home() {
         {/* ═══════════════════════════════════════════
             SECTION 2 — TRUST BAR
             ═══════════════════════════════════════════ */}
-        <section className="animate-on-scroll relative py-16 md:py-20 border-y" style={{ borderColor: 'var(--border)' }}>
+        <section
+          className="animate-on-scroll relative py-16 md:py-20 border-y"
+          style={{ borderColor: "var(--border)" }}
+        >
           <div className="max-w-5xl mx-auto px-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              <StatItem number={500} label="Students Trained" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 place-items-center">
               <StatItem number={50} label="Certifications Earned" />
               <StatItem number={30} label="Internships Secured" />
               <StatItem number={10} label="Startups Supported" />
@@ -411,27 +407,6 @@ function Home() {
         {/* ═══════════════════════════════════════════
             SECTION 7 — FINAL CTA
             ═══════════════════════════════════════════ */}
-        <section className="py-24 md:py-32 px-6 relative animate-on-scroll">
-          {/* Ambient glow */}
-          <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 50%, rgba(255, 177, 98, 0.04) 0%, transparent 60%)' }} />
-
-          <div className="max-w-3xl mx-auto text-center relative z-10">
-            <h2 className="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>
-              Ready to Shape<br />the Future?
-            </h2>
-            <p className="text-base md:text-lg mb-10 max-w-xl mx-auto" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-secondary)' }}>
-              Join 500+ professionals who chose VHASS to accelerate their cybersecurity and entrepreneurship careers.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="btn-primary" onClick={() => navigate('/course')}>
-                Explore Programs <ArrowRight className="w-4 h-4" />
-              </button>
-              <button className="btn-secondary" onClick={() => navigate('/helpdesk')}>
-                Book Free Consultation
-              </button>
-            </div>
-          </div>
-        </section>
 
         <Footer />
       </Suspense>
