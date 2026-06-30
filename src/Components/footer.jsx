@@ -25,9 +25,9 @@ const Footer = () => {
           <div className="md:col-span-4">
             <div className="flex items-center gap-3 mb-4">
               <img src="/VHASS.png" alt="VHASS" className="w-8 h-8" />
-              <span className="text-xl font-bold" style={{ fontFamily: "'Outfit', sans-serif", color: '#EEE9DF' }}>VHASS</span>
+              <span className="text-xl font-bold" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>VHASS</span>
             </div>
-            <p className="text-sm leading-relaxed mb-6 max-w-xs" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#6b7a8d' }}>
+            <p className="text-sm leading-relaxed mb-6 max-w-xs" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-muted)' }}>
               Empowering the next generation of cybersecurity professionals and tech entrepreneurs through premium education and incubation.
             </p>
             <div className="flex items-center gap-3">
@@ -45,10 +45,10 @@ const Footer = () => {
 
           {/* Column 2: Company */}
           <div className="md:col-span-2">
-            <h4 className="text-xs font-bold uppercase tracking-[0.15em] mb-5" style={{ fontFamily: "'Outfit', sans-serif", color: '#C9C1B1' }}>
+            <h4 className="text-xs font-bold uppercase tracking-[0.15em] mb-5" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-secondary)' }}>
               Company
             </h4>
-            <ul className="flex flex-col gap-3 text-sm" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#6b7a8d' }}>
+            <ul className="flex flex-col gap-3 text-sm" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-muted)' }}>
               <li><Link to="/" className="footer-link">Home</Link></li>
               <li><Link to="/aboutus" className="footer-link">About Us</Link></li>
               <li><Link to="/helpdesk" className="footer-link">Contact</Link></li>
@@ -58,10 +58,10 @@ const Footer = () => {
 
           {/* Column 3: Programs */}
           <div className="md:col-span-2">
-            <h4 className="text-xs font-bold uppercase tracking-[0.15em] mb-5" style={{ fontFamily: "'Outfit', sans-serif", color: '#C9C1B1' }}>
+            <h4 className="text-xs font-bold uppercase tracking-[0.15em] mb-5" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-secondary)' }}>
               Programs
             </h4>
-            <ul className="flex flex-col gap-3 text-sm" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#6b7a8d' }}>
+            <ul className="flex flex-col gap-3 text-sm" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-muted)' }}>
               <li><Link to="/course" className="footer-link">Courses</Link></li>
               <li><Link to="/workshop" className="footer-link">Workshops</Link></li>
               <li><Link to="/services" className="footer-link">Cybersecurity</Link></li>
@@ -71,10 +71,10 @@ const Footer = () => {
 
           {/* Column 4: Newsletter */}
           <div className="md:col-span-4">
-            <h4 className="text-xs font-bold uppercase tracking-[0.15em] mb-5" style={{ fontFamily: "'Outfit', sans-serif", color: '#C9C1B1' }}>
+            <h4 className="text-xs font-bold uppercase tracking-[0.15em] mb-5" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-secondary)' }}>
               Stay Updated
             </h4>
-            <p className="text-sm mb-4" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#6b7a8d' }}>
+            <p className="text-sm mb-4" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-muted)' }}>
               Get the latest on courses, workshops, and cybersecurity insights.
             </p>
             <form onSubmit={handleSubscribe} className="flex flex-col gap-3">
@@ -95,11 +95,11 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-8" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
-          <p className="text-xs" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#6b7a8d' }}>
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-8" style={{ borderTop: '1px solid var(--border)' }}>
+          <p className="text-xs" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-muted)' }}>
             © 2026 VHASS Softwares® Pvt. Ltd. All rights reserved.
           </p>
-          <div className="flex flex-wrap gap-6 text-xs" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#6b7a8d' }}>
+          <div className="flex flex-wrap gap-6 text-xs" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-muted)' }}>
             <Link to="/policies" className="footer-link">Terms</Link>
             <Link to="/policies" className="footer-link">Privacy</Link>
             <Link to="/policies" className="footer-link">Refunds</Link>

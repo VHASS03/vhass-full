@@ -4,6 +4,7 @@ import "./navbar.css";
 import React from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useAuthCheck } from "../hooks/useAuthCheck.js";
+import { Sun, Moon } from "lucide-react";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -11,6 +12,20 @@ function Navbar() {
   const { user } = useAuthCheck();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+
+  useEffect(() => {
+    if (theme === 'light') {
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
 
   // Scroll listener for transparent → solid transition
   useEffect(() => {
@@ -61,7 +76,6 @@ function Navbar() {
       ) : (
         <div className="user-buttons">
           <button className="login" onClick={() => { navigate("/auth"); closeMobileMenu(); }}>Log In</button>
-          <button className="cta-primary" onClick={() => { navigate("/helpdesk"); closeMobileMenu(); }}>Book Consultation</button>
         </div>
       )}
     </div>
@@ -92,6 +106,10 @@ function Navbar() {
         </nav>
 
         <div className="flex items-center gap-3">
+          <button className="theme-toggle-btn" onClick={toggleTheme} aria-label="Toggle Theme">
+            {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </button>
+
           <div className={`header-user-menu-wrapper ${isMobileMenuOpen ? 'mobile-menu-open' : ''}`}>
             {renderUserMenu(false)}
           </div>

@@ -11,6 +11,7 @@
   /* ─── Backgrounds ─── */
   --bg-primary: #0D1117;
   --bg-surface: #161E2A;
+  --nav-bg: rgba(13, 17, 23, 0.85);
   --bg-card: #1B2433;
   --bg-card-hover: #212d3f;
   --bg-elevated: #243040;
@@ -81,25 +82,47 @@ html, body {
   color: #fff;
 }
 
-/* ─── Light Mode Compat (minimal, for inner pages that still reference .light) ─── */
-.light {
-  --bg-primary: #0D1117;
-  --bg-secondary: #161E2A;
-  --bg-card: #1B2433;
-  --bg-card-hover: #212d3f;
-  --text-primary: #EEE9DF;
-  --text-secondary: #C9C1B1;
-  --text-muted: #6b7a8d;
-  --accent-primary: #FFB162;
-  --accent-secondary: #e8944a;
-  --accent-gradient: linear-gradient(135deg, #FFB162 0%, #e8944a 100%);
-  --accent-gradient-hover: linear-gradient(135deg, #FFC182 0%, #FFB162 100%);
-  --border-color: rgba(255, 255, 255, 0.06);
-  --border-color-hover: rgba(255, 255, 255, 0.12);
-  --glow-color: rgba(255, 177, 98, 0.12);
-  --glow-color-hover: rgba(255, 177, 98, 0.25);
-  --hero-glow: rgba(255, 177, 98, 0.08);
-  --card-bg-raw: 27, 36, 51;
+/* ─── Light Mode Theme ─── */
+.light, html.light {
+  --bg-primary: #F7F9FC;
+  --bg-surface: #FFFFFF;
+  --nav-bg: rgba(247, 249, 252, 0.85);
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F1F3F7;
+  --bg-elevated: #EBF0F6;
+
+  --text-primary: #1E293B;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+
+  --accent: #D97706;
+  --accent-hover: #B45309;
+  --accent-dim: #F59E0B;
+  --accent-glow: rgba(217, 119, 6, 0.08);
+  --accent-glow-strong: rgba(217, 119, 6, 0.15);
+
+  --border: rgba(0, 0, 0, 0.08);
+  --border-hover: rgba(0, 0, 0, 0.14);
+  --border-accent: rgba(217, 119, 6, 0.2);
+
+  --accent-gradient: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  --accent-gradient-hover: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%);
+  --surface-gradient: linear-gradient(180deg, #FFFFFF 0%, #F7F9FC 100%);
+  --hero-glow: radial-gradient(ellipse at 30% 50%, rgba(217, 119, 6, 0.04) 0%, transparent 70%);
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 16px 64px rgba(0, 0, 0, 0.12);
+  --shadow-glow: 0 0 40px rgba(217, 119, 6, 0.06);
+
+  --bg-secondary: #FFFFFF;
+  --accent-primary: #D97706;
+  --accent-secondary: #B45309;
+  --border-color: rgba(0, 0, 0, 0.08);
+  --border-color-hover: rgba(0, 0, 0, 0.14);
+  --glow-color: rgba(217, 119, 6, 0.08);
+  --glow-color-hover: rgba(217, 119, 6, 0.15);
+  --card-bg-raw: 255, 255, 255;
 }
 
 /* ═══════════════════════════════════════════

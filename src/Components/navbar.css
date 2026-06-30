@@ -25,7 +25,7 @@ header.nav-transparent {
 
 /* After scroll: solid glass */
 header.nav-solid {
-  background: rgba(13, 17, 23, 0.85);
+  background: var(--nav-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border, rgba(255,255,255,0.06));
@@ -400,7 +400,25 @@ body.mobile-menu-open {
   }
 }
 
-/* Remove old theme toggle styles — no longer needed */
+/* Theme toggle button styling */
 .theme-toggle-btn {
-  display: none;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
 }

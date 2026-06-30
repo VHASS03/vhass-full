@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import React, { useState, useEffect } from "react"
 import { Mail, User, Eye, EyeOff, ArrowLeft, Lock, Shield } from "lucide-react"
@@ -8,6 +8,68 @@ import Navbar from "./Components/navbar";
 import Footer from "./Components/footer";
 import { useAuth } from "./context/AuthContext.jsx";
 import GoogleLogin from "./Components/GoogleLogin.jsx";
+
+// ─── Shared input style ───────────────────────────────────────────
+const inputStyle = {
+  width: '100%',
+  padding: '12px 44px 12px 16px',
+  background: 'var(--bg-card)',
+  border: '1px solid var(--border-color)',
+  borderRadius: '12px',
+  color: 'var(--text-primary)',
+  fontSize: '0.95rem',
+  fontFamily: "'Plus Jakarta Sans', sans-serif",
+  outline: 'none',
+  transition: 'border-color 0.25s ease, box-shadow 0.25s ease',
+}
+
+const labelStyle = {
+  display: 'block',
+  fontSize: '0.8rem',
+  fontWeight: '600',
+  color: 'var(--text-secondary)',
+  marginBottom: '6px',
+  fontFamily: "'Plus Jakarta Sans', sans-serif",
+  textTransform: 'uppercase',
+  letterSpacing: '0.05em'
+}
+
+const InputField = ({ label, icon: Icon, rightSlot, ...inputProps }) => (
+  <div className="space-y-1">
+    <label style={labelStyle}>{label}</label>
+    <div className="relative">
+      <input
+        {...inputProps}
+        style={inputStyle}
+        onFocus={e => { e.target.style.borderColor = 'var(--accent-primary)'; e.target.style.boxShadow = '0 0 0 3px var(--glow-color)'; }}
+        onBlur={e => { e.target.style.borderColor = 'var(--border-color)'; e.target.style.boxShadow = 'none'; }}
+      />
+      {rightSlot ? (
+        <div className="absolute right-3 top-1/2 -translate-y-1/2">{rightSlot}</div>
+      ) : Icon ? (
+        <Icon className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--text-muted)' }} />
+      ) : null}
+    </div>
+  </div>
+)
+
+const SubmitButton = ({ children, disabled }) => (
+  <button
+    type="submit"
+    disabled={disabled}
+    className="w-full py-3.5 rounded-full font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+    style={{
+      background: 'var(--accent-gradient)',
+      boxShadow: '0 4px 15px var(--glow-color)',
+      fontFamily: "'Plus Jakarta Sans', sans-serif",
+      fontSize: '0.95rem',
+    }}
+    onMouseEnter={e => { if (!disabled) e.currentTarget.style.boxShadow = '0 6px 20px var(--glow-color-hover)'; }}
+    onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 4px 15px var(--glow-color)'; }}
+  >
+    {children}
+  </button>
+)
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -225,68 +287,6 @@ export default function AuthPage() {
     setOtpValues(["", "", "", "", "", ""])
     setError("")
   }
-
-  // ─── Shared input style ───────────────────────────────────────────
-  const inputStyle = {
-    width: '100%',
-    padding: '12px 44px 12px 16px',
-    background: 'var(--bg-card)',
-    border: '1px solid var(--border-color)',
-    borderRadius: '12px',
-    color: 'var(--text-primary)',
-    fontSize: '0.95rem',
-    fontFamily: "'Plus Jakarta Sans', sans-serif",
-    outline: 'none',
-    transition: 'border-color 0.25s ease, box-shadow 0.25s ease',
-  }
-
-  const labelStyle = {
-    display: 'block',
-    fontSize: '0.8rem',
-    fontWeight: '600',
-    color: 'var(--text-secondary)',
-    marginBottom: '6px',
-    fontFamily: "'Plus Jakarta Sans', sans-serif",
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em'
-  }
-
-  const InputField = ({ label, icon: Icon, rightSlot, ...inputProps }) => (
-    <div className="space-y-1">
-      <label style={labelStyle}>{label}</label>
-      <div className="relative">
-        <input
-          {...inputProps}
-          style={inputStyle}
-          onFocus={e => { e.target.style.borderColor = 'var(--accent-primary)'; e.target.style.boxShadow = '0 0 0 3px var(--glow-color)'; }}
-          onBlur={e => { e.target.style.borderColor = 'var(--border-color)'; e.target.style.boxShadow = 'none'; }}
-        />
-        {rightSlot ? (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2">{rightSlot}</div>
-        ) : Icon ? (
-          <Icon className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--text-muted)' }} />
-        ) : null}
-      </div>
-    </div>
-  )
-
-  const SubmitButton = ({ children, disabled }) => (
-    <button
-      type="submit"
-      disabled={disabled}
-      className="w-full py-3.5 rounded-full font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-      style={{
-        background: 'var(--accent-gradient)',
-        boxShadow: '0 4px 15px var(--glow-color)',
-        fontFamily: "'Plus Jakarta Sans', sans-serif",
-        fontSize: '0.95rem',
-      }}
-      onMouseEnter={e => { if (!disabled) e.currentTarget.style.boxShadow = '0 6px 20px var(--glow-color-hover)'; }}
-      onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 4px 15px var(--glow-color)'; }}
-    >
-      {children}
-    </button>
-  )
 
   const renderMainForm = () => {
     const isLogin = currentPage === "login"

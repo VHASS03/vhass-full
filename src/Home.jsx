@@ -57,7 +57,7 @@ const StatItem = ({ number, suffix = "+", label }) => {
       <div className="text-5xl md:text-7xl font-extrabold tracking-tight mb-2" style={{ fontFamily: "'Outfit', sans-serif", color: '#FFB162' }}>
         {count}{suffix}
       </div>
-      <div className="text-sm md:text-base font-medium" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#C9C1B1' }}>
+      <div className="text-sm md:text-base font-medium" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-secondary)' }}>
         {label}
       </div>
     </div>
@@ -114,7 +114,7 @@ function Home() {
   }, []);
 
   return (
-    <main ref={mainRef} className="overflow-x-hidden" style={{ background: '#0D1117' }}>
+    <main ref={mainRef} className="overflow-x-hidden" style={{ background: 'var(--bg-primary)' }}>
       <SEO
         title="VHASS Academy — Build Future-Proof Skills in Cybersecurity & Entrepreneurship"
         description="Learn through real-world projects, industry certifications, startup innovation programs, internships, and career acceleration pathways. Join VHASS Academy."
@@ -125,10 +125,10 @@ function Home() {
       <StructuredData data={generateWebSiteSchema()} />
 
       <Suspense fallback={
-        <div className="fixed inset-0 grid place-items-center" style={{ background: '#0D1117' }}>
+        <div className="fixed inset-0 grid place-items-center" style={{ background: 'var(--bg-primary)' }}>
           <div className="flex flex-col items-center gap-4">
             <div className="w-10 h-10 border-2 border-t-[#FFB162] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin" />
-            <span style={{ color: '#C9C1B1', fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '14px' }}>Loading VHASS...</span>
+            <span style={{ color: 'var(--text-secondary)', fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '14px' }}>Loading VHASS...</span>
           </div>
         </div>
       }>
@@ -151,7 +151,7 @@ function Home() {
               </div>
 
               {/* Headline */}
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[4.5rem] font-extrabold leading-[1.08] tracking-tight mb-6" style={{ fontFamily: "'Outfit', sans-serif", color: '#EEE9DF' }}>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[4.5rem] font-extrabold leading-[1.08] tracking-tight mb-6" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>
                 Build Future-Proof Skills in{' '}
                 <span style={{ background: 'linear-gradient(135deg, #FFB162 0%, #e8944a 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                   Cybersecurity
@@ -160,7 +160,7 @@ function Home() {
               </h1>
 
               {/* Subheadline */}
-              <p className="text-base md:text-lg mb-10 leading-relaxed max-w-xl" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#C9C1B1' }}>
+              <p className="text-base md:text-lg mb-10 leading-relaxed max-w-xl" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-secondary)' }}>
                 Learn through real-world projects, industry certifications, startup innovation programs, internships, and career acceleration pathways.
               </p>
 
@@ -190,7 +190,7 @@ function Home() {
                 ].map(({ icon: Icon, label }) => (
                   <div key={label} className="flex items-center gap-2">
                     <Icon className="w-4 h-4" style={{ color: '#FFB162' }} />
-                    <span style={{ color: '#6b7a8d' }}>{label}</span>
+                    <span style={{ color: 'var(--text-muted)' }}>{label}</span>
                   </div>
                 ))}
               </div>
@@ -208,7 +208,7 @@ function Home() {
         {/* ═══════════════════════════════════════════
             SECTION 2 — TRUST BAR
             ═══════════════════════════════════════════ */}
-        <section className="animate-on-scroll relative py-16 md:py-20 border-y" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
+        <section className="animate-on-scroll relative py-16 md:py-20 border-y" style={{ borderColor: 'var(--border)' }}>
           <div className="max-w-5xl mx-auto px-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               <StatItem number={500} label="Students Trained" />
@@ -226,10 +226,10 @@ function Home() {
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16 animate-on-scroll">
               <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: '#FFB162', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>What We Offer</p>
-              <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4" style={{ fontFamily: "'Outfit', sans-serif", color: '#EEE9DF' }}>
+              <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>
                 Four Pillars of Excellence
               </h2>
-              <p className="text-base md:text-lg max-w-2xl mx-auto" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#C9C1B1' }}>
+              <p className="text-base md:text-lg max-w-2xl mx-auto" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-secondary)' }}>
                 A comprehensive ecosystem designed to take you from learning to launching.
               </p>
             </div>
@@ -244,7 +244,7 @@ function Home() {
                 <div
                   key={title}
                   className="animate-on-scroll group relative p-8 rounded-2xl cursor-pointer transition-all duration-500 hover:-translate-y-2"
-                  style={{ background: '#1B2433', border: '1px solid rgba(255,255,255,0.06)' }}
+                  style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
                   onClick={() => navigate(link)}
                 >
                   {/* Hover glow */}
@@ -254,8 +254,8 @@ function Home() {
                     <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-6" style={{ background: `${color}12`, border: `1px solid ${color}20` }}>
                       <Icon className="w-6 h-6" style={{ color }} />
                     </div>
-                    <h3 className="text-lg font-bold mb-3 group-hover:text-[#FFB162] transition-colors" style={{ fontFamily: "'Outfit', sans-serif", color: '#EEE9DF' }}>{title}</h3>
-                    <p className="text-sm leading-relaxed mb-6" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#6b7a8d' }}>{desc}</p>
+                    <h3 className="text-lg font-bold mb-3 group-hover:text-[#FFB162] transition-colors" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>{title}</h3>
+                    <p className="text-sm leading-relaxed mb-6" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-muted)' }}>{desc}</p>
                     <span className="inline-flex items-center gap-1.5 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ color: '#FFB162', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                       Learn More <ChevronRight className="w-4 h-4" />
                     </span>
@@ -269,14 +269,14 @@ function Home() {
         {/* ═══════════════════════════════════════════
             SECTION 4 — CAREER JOURNEY
             ═══════════════════════════════════════════ */}
-        <section className="py-24 md:py-32 px-6 animate-on-scroll" style={{ background: 'linear-gradient(180deg, rgba(22,30,42,0.5) 0%, #0D1117 100%)' }}>
+        <section className="py-24 md:py-32 px-6 animate-on-scroll" style={{ background: 'linear-gradient(180deg, rgba(22,30,42,0.5) 0%, var(--bg-primary) 100%)' }}>
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-16">
               <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: '#FFB162', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Your Path Forward</p>
-              <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4" style={{ fontFamily: "'Outfit', sans-serif", color: '#EEE9DF' }}>
+              <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>
                 From Learner to Leader
               </h2>
-              <p className="text-base md:text-lg max-w-xl mx-auto" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#C9C1B1' }}>
+              <p className="text-base md:text-lg max-w-xl mx-auto" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-secondary)' }}>
                 A structured 5-step journey that transforms your potential into a career.
               </p>
             </div>
@@ -295,12 +295,12 @@ function Home() {
               ].map(({ step, icon: Icon, title, desc }, i) => (
                 <div key={step} className="relative flex flex-col items-center text-center z-10 flex-1">
                   {/* Node */}
-                  <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-all duration-300 hover:scale-110" style={{ background: '#1B2433', border: '2px solid rgba(255,177,98,0.2)' }}>
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-all duration-300 hover:scale-110" style={{ background: 'var(--bg-card)', border: '2px solid rgba(255,177,98,0.2)' }}>
                     <Icon className="w-6 h-6" style={{ color: '#FFB162' }} />
                   </div>
                   <div className="text-xs font-bold mb-1" style={{ color: '#FFB162', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{step}</div>
-                  <h4 className="text-base font-bold mb-1" style={{ fontFamily: "'Outfit', sans-serif", color: '#EEE9DF' }}>{title}</h4>
-                  <p className="text-xs" style={{ color: '#6b7a8d', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{desc}</p>
+                  <h4 className="text-base font-bold mb-1" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>{title}</h4>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{desc}</p>
                 </div>
               ))}
             </div>
@@ -316,11 +316,11 @@ function Home() {
               {/* Left: Content */}
               <div className="animate-on-scroll">
                 <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: '#FFB162', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Startup Ecosystem</p>
-                <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-6" style={{ fontFamily: "'Outfit', sans-serif", color: '#EEE9DF' }}>
+                <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-6" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>
                   From Idea to<br />
                   <span style={{ color: '#FFB162' }}>Funded Startup</span>
                 </h2>
-                <p className="text-base leading-relaxed mb-8" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#C9C1B1' }}>
+                <p className="text-base leading-relaxed mb-8" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-secondary)' }}>
                   Our entrepreneurship program is designed for aspiring founders who want to build impactful ventures in the cybersecurity and technology space.
                 </p>
                 <button className="btn-primary" onClick={() => navigate('/Entrepreneur')}>
@@ -336,10 +336,10 @@ function Home() {
                   { icon: Network, title: "Incubation", desc: "Resources, workspace, and support" },
                   { icon: TrendingUp, title: "Funding Readiness", desc: "Pitch prep and investor access" },
                 ].map(({ icon: Icon, title, desc }) => (
-                  <div key={title} className="group p-6 rounded-xl transition-all duration-300 hover:-translate-y-1" style={{ background: '#1B2433', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div key={title} className="group p-6 rounded-xl transition-all duration-300 hover:-translate-y-1" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
                     <Icon className="w-5 h-5 mb-4 group-hover:scale-110 transition-transform" style={{ color: '#FFB162' }} />
-                    <h4 className="text-sm font-bold mb-1" style={{ fontFamily: "'Outfit', sans-serif", color: '#EEE9DF' }}>{title}</h4>
-                    <p className="text-xs leading-relaxed" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#6b7a8d' }}>{desc}</p>
+                    <h4 className="text-sm font-bold mb-1" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>{title}</h4>
+                    <p className="text-xs leading-relaxed" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-muted)' }}>{desc}</p>
                   </div>
                 ))}
               </div>
@@ -350,11 +350,11 @@ function Home() {
         {/* ═══════════════════════════════════════════
             SECTION 6 — TESTIMONIALS
             ═══════════════════════════════════════════ */}
-        <section className="py-24 md:py-32 px-6 animate-on-scroll" style={{ background: 'linear-gradient(180deg, rgba(22,30,42,0.3) 0%, #0D1117 100%)' }}>
+        <section className="py-24 md:py-32 px-6 animate-on-scroll" style={{ background: 'linear-gradient(180deg, rgba(22,30,42,0.3) 0%, var(--bg-primary) 100%)' }}>
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: '#FFB162', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Success Stories</p>
-              <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight" style={{ fontFamily: "'Outfit', sans-serif", color: '#EEE9DF' }}>
+              <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>
                 What Our Students Say
               </h2>
             </div>
@@ -383,7 +383,7 @@ function Home() {
                 <div
                   key={name}
                   className="group p-8 rounded-2xl transition-all duration-500 hover:-translate-y-2"
-                  style={{ background: 'rgba(27, 36, 51, 0.6)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.06)' }}
+                  style={{ background: 'var(--bg-card)', backdropFilter: 'blur(16px)', border: '1px solid var(--border)' }}
                 >
                   {/* Stars */}
                   <div className="flex gap-1 mb-6">
@@ -393,14 +393,14 @@ function Home() {
                   </div>
 
                   {/* Quote */}
-                  <p className="text-sm leading-relaxed mb-8" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#C9C1B1' }}>
+                  <p className="text-sm leading-relaxed mb-8" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-secondary)' }}>
                     "{quote}"
                   </p>
 
                   {/* Author */}
                   <div>
-                    <div className="text-sm font-bold" style={{ fontFamily: "'Outfit', sans-serif", color: '#EEE9DF' }}>{name}</div>
-                    <div className="text-xs" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#6b7a8d' }}>{role}</div>
+                    <div className="text-sm font-bold" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>{name}</div>
+                    <div className="text-xs" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-muted)' }}>{role}</div>
                   </div>
                 </div>
               ))}
@@ -416,10 +416,10 @@ function Home() {
           <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 50%, rgba(255, 177, 98, 0.04) 0%, transparent 60%)' }} />
 
           <div className="max-w-3xl mx-auto text-center relative z-10">
-            <h2 className="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6" style={{ fontFamily: "'Outfit', sans-serif", color: '#EEE9DF' }}>
+            <h2 className="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6" style={{ fontFamily: "'Outfit', sans-serif", color: 'var(--text-primary)' }}>
               Ready to Shape<br />the Future?
             </h2>
-            <p className="text-base md:text-lg mb-10 max-w-xl mx-auto" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#C9C1B1' }}>
+            <p className="text-base md:text-lg mb-10 max-w-xl mx-auto" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-secondary)' }}>
               Join 500+ professionals who chose VHASS to accelerate their cybersecurity and entrepreneurship careers.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
